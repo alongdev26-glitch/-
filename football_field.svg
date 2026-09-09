@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 680" width="1050" height="680">
+  <defs>
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3fa34d"/>
+      <stop offset="100%" stop-color="#2f8a3d"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Field background with mowed stripes -->
+  <rect x="0" y="0" width="1050" height="680" fill="url(#grass)"/>
+  <g fill="#000000" opacity="0.06">
+    <rect x="0"   y="0" width="70" height="680"/>
+    <rect x="140" y="0" width="70" height="680"/>
+    <rect x="280" y="0" width="70" height="680"/>
+    <rect x="420" y="0" width="70" height="680"/>
+    <rect x="560" y="0" width="70" height="680"/>
+    <rect x="700" y="0" width="70" height="680"/>
+    <rect x="840" y="0" width="70" height="680"/>
+    <rect x="980" y="0" width="70" height="680"/>
+  </g>
+
+  <!-- Outer boundary -->
+  <rect x="25" y="25" width="1000" height="630" fill="none" stroke="#ffffff" stroke-width="4"/>
+
+  <!-- Halfway line -->
+  <line x1="525" y1="25" x2="525" y2="655" stroke="#ffffff" stroke-width="4"/>
+
+  <!-- Center circle and spot -->
+  <circle cx="525" cy="340" r="91.5" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <circle cx="525" cy="340" r="3" fill="#ffffff"/>
+
+  <!-- Left penalty area -->
+  <rect x="25" y="145" width="165" height="390" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <!-- Left 6-yard box -->
+  <rect x="25" y="255" width="55" height="170" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <!-- Left penalty spot -->
+  <circle cx="187" cy="340" r="3" fill="#ffffff"/>
+  <!-- Left penalty arc -->
+  <path d="M 190 271 A 91.5 91.5 0 0 1 190 409" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <!-- Left goal -->
+  <rect x="5" y="292" width="20" height="96" fill="none" stroke="#ffffff" stroke-width="4"/>
+
+  <!-- Right penalty area -->
+  <rect x="860" y="145" width="165" height="390" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <!-- Right 6-yard box -->
+  <rect x="970" y="255" width="55" height="170" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <!-- Right penalty spot -->
+  <circle cx="863" cy="340" r="3" fill="#ffffff"/>
+  <!-- Right penalty arc -->
+  <path d="M 860 271 A 91.5 91.5 0 0 0 860 409" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <!-- Right goal -->
+  <rect x="1025" y="292" width="20" height="96" fill="none" stroke="#ffffff" stroke-width="4"/>
+
+  <!-- Corner arcs -->
+  <path d="M 25 45 A 20 20 0 0 0 45 25" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <path d="M 1005 25 A 20 20 0 0 0 1025 45" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <path d="M 45 655 A 20 20 0 0 0 25 635" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <path d="M 1025 635 A 20 20 0 0 0 1005 655" fill="none" stroke="#ffffff" stroke-width="4"/>
+</svg>
