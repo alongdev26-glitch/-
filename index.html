@@ -1,0 +1,1316 @@
+<title>מגירת המילים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#1c7c6f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="מגירת המילים">
+<style>
+  :root{
+    --bg:#f4f6f2;
+    --surface:#ffffff;
+    --surface-2:#eaeee4;
+    --ink:#1c2a20;
+    --ink-soft:#516152;
+    --line:#cdd6c4;
+    --accent:#1c7c6f;
+    --accent-strong:#0f5c52;
+    --accent-tint:#e3f0ea;
+    --amber:#c97f2e;
+    --amber-tint:#f7e9d6;
+    --good:#2f8f5d;
+    --good-tint:#e3f2e7;
+    --bad:#b8483b;
+    --bad-tint:#faeae7;
+    --shadow: 0 1px 0 rgba(28,42,32,.06), 0 10px 24px -14px rgba(28,42,32,.35);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#101a14;
+      --surface:#16211a;
+      --surface-2:#1d2b21;
+      --ink:#e9efe6;
+      --ink-soft:#9db19f;
+      --line:#2c3d31;
+      --accent:#49d3bd;
+      --accent-strong:#7ee8d5;
+      --accent-tint:#1a3530;
+      --amber:#e3a35c;
+      --amber-tint:#2f2618;
+      --good:#5cc98b;
+      --good-tint:#173322;
+      --bad:#e2837a;
+      --bad-tint:#3a201d;
+      --shadow: 0 1px 0 rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#101a14;
+    --surface:#16211a;
+    --surface-2:#1d2b21;
+    --ink:#e9efe6;
+    --ink-soft:#9db19f;
+    --line:#2c3d31;
+    --accent:#49d3bd;
+    --accent-strong:#7ee8d5;
+    --accent-tint:#1a3530;
+    --amber:#e3a35c;
+    --amber-tint:#2f2618;
+    --good:#5cc98b;
+    --good-tint:#173322;
+    --bad:#e2837a;
+    --bad-tint:#3a201d;
+    --shadow: 0 1px 0 rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Assistant',system-ui,sans-serif;
+    padding:28px 16px 56px;
+    min-height:100vh;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+
+  h1{
+    font-family:'Frank Ruhl Libre',serif;
+    font-weight:900;
+    font-size:clamp(28px,6vw,40px);
+    margin:0 0 4px;
+    text-wrap:balance;
+    letter-spacing:.2px;
+  }
+  .sub{
+    color:var(--ink-soft);
+    font-size:15px;
+    margin:0 0 22px;
+    line-height:1.55;
+    max-width:38em;
+  }
+  .sub b{color:var(--ink);font-weight:700;}
+
+  /* --- chips --- */
+  .row{display:flex;flex-wrap:wrap;gap:8px;}
+  .chiprow{margin-bottom:10px;}
+  .chip{
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink-soft);
+    font:600 13.5px/1 'Assistant',sans-serif;
+    padding:8px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .15s,color .15s,border-color .15s,transform .1s;
+  }
+  .chip:hover{border-color:var(--accent);color:var(--ink);}
+  .chip:active{transform:scale(.97);}
+  .chip.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+  .modes{margin-bottom:10px;}
+  .modes .chip.active{background:var(--ink);border-color:var(--ink);color:var(--bg);}
+  .diffs{margin-bottom:8px;}
+  .diffs .chip.active{background:var(--amber);border-color:var(--amber);color:#fff;}
+  .diffnote{color:var(--ink-soft);font-size:12px;margin:0 0 14px;}
+
+  .timerset{margin-bottom:8px;}
+  .timer-custom{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 14px;
+    margin-bottom:14px;
+    box-shadow:var(--shadow);
+  }
+  .timer-custom input[type=range]{flex:1;accent-color:var(--accent);}
+  .timer-custom span{
+    font:700 13px 'IBM Plex Mono',monospace;
+    color:var(--accent-strong);
+    min-width:70px;
+    text-align:center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* --- stat bar --- */
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:6px;
+    margin-bottom:18px;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (max-width:480px){ .stats{grid-template-columns:repeat(2,1fr);} }
+  .stat{
+    text-align:center;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 4px;
+    box-shadow:var(--shadow);
+    min-width:0;
+  }
+  .stat .n{font:700 19px 'IBM Plex Mono',monospace;color:var(--accent-strong);display:block;}
+  .stat .l{font-size:10.5px;color:var(--ink-soft);letter-spacing:.02em;}
+
+  /* --- card --- */
+  .stage{position:relative;min-height:300px;margin-bottom:18px;}
+  .card{
+    position:relative;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    padding:30px 26px 26px;
+    min-height:300px;
+    display:flex;
+    flex-direction:column;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:14px; right:50%;
+    transform:translateX(50%);
+    width:26px;height:9px;
+    border-radius:999px;
+    background:var(--bg);
+    border:1px solid var(--line);
+  }
+  .card-head{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    align-items:center;
+    gap:6px;
+    margin-bottom:auto;
+    padding-top:6px;
+  }
+  .pos-tag{
+    font:700 11px/1 'Assistant',sans-serif;
+    letter-spacing:.04em;
+    color:var(--accent-strong);
+    background:var(--accent-tint);
+    padding:5px 10px;
+    border-radius:7px;
+  }
+  .index{font:600 12px 'IBM Plex Mono',monospace;color:var(--ink-soft);}
+
+  .card-body{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    text-align:center;
+    padding:28px 4px 20px;
+    flex:1;
+  }
+  .word-en{
+    direction:ltr;
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:clamp(30px,7vw,42px);
+    color:var(--ink);
+    text-wrap:balance;
+  }
+  .word-he{
+    font-family:'Frank Ruhl Libre',serif;
+    font-weight:700;
+    font-size:clamp(26px,6vw,36px);
+    color:var(--ink);
+  }
+  .hint{color:var(--ink-soft);font-size:13px;}
+  .hintcode{
+    direction:ltr;
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.2em;
+    color:var(--ink-soft);
+    font-size:15px;
+  }
+  .flip-rule{
+    width:70%;
+    height:1px;
+    background:var(--line);
+    margin:0 auto;
+  }
+  .diff-badge{
+    font:700 10.5px 'Assistant',sans-serif;
+    letter-spacing:.02em;
+    padding:5px 9px;
+    border-radius:7px;
+  }
+
+  /* flip animation */
+  .flip-scene{width:100%;perspective:1200px;}
+  .flip-card{
+    position:relative;
+    width:100%;
+    min-height:168px;
+    transform-style:preserve-3d;
+  }
+  .flip-card.no-anim{transition:none;}
+  .flip-card.anim{transition:transform .55s cubic-bezier(.4,.15,.2,1);}
+  .flip-face{
+    position:absolute;
+    inset:0;
+    backface-visibility:hidden;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    width:100%;
+  }
+  .flip-face.back{transform:rotateY(180deg);}
+
+  .card-actions{display:flex;justify-content:center;gap:10px;margin-top:6px;flex-wrap:wrap;}
+  .btn{
+    font:700 14.5px 'Assistant',sans-serif;
+    padding:11px 20px;
+    border-radius:11px;
+    border:1px solid var(--line);
+    background:var(--surface-2);
+    color:var(--ink);
+    cursor:pointer;
+    transition:transform .1s,background .15s,border-color .15s;
+  }
+  .btn:hover{border-color:var(--accent);}
+  .btn:active{transform:scale(.96);}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .btn.primary:hover{background:var(--accent-strong);border-color:var(--accent-strong);}
+  .btn.good{background:var(--good-tint);border-color:var(--good);color:var(--good);}
+  .btn.bad{background:var(--bad-tint);border-color:var(--bad);color:var(--bad);}
+  .btn.ghost{background:transparent;}
+  .btn:disabled{opacity:.5;cursor:default;}
+
+  /* multiple choice */
+  .options{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    width:100%;
+    margin-top:4px;
+  }
+  @media (max-width:480px){ .options{grid-template-columns:1fr;} }
+  .opt{
+    font:600 16px 'Frank Ruhl Libre',serif;
+    padding:14px 12px;
+    border-radius:12px;
+    border:1.5px solid var(--line);
+    background:var(--surface-2);
+    color:var(--ink);
+    cursor:pointer;
+    transition:transform .1s,border-color .15s,background .15s;
+  }
+  .opt:hover:not(:disabled){border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 16px -10px rgba(28,42,32,.35);}
+  .opt:active:not(:disabled){transform:scale(.98);}
+  .opt.correct{background:var(--good-tint);border-color:var(--good);color:var(--good);}
+  .opt.wrong{background:var(--bad-tint);border-color:var(--bad);color:var(--bad);}
+  .opt:disabled{cursor:default;}
+
+  /* typing */
+  .typebox{
+    display:flex;
+    gap:8px;
+    width:100%;
+    max-width:360px;
+    margin-top:4px;
+  }
+  #typeInput{
+    direction:ltr;
+    text-align:center;
+    flex:1;
+    font:600 18px 'IBM Plex Mono',monospace;
+    padding:12px 14px;
+    border-radius:11px;
+    border:1.5px solid var(--line);
+    background:var(--surface);
+    color:var(--ink);
+  }
+  #typeInput:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .feedback{font:600 15px 'Assistant',sans-serif;min-height:20px;}
+  .feedback.good{color:var(--good);}
+  .feedback.bad{color:var(--bad);}
+
+  /* translate swap bar */
+  .translate-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2px;}
+  .lang-pill{
+    font:700 12px 'Assistant',sans-serif;
+    padding:6px 14px;
+    border-radius:999px;
+    background:var(--surface-2);
+    color:var(--ink-soft);
+    border:1px solid var(--line);
+  }
+  .lang-pill.active{background:var(--accent-tint);color:var(--accent-strong);border-color:var(--accent);}
+  .swap-btn{
+    width:34px;height:34px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink);
+    font-size:16px;
+    cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;
+    transition:transform .2s,border-color .15s,color .15s;
+  }
+  .swap-btn:hover{border-color:var(--accent);color:var(--accent-strong);}
+  .swap-btn:active{transform:rotate(180deg);}
+
+  /* timer */
+  .timerwrap{width:100%;}
+  .timerbar{height:6px;border-radius:999px;background:var(--surface-2);overflow:hidden;}
+  .timerbar > i{display:block;height:100%;background:var(--amber);transition:width .1s linear;}
+  .timerlabel{font-size:11px;color:var(--ink-soft);margin-top:4px;}
+
+  .progress{
+    height:6px;
+    background:var(--line);
+    border-radius:999px;
+    overflow:hidden;
+    margin-bottom:22px;
+  }
+  .progress > i{
+    display:block;height:100%;
+    background:var(--accent);
+    transition:width .25s;
+  }
+
+  /* edit panel */
+  .edit-intro{color:var(--ink-soft);font-size:13px;line-height:1.65;margin-bottom:14px;}
+  .editlist{display:flex;flex-direction:column;gap:7px;width:100%;}
+  .edit-group-label{
+    font:700 12px 'Assistant',sans-serif;
+    color:var(--accent-strong);
+    letter-spacing:.04em;
+    margin:14px 0 2px;
+  }
+  .edit-group-label:first-child{margin-top:0;}
+  .editrow{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:7px 9px;
+  }
+  .editrow-en{
+    direction:ltr;
+    text-align:left;
+    font:600 13.5px 'IBM Plex Mono',monospace;
+    color:var(--ink);
+    min-width:92px;
+    flex-shrink:0;
+  }
+  .editrow-input{
+    flex:1;
+    min-width:0;
+    font:600 15px 'Frank Ruhl Libre',serif;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink);
+  }
+  .editrow-input:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .reset-btn{
+    flex-shrink:0;
+    width:30px;height:30px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink-soft);
+    cursor:pointer;
+    font-size:15px;
+    display:inline-flex;align-items:center;justify-content:center;
+  }
+  .reset-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .edit-footrow{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+
+  /* results screen */
+  .results-flag{font:800 21px 'Frank Ruhl Libre',serif;color:var(--accent-strong);text-align:center;text-wrap:balance;}
+  .results-points{font:800 48px 'IBM Plex Mono',monospace;color:var(--ink);line-height:1;}
+  .results-points span{font-size:20px;color:var(--ink-soft);font-family:'Assistant',sans-serif;font-weight:700;}
+  .results-sub{font:600 14px 'Assistant',sans-serif;color:var(--ink-soft);}
+  .results-best{font:700 13.5px 'Assistant',sans-serif;padding:6px 14px;border-radius:999px;}
+  .results-meta{font:600 11.5px 'Assistant',sans-serif;color:var(--ink-soft);letter-spacing:.03em;margin-top:2px;}
+  .results-footrow{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;justify-content:center;width:100%;}
+  .results-footrow .btn{flex:1;min-width:150px;}
+
+  footer{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:12.5px;
+    margin-top:30px;
+    line-height:1.7;
+  }
+  footer b{color:var(--ink);}
+
+  .installbox{
+    margin-top:22px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 18px;
+    box-shadow:var(--shadow);
+  }
+  .installbox-title{font:700 14px 'Assistant',sans-serif;margin-bottom:10px;}
+  .installbox-body{display:flex;flex-direction:column;align-items:flex-start;gap:10px;}
+  #installBtn{display:none;}
+  .installbox-help{width:100%;}
+  .installbox-help summary{
+    cursor:pointer;
+    font:600 13px 'Assistant',sans-serif;
+    color:var(--accent-strong);
+  }
+  .installbox-help p{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    line-height:1.65;
+    margin:8px 0 0;
+  }
+  .installbox-help p b{color:var(--ink);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+
+<div class="wrap" dir="rtl" lang="he">
+  <h1>מגירת המילים</h1>
+  <p class="sub">28 מילים באנגלית, מסודרות בקטגוריות כמו במגירת קלפים — <b>שמות עצם</b>, <b>פעלים</b>, <b>שמות תואר</b> ו<b>אחר</b>. אפשר לכתוב לעצמכם את הפירוש בעברית, לבחור רמת קושי, ולתרגל בכרטיסיות, בבחירה מרובה או בהקלדה — ובהקלדה אפשר להחליף כיוון (⇄) בין עברית לאנגלית, כמו בגוגל טרנסלייט.</p>
+
+  <div class="row chiprow" id="catRow"></div>
+  <div class="row modes" id="modeRow"></div>
+  <div class="row diffs" id="diffRow"></div>
+  <p class="diffnote" id="diffNote"></p>
+
+  <div class="row chiprow timerset" id="timerModeRow"></div>
+  <div class="timer-custom" id="timerCustomWrap" style="display:none;">
+    <span id="timerSliderLabel">20 שניות</span>
+    <input type="range" id="timerSlider" min="10" max="60" step="1" value="20">
+  </div>
+
+  <div class="stats" id="statsBar">
+    <div class="stat"><span class="n" id="statPoints">0</span><span class="l">ניקוד</span></div>
+    <div class="stat"><span class="n" id="statScore">0/0</span><span class="l">תשובות נכונות</span></div>
+    <div class="stat"><span class="n" id="statStreak">0</span><span class="l">רצף נוכחי</span></div>
+    <div class="stat"><span class="n" id="statBest">0</span><span class="l">שיא ניקוד</span></div>
+  </div>
+
+  <div class="progress" id="progressWrap"><i id="progressBar" style="width:0%"></i></div>
+
+  <div class="stage">
+    <div class="card" id="card"></div>
+  </div>
+
+  <footer>הפירושים והציון נשמרים בדפדפן שלך בין ביקורים · לחצו על "ערוך פירושים" כדי לכתוב תרגום משלכם, ועל קטגוריית מילים כדי לתרגל רק אותה</footer>
+
+  <div class="installbox">
+    <div class="installbox-title">📲 להתקין כאפליקציה בטלפון</div>
+    <div class="installbox-body">
+      <button class="btn primary" id="installBtn" type="button">📲 התקן כאפליקציה</button>
+      <details class="installbox-help">
+        <summary>הכפתור לא מופיע? הוסיפו למסך הבית ידנית</summary>
+        <p><b>באייפון (Safari):</b> לוחצים על כפתור השיתוף ⬆️ בסרגל התחתון, גוללים ובוחרים ב"הוסף למסך הבית".</p>
+        <p><b>באנדרואיד (Chrome):</b> לוחצים על שלוש הנקודות ⋮ בפינה הימנית העליונה, ובוחרים "הוסף למסך הבית" או "התקן אפליקציה".</p>
+      </details>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var BASE_WORDS = [
+    {en:"blog", he:"בלוג", pos:"noun", cat:"nouns"},
+    {en:"chance", he:"הזדמנות", pos:"noun", cat:"nouns"},
+    {en:"concert", he:"קונצרט", pos:"noun", cat:"nouns"},
+    {en:"cooking", he:"בישול", pos:"noun", cat:"nouns"},
+    {en:"cousin", he:"בן/בת דוד", pos:"noun", cat:"nouns"},
+    {en:"discount", he:"הנחה", pos:"noun", cat:"nouns"},
+    {en:"factory", he:"מפעל", pos:"noun", cat:"nouns"},
+    {en:"festival", he:"פסטיבל", pos:"noun", cat:"nouns"},
+    {en:"taste", he:"טעם", pos:"noun", cat:"nouns"},
+    {en:"variety", he:"גיוון / מבחר", pos:"noun", cat:"nouns"},
+
+    {en:"adjust", he:"להתאים", pos:"verb", cat:"verbs"},
+    {en:"create", he:"ליצור", pos:"verb", cat:"verbs"},
+    {en:"develop", he:"לפתח", pos:"verb", cat:"verbs"},
+    {en:"land", he:"לנחות", pos:"verb", cat:"verbs"},
+    {en:"last", he:"להימשך", pos:"verb", cat:"verbs"},
+
+    {en:"amazing", he:"מדהים", pos:"adj", cat:"adj"},
+    {en:"crowded", he:"צפוף", pos:"adj", cat:"adj"},
+    {en:"delicious", he:"טעים", pos:"adj", cat:"adj"},
+    {en:"exciting", he:"מרגש", pos:"adj", cat:"adj"},
+    {en:"illegal", he:"לא חוקי", pos:"adj", cat:"adj"},
+    {en:"northern", he:"צפוני", pos:"adj", cat:"adj"},
+    {en:"traditional", he:"מסורתי", pos:"adj", cat:"adj"},
+    {en:"unpleasant", he:"לא נעים", pos:"adj", cat:"adj"},
+    {en:"upset", he:"מוטרד / עצוב", pos:"adj", cat:"adj"},
+
+    {en:"downtown", he:"מרכז העיר", pos:"other", cat:"other"},
+    {en:"for sale", he:"למכירה", pos:"other", cat:"other"},
+    {en:"part of", he:"חלק מ-", pos:"other", cat:"other"},
+    {en:"take it easy", he:"להירגע / לקחת בקלות", pos:"other", cat:"other"}
+  ];
+
+  var CATS = [
+    {key:"all", label:"כל המילים"},
+    {key:"nouns", label:"שמות עצם"},
+    {key:"verbs", label:"פעלים"},
+    {key:"adj", label:"שמות תואר"},
+    {key:"other", label:"אחר"}
+  ];
+  var POS_LABEL = {noun:"שם עצם", verb:"פועל", adj:"תואר", other:"אחר"};
+  var CAT_LABEL = {nouns:"שמות עצם", verbs:"פעלים", adj:"שמות תואר", other:"אחר"};
+
+  var MODES = [
+    {key:"flash", label:"כרטיסיות"},
+    {key:"mc", label:"בחירה מרובה"},
+    {key:"type", label:"הקלדה"},
+    {key:"edit", label:"✎ ערוך פירושים"}
+  ];
+
+  var DIFFS = [
+    {key:"easy", label:"קל", options:3, timer:0, points:10, roundSize:8, typeHint:"first",
+      color:"var(--good)", tint:"var(--good-tint)",
+      note:"3 אפשרויות, בלי שעון, רמז לאות ראשונה בהקלדה, סיבוב של 8 שאלות."},
+    {key:"medium", label:"בינוני", options:4, timer:15, points:20, roundSize:10, typeHint:"length",
+      color:"var(--amber)", tint:"var(--amber-tint)",
+      note:"4 אפשרויות, 15 שניות לתשובה, רק אורך המילה מוצג בהקלדה, סיבוב של 10 שאלות."},
+    {key:"hard", label:"קשה", options:6, timer:8, points:35, roundSize:12, typeHint:"none",
+      color:"var(--bad)", tint:"var(--bad-tint)",
+      note:"6 אפשרויות, 8 שניות לתשובה, בלי שום רמז בהקלדה, סיבוב של 12 שאלות."}
+  ];
+  function diffCfg(){
+    for(var i=0;i<DIFFS.length;i++){ if(DIFFS[i].key===state.diff) return DIFFS[i]; }
+    return DIFFS[1];
+  }
+
+  var state = {
+    cat:"all",
+    mode:"flash",
+    diff:"medium",
+    queue:[],
+    pos:0,
+    flipped:false,
+    justFlipped:false,
+    finished:false,
+    isNewBest:false,
+    timerId:null,
+    typeDir:"he2en",
+    timerMode:"auto",
+    customSeconds:20,
+    session:{correct:0,total:0,streak:0,points:0}
+  };
+
+  function effectiveTimerSeconds(cfg){
+    if(state.timerMode==="off") return 0;
+    if(state.timerMode==="custom") return state.customSeconds;
+    return cfg.timer;
+  }
+
+  function currentKey(){ return state.cat+"|"+state.mode+"|"+state.diff; }
+  function catLabel(key){ for(var i=0;i<CATS.length;i++){ if(CATS[i].key===key) return CATS[i].label; } return key; }
+  function modeLabel(key){ for(var i=0;i<MODES.length;i++){ if(MODES[i].key===key) return MODES[i].label; } return key; }
+
+  var STORE_KEY = "word-drawer-stats-v2";
+  function loadStore(){
+    try{
+      var raw = localStorage.getItem(STORE_KEY);
+      if(!raw) return {overrides:{}, bestByKey:{}};
+      var parsed = JSON.parse(raw) || {};
+      return {
+        overrides: (parsed.overrides && typeof parsed.overrides==="object") ? parsed.overrides : {},
+        bestByKey: (parsed.bestByKey && typeof parsed.bestByKey==="object") ? parsed.bestByKey : {}
+      };
+    }catch(e){ return {overrides:{}, bestByKey:{}}; }
+  }
+  function saveStore(){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){}
+  }
+  var store = loadStore();
+
+  function buildActiveWords(){
+    return BASE_WORDS.map(function(w){
+      var override = store.overrides[w.en];
+      return {
+        en: w.en,
+        he: (override && override.trim()) ? override.trim() : w.he,
+        pos: w.pos,
+        cat: w.cat
+      };
+    });
+  }
+  var WORDS = buildActiveWords();
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i=a.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t=a[i]; a[i]=a[j]; a[j]=t;
+    }
+    return a;
+  }
+
+  function wordsForCat(cat){
+    if(cat==="all") return WORDS;
+    return WORDS.filter(function(w){ return w.cat===cat; });
+  }
+
+  function buildQueue(){
+    var size = diffCfg().roundSize;
+    var pool = wordsForCat(state.cat);
+    var q = [];
+    while(q.length < size){ q = q.concat(shuffle(pool)); }
+    state.queue = q.slice(0, size);
+    state.pos = 0;
+    state.flipped = false;
+  }
+
+  function current(){ return state.queue[state.pos]; }
+
+  function clearTimer(){
+    if(state.timerId){ clearInterval(state.timerId); state.timerId = null; }
+  }
+
+  function resetSession(){
+    state.session = {correct:0,total:0,streak:0,points:0};
+    state.finished = false;
+  }
+
+  function finishRound(){
+    clearTimer();
+    var key = currentKey();
+    var prevBest = store.bestByKey[key] || 0;
+    state.isNewBest = state.session.points > prevBest;
+    if(state.isNewBest){
+      store.bestByKey[key] = state.session.points;
+      saveStore();
+    }
+    state.finished = true;
+    render();
+  }
+
+  function advance(){
+    state.pos++;
+    if(state.pos >= state.queue.length){
+      finishRound();
+      return;
+    }
+    state.flipped = false;
+    render();
+  }
+
+  function registerAnswer(correct){
+    var cfg = diffCfg();
+    state.session.total++;
+    if(correct){
+      state.session.correct++;
+      state.session.streak++;
+      state.session.points += cfg.points;
+    } else {
+      state.session.streak = 0;
+    }
+    renderStats();
+  }
+
+  function renderStats(){
+    document.getElementById("statPoints").textContent = state.session.points;
+    document.getElementById("statScore").textContent = state.session.correct + "/" + state.session.total;
+    document.getElementById("statStreak").textContent = state.session.streak;
+    document.getElementById("statBest").textContent = store.bestByKey[currentKey()] || 0;
+    var pct = state.queue.length ? Math.round(((state.pos)/state.queue.length)*100) : 0;
+    document.getElementById("progressBar").style.width = Math.min(pct,100) + "%";
+  }
+
+  function el(tag, cls, text){
+    var e = document.createElement(tag);
+    if(cls) e.className = cls;
+    if(text!=null) e.textContent = text;
+    return e;
+  }
+
+  function setChromeVisible(visible){
+    document.getElementById("statsBar").style.display = visible ? "grid" : "none";
+    document.getElementById("progressWrap").style.display = visible ? "block" : "none";
+  }
+
+  function renderChips(){
+    var catRow = document.getElementById("catRow");
+    catRow.innerHTML = "";
+    CATS.forEach(function(c){
+      var chip = el("button","chip"+(state.cat===c.key?" active":""), c.label);
+      chip.type="button";
+      chip.addEventListener("click", function(){
+        if(state.cat===c.key) return;
+        state.cat = c.key;
+        resetSession();
+        clearTimer();
+        buildQueue();
+        renderChips();
+        render();
+      });
+      catRow.appendChild(chip);
+    });
+
+    var modeRow = document.getElementById("modeRow");
+    modeRow.innerHTML = "";
+    MODES.forEach(function(m){
+      var chip = el("button","chip"+(state.mode===m.key?" active":""), m.label);
+      chip.type="button";
+      chip.addEventListener("click", function(){
+        if(state.mode===m.key) return;
+        state.mode = m.key;
+        state.flipped = false;
+        clearTimer();
+        if(state.mode !== "edit"){
+          WORDS = buildActiveWords();
+          resetSession();
+          buildQueue();
+        }
+        renderChips();
+        render();
+      });
+      modeRow.appendChild(chip);
+    });
+
+    var diffRow = document.getElementById("diffRow");
+    diffRow.innerHTML = "";
+    DIFFS.forEach(function(d){
+      var chip = el("button","chip"+(state.diff===d.key?" active":""), d.label);
+      chip.type="button";
+      if(state.diff===d.key){
+        chip.style.background = d.color;
+        chip.style.borderColor = d.color;
+        chip.style.color = "#fff";
+      }
+      chip.addEventListener("click", function(){
+        if(state.diff===d.key) return;
+        state.diff = d.key;
+        resetSession();
+        clearTimer();
+        buildQueue();
+        renderChips();
+        render();
+      });
+      diffRow.appendChild(chip);
+    });
+    var diffNote = document.getElementById("diffNote");
+    diffNote.textContent = "רמת קושי “" + diffCfg().label + "”: " + diffCfg().note;
+    diffNote.style.color = diffCfg().color;
+
+    var TIMER_MODES = [
+      {key:"auto", label:"⏱ שעון לפי רמת קושי"},
+      {key:"custom", label:"⏱ זמן מותאם אישית"},
+      {key:"off", label:"⏱ ללא שעון"}
+    ];
+    var timerModeRow = document.getElementById("timerModeRow");
+    timerModeRow.innerHTML = "";
+    TIMER_MODES.forEach(function(t){
+      var chip = el("button","chip"+(state.timerMode===t.key?" active":""), t.label);
+      chip.type="button";
+      chip.addEventListener("click", function(){
+        if(state.timerMode===t.key) return;
+        state.timerMode = t.key;
+        clearTimer();
+        renderChips();
+        render();
+      });
+      timerModeRow.appendChild(chip);
+    });
+
+    var timerCustomWrap = document.getElementById("timerCustomWrap");
+    timerCustomWrap.style.display = state.timerMode==="custom" ? "flex" : "none";
+    var timerSlider = document.getElementById("timerSlider");
+    if(timerSlider){
+      timerSlider.value = state.customSeconds;
+      document.getElementById("timerSliderLabel").textContent = state.customSeconds + " שניות";
+    }
+  }
+
+  function cardShell(bodyNode, actionsNode){
+    var card = document.getElementById("card");
+    card.innerHTML = "";
+    var cfg = diffCfg();
+    card.style.borderInlineStart = "5px solid " + cfg.color;
+    var head = el("div","card-head");
+    var leftGroup = el("div");
+    leftGroup.style.display="flex"; leftGroup.style.gap="6px"; leftGroup.style.alignItems="center";
+    var tag = el("span","pos-tag", POS_LABEL[current().pos]);
+    var diffBadge = el("span","diff-badge", cfg.label);
+    diffBadge.style.background = cfg.tint;
+    diffBadge.style.color = cfg.color;
+    leftGroup.appendChild(tag); leftGroup.appendChild(diffBadge);
+    var idx = el("span","index", (state.pos+1) + " / " + state.queue.length);
+    head.appendChild(leftGroup); head.appendChild(idx);
+    var body = el("div","card-body");
+    body.appendChild(bodyNode);
+    card.appendChild(head);
+    card.appendChild(body);
+    if(actionsNode){
+      var actions = el("div","card-actions");
+      actions.appendChild(actionsNode);
+      card.appendChild(actions);
+    }
+  }
+
+  function makeTimer(seconds, color, onExpire){
+    var wrap = el("div","timerwrap");
+    var bar = el("div","timerbar");
+    var fill = el("i");
+    bar.appendChild(fill);
+    var label = el("div","timerlabel","⏱ " + seconds + " שניות לתשובה");
+    wrap.appendChild(bar); wrap.appendChild(label);
+    var remaining = seconds;
+    fill.style.width = "100%";
+    fill.style.background = color;
+    clearTimer();
+    state.timerId = setInterval(function(){
+      remaining -= 0.1;
+      var pct = Math.max(0, (remaining/seconds)*100);
+      fill.style.width = pct + "%";
+      fill.style.background = pct < 30 ? "var(--bad)" : color;
+      label.textContent = "⏱ " + Math.max(0, Math.ceil(remaining)) + " שניות לתשובה";
+      if(remaining<=0){
+        clearTimer();
+        onExpire();
+      }
+    }, 100);
+    return wrap;
+  }
+
+  function renderFlash(){
+    var w = current();
+
+    var scene = el("div","flip-scene");
+    var flipCard = el("div","flip-card no-anim");
+    var front = el("div","flip-face front");
+    front.appendChild(el("div","word-en", w.en));
+    front.appendChild(el("div","flip-rule"));
+    front.appendChild(el("div","hint","לחצו להפוך ולראות את התרגום"));
+    var back = el("div","flip-face back");
+    back.appendChild(el("div","word-he", w.he));
+    flipCard.appendChild(front); flipCard.appendChild(back);
+    scene.appendChild(flipCard);
+
+    scene.style.cursor = state.flipped ? "default" : "pointer";
+    scene.addEventListener("click", function(){
+      if(!state.flipped){
+        state.flipped = true;
+        state.justFlipped = true;
+        render();
+      }
+    });
+
+    var startFlipped = state.flipped && !state.justFlipped;
+    flipCard.style.transform = startFlipped ? "rotateY(180deg)" : "rotateY(0deg)";
+
+    var actions;
+    if(state.flipped){
+      actions = el("div");
+      var bad = el("button","btn bad","לא ידעתי");
+      var good = el("button","btn good","ידעתי!");
+      bad.type="button"; good.type="button";
+      bad.addEventListener("click", function(){ registerAnswer(false); advance(); });
+      good.addEventListener("click", function(){ registerAnswer(true); advance(); });
+      actions.appendChild(bad); actions.appendChild(good);
+      actions.style.display="flex"; actions.style.gap="10px";
+    } else {
+      actions = el("button","btn primary","הפוך כרטיס");
+      actions.type="button";
+      actions.addEventListener("click", function(){ state.flipped=true; state.justFlipped=true; render(); });
+    }
+    cardShell(scene, actions);
+
+    if(state.justFlipped){
+      state.justFlipped = false;
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          flipCard.classList.remove("no-anim");
+          flipCard.classList.add("anim");
+          flipCard.style.transform = "rotateY(180deg)";
+        });
+      });
+    }
+  }
+
+  function renderMC(){
+    var w = current();
+    var cfg = diffCfg();
+    var body = document.createDocumentFragment();
+    body.appendChild(el("div","word-en", w.en));
+    body.appendChild(el("div","hint","בחרו את התרגום הנכון"));
+
+    var need = cfg.options - 1;
+    var pool = WORDS.filter(function(x){ return x.cat===w.cat && x.en!==w.en; });
+    if(pool.length < need){
+      pool = pool.concat(shuffle(WORDS.filter(function(x){ return x.cat!==w.cat && x.en!==w.en; })));
+    }
+    var distractors = shuffle(pool).slice(0, need);
+    var choices = shuffle([w].concat(distractors));
+
+    var optionsWrap = el("div","options");
+    var answered = false;
+
+    function finish(isCorrect){
+      answered = true;
+      clearTimer();
+      Array.prototype.forEach.call(optionsWrap.children, function(b){
+        b.disabled = true;
+        if(b.textContent===w.he) b.classList.add("correct");
+      });
+      registerAnswer(isCorrect);
+      var next = el("button","btn primary","הבא ←");
+      next.type="button";
+      next.style.marginTop="14px";
+      next.addEventListener("click", advance);
+      bodyWrap.appendChild(next);
+    }
+
+    choices.forEach(function(choice){
+      var btn = el("button","opt", choice.he);
+      btn.type="button";
+      btn.addEventListener("click", function(){
+        if(answered) return;
+        var isCorrect = choice.en===w.en;
+        if(!isCorrect) btn.classList.add("wrong");
+        finish(isCorrect);
+      });
+      optionsWrap.appendChild(btn);
+    });
+
+    var bodyWrap = el("div"); bodyWrap.style.width="100%";
+    bodyWrap.style.display="flex"; bodyWrap.style.flexDirection="column";
+    bodyWrap.style.alignItems="center"; bodyWrap.style.gap="12px";
+    var secs = effectiveTimerSeconds(cfg);
+    if(secs>0){
+      bodyWrap.appendChild(makeTimer(secs, cfg.color, function(){ if(!answered) finish(false); }));
+    }
+    bodyWrap.appendChild(body);
+    bodyWrap.appendChild(optionsWrap);
+    cardShell(bodyWrap, null);
+  }
+
+  function buildHint(text, level){
+    if(level==="none") return "";
+    return text.split("").map(function(ch, idx){
+      if(ch===" ") return "  ";
+      if(level==="first" && (idx===0 || text[idx-1]===" ")) return ch;
+      return "_";
+    }).join(" ");
+  }
+
+  function normalizeHe(s){
+    return s.normalize("NFKC").replace(/["'׳״]/g,"").replace(/\s+/g," ").trim().toLowerCase();
+  }
+
+  function heAnswersFor(text){
+    text = text.trim();
+    if(text.indexOf(" / ") !== -1){
+      return text.split(" / ").map(function(s){ return s.trim(); }).filter(Boolean);
+    }
+    if(text.indexOf("/") !== -1){
+      var idx = text.indexOf("/");
+      var left = text.slice(0, idx).trim();
+      var rightPart = text.slice(idx+1).trim();
+      var spaceIdx = rightPart.indexOf(" ");
+      if(spaceIdx > -1){
+        var sharedSuffix = rightPart.slice(spaceIdx);
+        return [(left + sharedSuffix).trim(), rightPart.trim()];
+      }
+      return [left, rightPart];
+    }
+    return [text.replace(/[-־]\s*$/,"").trim()];
+  }
+
+  function renderType(){
+    var w = current();
+    var cfg = diffCfg();
+    var dir = state.typeDir; // "he2en": shown Hebrew, type English | "en2he": shown English, type Hebrew
+    var sourceText = dir==="he2en" ? w.he : w.en;
+    var targetIsEnglish = dir==="he2en";
+    var targetSample = targetIsEnglish ? w.en : heAnswersFor(w.he)[0];
+
+    var translateBar = el("div","translate-bar");
+    var pillHe = el("span","lang-pill"+(dir==="he2en"?" active":""), "עברית");
+    var pillEn = el("span","lang-pill"+(dir==="en2he"?" active":""), "English");
+    var swapBtn = el("button","swap-btn","⇄");
+    swapBtn.type = "button";
+    swapBtn.title = "החלף כיוון תרגום";
+    swapBtn.addEventListener("click", function(){
+      state.typeDir = state.typeDir==="he2en" ? "en2he" : "he2en";
+      clearTimer();
+      render();
+    });
+    translateBar.appendChild(pillHe);
+    translateBar.appendChild(swapBtn);
+    translateBar.appendChild(pillEn);
+
+    var body = document.createDocumentFragment();
+    var sourceNode = el("div", targetIsEnglish ? "word-he" : "word-en", sourceText);
+    body.appendChild(sourceNode);
+    body.appendChild(el("div","hint", targetIsEnglish ? "הקלידו את המילה באנגלית ולחצו Enter" : "הקלידו את הפירוש בעברית ולחצו Enter"));
+    var hintText = buildHint(targetSample, cfg.typeHint);
+    if(hintText) body.appendChild(el("div","hintcode", hintText));
+
+    var box = el("div","typebox");
+    var input = el("input");
+    input.type="text"; input.id="typeInput"; input.autocomplete="off"; input.spellcheck=false;
+    input.setAttribute("dir", targetIsEnglish ? "ltr" : "rtl");
+    input.style.fontFamily = targetIsEnglish ? "'IBM Plex Mono',monospace" : "'Frank Ruhl Libre',serif";
+    var submit = el("button","btn primary","בדוק");
+    submit.type="button";
+    box.appendChild(input); box.appendChild(submit);
+
+    var feedback = el("div","feedback");
+
+    var bodyWrap = el("div"); bodyWrap.style.width="100%";
+    bodyWrap.style.display="flex"; bodyWrap.style.flexDirection="column";
+    bodyWrap.style.alignItems="center"; bodyWrap.style.gap="14px";
+
+    var answered = false;
+    function finish(isCorrect){
+      answered = true;
+      clearTimer();
+      input.disabled = true; submit.disabled = true;
+      if(isCorrect){
+        feedback.textContent = "נכון! 🎉";
+        feedback.className = "feedback good";
+      } else {
+        feedback.textContent = "התשובה הנכונה: " + (targetIsEnglish ? w.en : w.he);
+        feedback.className = "feedback bad";
+      }
+      registerAnswer(isCorrect);
+      var next = el("button","btn primary","הבא ←");
+      next.type="button";
+      next.style.marginTop="6px";
+      next.addEventListener("click", advance);
+      bodyWrap.appendChild(next);
+    }
+    function check(){
+      if(answered) return;
+      var raw = input.value.trim();
+      if(!raw) return;
+      if(targetIsEnglish){
+        finish(raw.toLowerCase() === w.en.toLowerCase());
+      } else {
+        var answers = heAnswersFor(w.he).map(normalizeHe);
+        finish(answers.indexOf(normalizeHe(raw)) !== -1);
+      }
+    }
+    submit.addEventListener("click", check);
+    input.addEventListener("keydown", function(e){ if(e.key==="Enter") check(); });
+
+    var secs = effectiveTimerSeconds(cfg);
+    if(secs>0){
+      bodyWrap.appendChild(makeTimer(secs, cfg.color, function(){ if(!answered) finish(false); }));
+    }
+    bodyWrap.appendChild(translateBar);
+    bodyWrap.appendChild(body);
+    bodyWrap.appendChild(box);
+    bodyWrap.appendChild(feedback);
+
+    cardShell(bodyWrap, null);
+    setTimeout(function(){ input.focus(); }, 30);
+  }
+
+  function renderEditPanel(){
+    var card = document.getElementById("card");
+    card.innerHTML = "";
+    card.appendChild(el("div","edit-intro","כתבו כאן את הפירוש בעברית כמו שאתם זוכרים אותו — הוא יוצג לכם בתרגול במקום ההצעה שלנו. משאירים שדה ריק? נשתמש בפירוש המוצע."));
+
+    var list = el("div","editlist");
+    var lastCat = null;
+    BASE_WORDS.forEach(function(bw){
+      if(bw.cat !== lastCat){
+        list.appendChild(el("div","edit-group-label", CAT_LABEL[bw.cat]));
+        lastCat = bw.cat;
+      }
+      var row = el("div","editrow");
+      var enSpan = el("span","editrow-en", bw.en);
+      var input = el("input","editrow-input");
+      input.type="text";
+      input.value = store.overrides[bw.en] || bw.he;
+      input.placeholder = bw.he;
+      var resetBtn = el("button","reset-btn","↺");
+      resetBtn.type="button";
+      resetBtn.title="אפס לפירוש המוצע";
+      resetBtn.style.visibility = store.overrides[bw.en] ? "visible" : "hidden";
+
+      input.addEventListener("change", function(){
+        var val = input.value.trim();
+        if(!val || val===bw.he){
+          delete store.overrides[bw.en];
+          input.value = bw.he;
+          resetBtn.style.visibility = "hidden";
+        } else {
+          store.overrides[bw.en] = val;
+          resetBtn.style.visibility = "visible";
+        }
+        saveStore();
+      });
+      resetBtn.addEventListener("click", function(){
+        delete store.overrides[bw.en];
+        saveStore();
+        input.value = bw.he;
+        resetBtn.style.visibility = "hidden";
+      });
+
+      row.appendChild(enSpan); row.appendChild(input); row.appendChild(resetBtn);
+      list.appendChild(row);
+    });
+    card.appendChild(list);
+
+    var footRow = el("div","edit-footrow");
+    var resetAll = el("button","btn ghost","אפס את כל הפירושים למקור");
+    resetAll.type="button";
+    resetAll.addEventListener("click", function(){
+      store.overrides = {};
+      saveStore();
+      renderEditPanel();
+    });
+    var doneBtn = el("button","btn primary","סיימתי — חזרה לתרגול");
+    doneBtn.type="button";
+    doneBtn.style.flex="1";
+    doneBtn.addEventListener("click", function(){
+      state.mode = "flash";
+      WORDS = buildActiveWords();
+      resetSession();
+      buildQueue();
+      renderChips();
+      render();
+    });
+    footRow.appendChild(resetAll);
+    footRow.appendChild(doneBtn);
+    card.appendChild(footRow);
+  }
+
+  function renderResults(){
+    var card = document.getElementById("card");
+    card.innerHTML = "";
+    card.style.borderInlineStart = "";
+    var cfg = diffCfg();
+    var key = currentKey();
+    var best = store.bestByKey[key] || 0;
+    var accuracy = state.session.total ? Math.round((state.session.correct/state.session.total)*100) : 0;
+
+    var wrap = el("div");
+    wrap.style.width="100%"; wrap.style.display="flex"; wrap.style.flexDirection="column";
+    wrap.style.alignItems="center"; wrap.style.gap="10px"; wrap.style.padding="14px 0 4px";
+
+    wrap.appendChild(el("div","results-flag", state.isNewBest ? "🏆 שיא חדש!" : "🏁 הסיבוב הסתיים"));
+
+    var pointsLine = el("div","results-points", state.session.points + " ");
+    var pointsUnit = el("span",null,"נק'");
+    pointsLine.appendChild(pointsUnit);
+    wrap.appendChild(pointsLine);
+
+    wrap.appendChild(el("div","results-sub", state.session.correct + " מתוך " + state.session.total + " נכון · " + accuracy + "% דיוק"));
+
+    var bestLine = el("div","results-best", state.isNewBest ? "שיפרתם את השיא במצב הזה!" : "השיא שלכם במצב הזה: " + best + " נק'");
+    bestLine.style.background = cfg.tint;
+    bestLine.style.color = cfg.color;
+    wrap.appendChild(bestLine);
+
+    wrap.appendChild(el("div","results-meta", catLabel(state.cat) + " · " + modeLabel(state.mode) + " · רמת " + cfg.label));
+
+    var footRow = el("div","results-footrow");
+    var retry = el("button","btn primary","🔄 נסה שוב לשבור שיא");
+    retry.type="button";
+    retry.addEventListener("click", function(){
+      resetSession();
+      buildQueue();
+      render();
+    });
+    var home = el("button","btn ghost","🏠 חזרה למסך הבית");
+    home.type="button";
+    home.addEventListener("click", function(){
+      state.cat = "all"; state.mode = "flash"; state.diff = "medium";
+      resetSession();
+      buildQueue();
+      renderChips();
+      render();
+    });
+    footRow.appendChild(retry); footRow.appendChild(home);
+    wrap.appendChild(footRow);
+
+    card.appendChild(wrap);
+  }
+
+  function render(){
+    clearTimer();
+    if(state.mode==="edit"){
+      setChromeVisible(false);
+      renderEditPanel();
+      return;
+    }
+    setChromeVisible(true);
+    if(state.finished){
+      renderResults();
+      renderStats();
+      return;
+    }
+    if(!state.queue.length) buildQueue();
+    if(state.mode==="flash") renderFlash();
+    else if(state.mode==="mc") renderMC();
+    else renderType();
+    renderStats();
+  }
+
+  var timerSliderEl = document.getElementById("timerSlider");
+  timerSliderEl.addEventListener("input", function(){
+    state.customSeconds = parseInt(timerSliderEl.value, 10);
+    document.getElementById("timerSliderLabel").textContent = state.customSeconds + " שניות";
+  });
+  timerSliderEl.addEventListener("change", function(){
+    clearTimer();
+    render();
+  });
+
+  buildQueue();
+  renderChips();
+  render();
+
+  // --- installable app (add to home screen) ---
+  try{
+    var deferredInstallPrompt = null;
+    var installBtn = document.getElementById("installBtn");
+    window.addEventListener("beforeinstallprompt", function(e){
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      installBtn.style.display = "inline-flex";
+    });
+    installBtn.addEventListener("click", function(){
+      if(!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.finally(function(){
+        deferredInstallPrompt = null;
+        installBtn.style.display = "none";
+      });
+    });
+    window.addEventListener("appinstalled", function(){
+      installBtn.style.display = "none";
+    });
+    if("serviceWorker" in navigator){
+      window.addEventListener("load", function(){
+        navigator.serviceWorker.register("sw.js").catch(function(){});
+      });
+    }
+  }catch(e){}
+})();
+</script>
