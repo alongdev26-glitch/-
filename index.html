@@ -77,7 +77,9 @@
   html{height:100%;}
   body{
     margin:0;
-    min-height:100%;
+    min-height:100vh;
+    min-height:100dvh;
+    min-height:calc(var(--app-height, 100vh));
     background:
       radial-gradient(var(--dot) 1.4px, transparent 1.4px) 0 0/24px 24px,
       linear-gradient(180deg, var(--bg-top), var(--bg) 420px);
@@ -669,6 +671,22 @@
 <script>
 (function(){
   "use strict";
+
+  // Some mobile/in-app browsers report an inaccurate 100vh/100dvh (their
+  // own chrome — address bar, share sheet — isn't subtracted correctly),
+  // which leaves the sticky bottom nav short of the real screen edge.
+  // window.innerHeight is always accurate, so mirror it into a CSS var.
+  function setAppHeight(){
+    try{
+      document.documentElement.style.setProperty("--app-height", window.innerHeight + "px");
+    }catch(e){}
+  }
+  setAppHeight();
+  window.addEventListener("resize", setAppHeight);
+  window.addEventListener("orientationchange", function(){ setTimeout(setAppHeight, 60); });
+  if(window.visualViewport){
+    window.visualViewport.addEventListener("resize", setAppHeight);
+  }
 
   var BASE_WORDS = [
     {en:"blog", he:"בלוג", pos:"noun", cat:"nouns", ipa:"blɒg"},
