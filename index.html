@@ -26,6 +26,8 @@
     --good-tint:#e3f2e7;
     --bad:#b8483b;
     --bad-tint:#faeae7;
+    --bg-top:#eef3ea;
+    --dot:rgba(28,124,111,.10);
     --shadow: 0 1px 0 rgba(28,42,32,.06), 0 10px 24px -14px rgba(28,42,32,.35);
   }
   @media (prefers-color-scheme: dark){
@@ -45,6 +47,8 @@
       --good-tint:#173322;
       --bad:#e2837a;
       --bad-tint:#3a201d;
+      --bg-top:#152218;
+      --dot:rgba(73,211,189,.08);
       --shadow: 0 1px 0 rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
     }
   }
@@ -64,13 +68,17 @@
     --good-tint:#173322;
     --bad:#e2837a;
     --bad-tint:#3a201d;
+    --bg-top:#152218;
+    --dot:rgba(73,211,189,.08);
     --shadow: 0 1px 0 rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
   }
 
   *{box-sizing:border-box;}
   body{
     margin:0;
-    background:var(--bg);
+    background:
+      radial-gradient(var(--dot) 1.4px, transparent 1.4px) 0 0/24px 24px,
+      linear-gradient(180deg, var(--bg-top), var(--bg) 420px);
     color:var(--ink);
     font-family:'Assistant',system-ui,sans-serif;
     padding:28px 16px 56px;
@@ -85,6 +93,20 @@
     margin:0 0 4px;
     text-wrap:balance;
     letter-spacing:.2px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  h1 .badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:.22em .26em;
+    font-size:.58em;
+    line-height:1;
+    border-radius:11px;
+    background:var(--accent-tint);
+    flex-shrink:0;
   }
   .sub{
     color:var(--ink-soft);
@@ -165,8 +187,20 @@
 
   /* --- card --- */
   .stage{position:relative;min-height:300px;margin-bottom:18px;}
+  .stage::before,
+  .stage::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:18px;
+    border:1px solid var(--line);
+    z-index:0;
+  }
+  .stage::before{background:var(--surface-2);transform:rotate(-3deg) translateY(6px);}
+  .stage::after{background:var(--surface);transform:rotate(2.5deg) translateY(4px);}
   .card{
     position:relative;
+    z-index:1;
     background:var(--surface);
     border:1px solid var(--line);
     border-radius:18px;
@@ -286,8 +320,13 @@
   }
   .btn:hover{border-color:var(--accent);}
   .btn:active{transform:scale(.96);}
-  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
-  .btn.primary:hover{background:var(--accent-strong);border-color:var(--accent-strong);}
+  .btn.primary{
+    background:linear-gradient(135deg, var(--accent), var(--accent-strong));
+    border-color:var(--accent-strong);
+    color:#fff;
+    box-shadow:0 8px 18px -10px var(--accent-strong);
+  }
+  .btn.primary:hover{background:linear-gradient(135deg, var(--accent-strong), var(--accent));}
   .btn.good{background:var(--good-tint);border-color:var(--good);color:var(--good);}
   .btn.bad{background:var(--bad-tint);border-color:var(--bad);color:var(--bad);}
   .btn.ghost{background:transparent;}
@@ -440,7 +479,33 @@
 
   /* results screen */
   .results-flag{font:800 21px 'Frank Ruhl Libre',serif;color:var(--accent-strong);text-align:center;text-wrap:balance;}
-  .results-points{font:800 48px 'IBM Plex Mono',monospace;color:var(--ink);line-height:1;}
+  .results-points{
+    font:800 48px 'IBM Plex Mono',monospace;
+    color:var(--ink);
+    line-height:1;
+    animation:pop-in .45s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  @keyframes pop-in{
+    0%{transform:scale(.4);opacity:0;}
+    100%{transform:scale(1);opacity:1;}
+  }
+  .confetti-wrap{position:absolute;inset:0;pointer-events:none;overflow:visible;}
+  .confetti-piece{
+    position:absolute;
+    top:-10px;
+    width:8px;height:14px;
+    border-radius:2px;
+    opacity:0;
+    animation:confetti-fall 1.5s ease-in forwards;
+  }
+  @keyframes confetti-fall{
+    0%{opacity:1;transform:translateY(0) rotate(0deg);}
+    100%{opacity:0;transform:translateY(220px) rotate(360deg);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .results-points{animation:none;}
+    .confetti-piece{display:none;}
+  }
   .results-points span{font-size:20px;color:var(--ink-soft);font-family:'Assistant',sans-serif;font-weight:700;}
   .results-sub{font:600 14px 'Assistant',sans-serif;color:var(--ink-soft);}
   .results-best{font:700 13.5px 'Assistant',sans-serif;padding:6px 14px;border-radius:999px;}
@@ -488,7 +553,7 @@
 </style>
 
 <div class="wrap" dir="rtl" lang="he">
-  <h1>מגירת המילים</h1>
+  <h1><span class="badge">📇</span> מגירת המילים</h1>
   <p class="sub">28 מילים באנגלית, מסודרות בקטגוריות כמו במגירת קלפים — <b>שמות עצם</b>, <b>פעלים</b>, <b>שמות תואר</b> ו<b>אחר</b>. אפשר לכתוב לעצמכם את הפירוש בעברית, לבחור רמת קושי, ולתרגל בכרטיסיות, בבחירה מרובה או בהקלדה — ובהקלדה אפשר להחליף כיוון (⇄) בין עברית לאנגלית, כמו בגוגל טרנסלייט.</p>
 
   <div class="row chiprow" id="catRow"></div>
@@ -503,10 +568,10 @@
   </div>
 
   <div class="stats" id="statsBar">
-    <div class="stat"><span class="n" id="statPoints">0</span><span class="l">ניקוד</span></div>
-    <div class="stat"><span class="n" id="statScore">0/0</span><span class="l">תשובות נכונות</span></div>
-    <div class="stat"><span class="n" id="statStreak">0</span><span class="l">רצף נוכחי</span></div>
-    <div class="stat"><span class="n" id="statBest">0</span><span class="l">שיא ניקוד</span></div>
+    <div class="stat"><span class="n" id="statPoints">0</span><span class="l">🎯 ניקוד</span></div>
+    <div class="stat"><span class="n" id="statScore">0/0</span><span class="l">✅ נכונות</span></div>
+    <div class="stat"><span class="n" id="statStreak">0</span><span class="l">🔥 רצף</span></div>
+    <div class="stat"><span class="n" id="statBest">0</span><span class="l">🏆 שיא</span></div>
   </div>
 
   <div class="progress" id="progressWrap"><i id="progressBar" style="width:0%"></i></div>
@@ -1210,8 +1275,23 @@
     var accuracy = state.session.total ? Math.round((state.session.correct/state.session.total)*100) : 0;
 
     var wrap = el("div");
+    wrap.style.position="relative";
     wrap.style.width="100%"; wrap.style.display="flex"; wrap.style.flexDirection="column";
     wrap.style.alignItems="center"; wrap.style.gap="10px"; wrap.style.padding="14px 0 4px";
+
+    if(state.isNewBest){
+      var confettiWrap = el("div","confetti-wrap");
+      var colors = ["var(--accent)","var(--amber)","var(--good)","var(--bad)","var(--accent-strong)"];
+      for(var i=0;i<24;i++){
+        var piece = el("span","confetti-piece");
+        piece.style.left = (Math.random()*100) + "%";
+        piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+        piece.style.animationDelay = (Math.random()*0.4) + "s";
+        piece.style.animationDuration = (1.1 + Math.random()*0.8) + "s";
+        confettiWrap.appendChild(piece);
+      }
+      wrap.appendChild(confettiWrap);
+    }
 
     wrap.appendChild(el("div","results-flag", state.isNewBest ? "🏆 שיא חדש!" : "🏁 הסיבוב הסתיים"));
 
