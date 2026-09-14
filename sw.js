@@ -1,4 +1,4 @@
-var CACHE_NAME = "word-drawer-v1";
+var CACHE_NAME = "word-drawer-v2";
 var SHELL = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", function(event){
@@ -23,16 +23,17 @@ self.addEventListener("activate", function(event){
 
 self.addEventListener("fetch", function(event){
   if(event.request.method !== "GET") return;
+  // Network-first: always prefer a fresh copy so app updates show up
+  // immediately; only fall back to the cache when there is no network.
   event.respondWith(
-    caches.match(event.request).then(function(cached){
-      var fetchPromise = fetch(event.request).then(function(res){
-        if(res && res.status === 200){
-          var resClone = res.clone();
-          caches.open(CACHE_NAME).then(function(cache){ cache.put(event.request, resClone); });
-        }
-        return res;
-      }).catch(function(){ return cached; });
-      return cached || fetchPromise;
+    fetch(event.request).then(function(res){
+      if(res && res.status === 200){
+        var resClone = res.clone();
+        caches.open(CACHE_NAME).then(function(cache){ cache.put(event.request, resClone); });
+      }
+      return res;
+    }).catch(function(){
+      return caches.match(event.request);
     })
   );
 });
