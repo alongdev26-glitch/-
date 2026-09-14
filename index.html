@@ -74,24 +74,15 @@
   }
 
   *{box-sizing:border-box;}
-  html{height:100%;}
+  html,body{margin:0;}
   body{
-    margin:0;
-    min-height:100vh;
-    min-height:100dvh;
-    min-height:calc(var(--app-height, 100vh));
     background:
       radial-gradient(var(--dot) 1.4px, transparent 1.4px) 0 0/24px 24px,
       linear-gradient(180deg, var(--bg-top), var(--bg) 420px);
     color:var(--ink);
     font-family:'Assistant',system-ui,sans-serif;
-    display:flex;
-    flex-direction:column;
   }
-  .app{
-    max-width:480px;width:100%;margin:0 auto;padding:0 16px;position:relative;
-    display:flex;flex-direction:column;flex:1;
-  }
+  .app{max-width:480px;width:100%;margin:0 auto;padding:0 16px;position:relative;}
 
   .topbar{
     position:sticky;top:0;z-index:5;
@@ -112,11 +103,10 @@
     background:var(--amber-tint);padding:5px 10px;border-radius:999px;
   }
 
-  .tabcontent{flex:1 1 auto;padding-bottom:16px;}
+  .tabcontent{padding-bottom:16px;}
 
   .bottomnav{
-    position:sticky;bottom:0;
-    margin:0 -16px;
+    margin:24px -16px 0;
     display:flex;
     background:var(--surface);
     border-top:1px solid var(--line);
@@ -671,22 +661,6 @@
 <script>
 (function(){
   "use strict";
-
-  // Some mobile/in-app browsers report an inaccurate 100vh/100dvh (their
-  // own chrome — address bar, share sheet — isn't subtracted correctly),
-  // which leaves the sticky bottom nav short of the real screen edge.
-  // window.innerHeight is always accurate, so mirror it into a CSS var.
-  function setAppHeight(){
-    try{
-      document.documentElement.style.setProperty("--app-height", window.innerHeight + "px");
-    }catch(e){}
-  }
-  setAppHeight();
-  window.addEventListener("resize", setAppHeight);
-  window.addEventListener("orientationchange", function(){ setTimeout(setAppHeight, 60); });
-  if(window.visualViewport){
-    window.visualViewport.addEventListener("resize", setAppHeight);
-  }
 
   var BASE_WORDS = [
     {en:"blog", he:"בלוג", pos:"noun", cat:"nouns", ipa:"blɒg"},
