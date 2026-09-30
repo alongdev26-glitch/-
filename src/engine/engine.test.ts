@@ -193,3 +193,22 @@ describe('bots', () => {
     console.log(`bot games finished: ${finished}/8`);
   }, 60_000);
 });
+
+describe('lotto pot', () => {
+  it('collects taxes and pays out on free parking', () => {
+    let s = run(setup(), { type: 'ROLL', dice: [1, 3] });
+    expect(s.players[0].money).toBe(1300);
+    expect(s.pot).toBe(200);
+    s = run(s, { type: 'END_TURN' });
+    s.players[1].pos = 15;
+    s = run(s, { type: 'ROLL', dice: [2, 3] });
+    expect(s.players[1].money).toBe(1700);
+    expect(s.pot).toBe(0);
+  });
+  it('collects the jail fine', () => {
+    let s = setup();
+    s.players[0].inJail = true;
+    s = run(s, { type: 'PAY_JAIL' });
+    expect(s.pot).toBe(50);
+  });
+});

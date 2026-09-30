@@ -49,6 +49,7 @@ export function newGame(setup: PlayerSetup[], rng: () => number = Math.random): 
     phase: { t: 'roll' },
     dice: [1, 1],
     doubles: 0,
+    pot: 0,
     again: false,
     decks: { chance: shuffle(DECKS.chance.length, rng), chest: shuffle(DECKS.chest.length, rng) },
     log: ['המשחק התחיל! בהצלחה'],
@@ -89,6 +90,7 @@ function settle(s: GameState, from: number, owed: Owed[]) {
   for (const o of owed) {
     s.players[from].money -= o.amount;
     if (o.to !== null) s.players[o.to].money += o.amount;
+    else s.pot += o.amount;
   }
 }
 
@@ -168,6 +170,13 @@ function land(s: GameState, mod?: RentMod) {
     }
     case 'gotojail':
       sendToJail(s);
+      return finishMove(s);
+    case 'parking':
+      if (s.pot > 0) {
+        p.money += s.pot;
+        log(s, `${p.name} זכה בקופת הלוטו: ${fmt(s.pot)}!`);
+        s.pot = 0;
+      }
       return finishMove(s);
     default:
       return finishMove(s);
@@ -251,6 +260,7 @@ function goBankrupt(s: GameState, player: number, creditor: number | null) {
     }
   }
   if (creditor !== null) s.players[creditor].money += Math.max(0, p.money);
+  else s.pot += Math.max(0, p.money);
   p.money = 0;
   for (const deck of p.jailCards) returnJailCard(s, deck);
   p.jailCards = [];
@@ -352,6 +362,7 @@ export function reduce(prev: GameState, a: Action): GameState {
             return s;
           }
           p.money -= JAIL_FINE;
+          s.pot += JAIL_FINE;
           p.inJail = false;
           p.jailTurns = 0;
           log(s, `${p.name} שילם ${fmt(JAIL_FINE)} ויצא מהכלא`);
@@ -375,6 +386,7 @@ export function reduce(prev: GameState, a: Action): GameState {
     case 'PAY_JAIL':
       if (ph.t !== 'roll' || !p.inJail || p.money < JAIL_FINE) return prev;
       p.money -= JAIL_FINE;
+      s.pot += JAIL_FINE;
       p.inJail = false;
       p.jailTurns = 0;
       log(s, `${p.name} שילם ${fmt(JAIL_FINE)} ויצא מהכלא`);

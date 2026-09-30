@@ -134,6 +134,7 @@ export function Board({ game, shown, onSpace, center }: Props) {
       <div className="board-center">
         <div className="plaque" dir="rtl">
           <span>טייקון</span>
+          <small className="plaque-pot">קופת הלוטו: ש"ח {game.pot}</small>
           <i className="mascot">🎩</i>
         </div>
         <div className="deck deck-chest">

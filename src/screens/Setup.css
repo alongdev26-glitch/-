@@ -85,3 +85,27 @@
   border-color: var(--red);
   color: #fff;
 }
+.bot-names {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+.bot-names input {
+  width: 30%;
+  min-width: 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  padding: 5px 4px;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+}
+.setup {
+  overflow-y: auto;
+}
+@media (max-height: 430px) {
+  .setup-preview {
+    display: none;
+  }
+}

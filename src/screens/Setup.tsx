@@ -10,12 +10,13 @@ export function Setup({ onStart, onBack }: { onStart: (p: PlayerSetup[]) => void
   const [token, setToken] = useState<TokenId>('car');
   const [bots, setBots] = useState(3);
   const [name, setName] = useState('אני');
+  const [botNames, setBotNames] = useState(BOT_NAMES.slice(0, 3));
 
   const start = () => {
     const others = TOKENS.filter((t) => t.id !== token);
     onStart([
       { name: name.trim() || 'אני', token, isBot: false },
-      ...Array.from({ length: bots }, (_, i) => ({ name: BOT_NAMES[i], token: others[i].id, isBot: true })),
+      ...Array.from({ length: bots }, (_, i) => ({ name: botNames[i].trim() || BOT_NAMES[i], token: others[i].id, isBot: true })),
     ]);
   };
 
@@ -38,7 +39,7 @@ export function Setup({ onStart, onBack }: { onStart: (p: PlayerSetup[]) => void
         </div>
         <label className="setup-field">
           השם שלך
-          <input value={name} maxLength={12} onChange={(e) => setName(e.target.value)} />
+          <input id="player-name" value={name} maxLength={12} onChange={(e) => setName(e.target.value)} />
         </label>
         <div className="setup-field">
           שחקני מחשב
@@ -47,6 +48,18 @@ export function Setup({ onStart, onBack }: { onStart: (p: PlayerSetup[]) => void
               <button key={n} className={n === bots ? 'on' : ''} onClick={() => setBots(n)}>
                 {n}
               </button>
+            ))}
+          </div>
+          <div className="bot-names">
+            {botNames.slice(0, bots).map((n, i) => (
+              <input
+                key={i}
+                id={`bot-${i}`}
+                aria-label={`שם שחקן מחשב ${i + 1}`}
+                value={n}
+                maxLength={10}
+                onChange={(e) => setBotNames((b) => b.map((x, j) => (j === i ? e.target.value : x)))}
+              />
             ))}
           </div>
         </div>

@@ -1,25 +1,16 @@
 import { useCallback, useEffect, useReducer, useState } from 'react';
-import { BOARD, JAIL_FINE, isOwnable } from '../data/board';
+import { BOARD } from '../data/board';
 import { DECKS } from '../data/cards';
 import { botAction } from '../engine/bot';
-import { actor, reduce, rollDice } from '../engine/reducer';
-import {
-  canBuild,
-  canMortgage,
-  canSell,
-  canUnmortgage,
-  mortgageValue,
-  ownedBy,
-  sellValue,
-  unmortgageCost,
-} from '../engine/rules';
+import { actor, reduce } from '../engine/reducer';
 import type { Action, GameState } from '../engine/types';
-import { Board } from '../ui/Board';
-import { Dice } from '../ui/Dice';
+import { BoardTab } from '../tabs/BoardTab';
+import { MarketTab } from '../tabs/MarketTab';
+import { MyPropsTab } from '../tabs/MyPropsTab';
+import { ProfileTab } from '../tabs/ProfileTab';
 import { Modal } from '../ui/Modal';
-import { PlayerHud } from '../ui/PlayerHud';
 import { PropertyCard } from '../ui/PropertyCard';
-import { RibbonBanner } from '../ui/RibbonBanner';
+import { Token } from '../ui/Token';
 import { Winner } from './Winner';
 import './Game.css';
 
@@ -38,30 +29,23 @@ export function saveGame(g: GameState | null) {
 export function loadGame(): GameState | null {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
-    return raw ? (JSON.parse(raw) as GameState) : null;
+    if (!raw) return null;
+    const g = JSON.parse(raw) as GameState;
+    g.pot ??= 0;
+    return g;
   } catch {
     return null;
   }
 }
 
-function bannerText(g: GameState): string {
-  switch (g.phase.t) {
-    case 'roll':
-      return 'הטל!';
-    case 'buy':
-      return 'קנה!';
-    case 'auction':
-      return 'מכרז!';
-    case 'card':
-      return g.phase.deck === 'chance' ? 'הפתעה!' : 'תיבת המזל!';
-    case 'debt':
-      return 'חוב!';
-    case 'end':
-      return g.again ? 'דאבל!' : 'תכנן!';
-    case 'gameover':
-      return 'ניצחון!';
-  }
-}
+type Tab = 'board' | 'mine' | 'market' | 'profile';
+
+const TABS: { id: Tab; icon: string; label: string }[] = [
+  { id: 'board', icon: '🎲', label: 'לוח' },
+  { id: 'mine', icon: '💼', label: 'הנכסים שלי' },
+  { id: 'market', icon: '🏷️', label: 'נכסים פנויים' },
+  { id: 'profile', icon: '👤', label: 'פרופיל' },
+];
 
 interface Props {
   initial: GameState;
@@ -74,7 +58,7 @@ export function Game({ initial, onExit, onNewGame }: Props) {
   const [shown, setShown] = useState(() => initial.players.map((p) => p.pos));
   const [rolling, setRolling] = useState(false);
   const [info, setInfo] = useState<number | null>(null);
-  const [managing, setManaging] = useState(false);
+  const [tab, setTab] = useState<Tab>('board');
 
   const moving = shown.some((pos, i) => pos !== game.players[i].pos);
   const busy = rolling || moving;
@@ -83,6 +67,7 @@ export function Game({ initial, onExit, onNewGame }: Props) {
   const myTurn = game.current === me.id && game.phase.t !== 'gameover';
   const myInput = acting === me.id && !busy;
   const cur = game.players[game.current];
+  const needsBoard = myTurn && !busy && (game.phase.t === 'roll' || game.phase.t === 'end');
 
   const act = useCallback((a: Action) => {
     if (a.type === 'ROLL') {
@@ -122,55 +107,6 @@ export function Game({ initial, onExit, onNewGame }: Props) {
   }, [game, busy, act]);
 
   const ph = game.phase;
-  const debtTotal = ph.t === 'debt' ? ph.owed.reduce((a, o) => a + o.amount, 0) : 0;
-
-  const controls = () => {
-    if (!myTurn || busy) {
-      return <div className="waiting">{busy ? '...' : `${cur.name} משחק...`}</div>;
-    }
-    const manageBtn = (
-      <button className="btn btn-white btn-sm" onClick={() => setManaging(true)} disabled={ownedBy(game, me.id).length === 0}>
-        נהל נכסים
-      </button>
-    );
-    if (ph.t === 'roll') {
-      return (
-        <>
-          <button className="btn btn-red big" onClick={() => act({ type: 'ROLL', dice: rollDice() })}>
-            {me.inJail ? 'נסה דאבל' : 'הטל קוביות'}
-          </button>
-          {me.inJail && (
-            <button className="btn btn-gold btn-sm" disabled={me.money < JAIL_FINE} onClick={() => act({ type: 'PAY_JAIL' })}>
-              שלם ש"ח {JAIL_FINE} וצא
-            </button>
-          )}
-          {me.inJail && me.jailCards.length > 0 && (
-            <button className="btn btn-gold btn-sm" onClick={() => act({ type: 'USE_JAIL_CARD' })}>
-              השתמש בכרטיס יציאה
-            </button>
-          )}
-          {manageBtn}
-        </>
-      );
-    }
-    if (ph.t === 'end') {
-      return (
-        <>
-          {game.again ? (
-            <button className="btn btn-red big" onClick={() => act({ type: 'ROLL', dice: rollDice() })}>
-              הטל שוב
-            </button>
-          ) : (
-            <button className="btn btn-red big" onClick={() => act({ type: 'END_TURN' })}>
-              סיים תור
-            </button>
-          )}
-          {manageBtn}
-        </>
-      );
-    }
-    return null;
-  };
 
   const auctionModal = () => {
     if (ph.t !== 'auction') return null;
@@ -199,7 +135,12 @@ export function Game({ initial, onExit, onNewGame }: Props) {
             {myInput && inIt ? (
               <div className="auction-btns">
                 {[10, 50, 100].map((n) => (
-                  <button key={n} className="btn btn-red btn-sm" disabled={step(n) > me.money} onClick={() => act({ type: 'BID', amount: step(n) })}>
+                  <button
+                    key={n}
+                    className="btn btn-red btn-sm"
+                    disabled={step(n) > me.money}
+                    onClick={() => act({ type: 'BID', amount: step(n) })}
+                  >
                     +{n}
                   </button>
                 ))}
@@ -216,55 +157,8 @@ export function Game({ initial, onExit, onNewGame }: Props) {
     );
   };
 
-  const manageModal = () => {
-    if (!managing || !myTurn) return null;
-    const mine = ownedBy(game, me.id);
-    return (
-      <Modal title="הנכסים שלי" onClose={() => setManaging(false)}>
-        <div className="manage-money">מזומן: ש"ח {me.money}</div>
-        <div className="manage-list">
-          {mine.map((id) => {
-            const sp = BOARD[id];
-            const st = game.props[id];
-            return (
-              <div className="manage-row" key={id}>
-                <span className="manage-name">
-                  <i style={{ background: sp.group ? `var(--g-${sp.group})` : '#999' }} />
-                  {sp.name}
-                  {st.houses > 0 && <em>{st.houses === 5 ? ' 🏨' : ` 🏠×${st.houses}`}</em>}
-                  {st.mortgaged && <em> (ממושכן)</em>}
-                </span>
-                <span className="manage-btns">
-                  {sp.kind === 'property' && (
-                    <>
-                      <button className="btn btn-red btn-sm" disabled={!canBuild(game, me.id, id)} onClick={() => act({ type: 'BUILD', space: id })}>
-                        בנה {sp.houseCost}
-                      </button>
-                      <button className="btn btn-white btn-sm" disabled={!canSell(game, me.id, id)} onClick={() => act({ type: 'SELL', space: id })}>
-                        מכור +{sellValue(id)}
-                      </button>
-                    </>
-                  )}
-                  {st.mortgaged ? (
-                    <button className="btn btn-gold btn-sm" disabled={!canUnmortgage(game, me.id, id)} onClick={() => act({ type: 'UNMORTGAGE', space: id })}>
-                      פדה {unmortgageCost(id)}
-                    </button>
-                  ) : (
-                    <button className="btn btn-black btn-sm" disabled={!canMortgage(game, me.id, id)} onClick={() => act({ type: 'MORTGAGE', space: id })}>
-                      משכן +{mortgageValue(id)}
-                    </button>
-                  )}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </Modal>
-    );
-  };
-
   const phaseModal = () => {
-    if (busy || managing) return null;
+    if (busy) return null;
     if (ph.t === 'buy' && myTurn) {
       const price = BOARD[ph.space].price!;
       return (
@@ -280,10 +174,7 @@ export function Game({ initial, onExit, onNewGame }: Props) {
           </div>
           {me.money < price && (
             <div className="modal-note">
-              אין מספיק כסף.{' '}
-              <button className="link" onClick={() => setManaging(true)}>
-                נהל נכסים
-              </button>
+              אין מספיק כסף. אפשר למשכן נכסים בעמוד "הנכסים שלי" ולחזור, או להוציא למכרז.
             </div>
           )}
         </Modal>
@@ -307,20 +198,21 @@ export function Game({ initial, onExit, onNewGame }: Props) {
         </Modal>
       );
     }
-    if (ph.t === 'debt' && myTurn) {
+    if (ph.t === 'debt' && myTurn && tab !== 'mine') {
+      const total = ph.owed.reduce((a, o) => a + o.amount, 0);
       return (
         <Modal title="חוב!">
           <div className="debt">
             <p>
-              עליך לשלם <b>ש"ח {debtTotal}</b> אבל יש לך רק <b>ש"ח {me.money}</b>.
+              עליך לשלם <b>ש"ח {total}</b> אבל יש לך רק <b>ש"ח {me.money}</b>.
             </p>
-            <p>מכור בתים או משכן נכסים כדי לגייס כסף.</p>
+            <p>מכור בתים או משכן נכסים בעמוד "הנכסים שלי".</p>
             <div className="modal-actions">
-              <button className="btn btn-red" disabled={me.money < debtTotal} onClick={() => act({ type: 'PAY_DEBT' })}>
+              <button className="btn btn-red" disabled={me.money < total} onClick={() => act({ type: 'PAY_DEBT' })}>
                 שלם
               </button>
-              <button className="btn btn-white" onClick={() => setManaging(true)}>
-                נהל נכסים
+              <button className="btn btn-white" onClick={() => setTab('mine')}>
+                לנכסים שלי
               </button>
               <button className="btn btn-black" onClick={() => act({ type: 'BANKRUPT' })}>
                 פשיטת רגל
@@ -334,39 +226,40 @@ export function Game({ initial, onExit, onNewGame }: Props) {
   };
 
   return (
-    <div className="game">
-      <aside className="game-left" dir="rtl">
-        <PlayerHud game={game} />
-      </aside>
+    <div className="game" dir="rtl">
+      <nav className="tabbar" aria-label="עמודי המשחק">
+        <div className="turn-pill" style={{ borderColor: cur.color }} title={`התור של ${cur.name}`}>
+          <Token token={cur.token} color={cur.color} size="18px" />
+          <span>{cur.id === me.id ? 'התור שלך' : cur.name}</span>
+        </div>
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            className={`tab${tab === t.id ? ' on' : ''}${t.id === 'board' && needsBoard && tab !== 'board' ? ' ping' : ''}`}
+            onClick={() => setTab(t.id)}
+            aria-current={tab === t.id ? 'page' : undefined}
+          >
+            <span className="tab-icon">{t.icon}</span>
+            <span className="tab-label">{t.label}</span>
+            {t.id === 'mine' && <span className="tab-sub">ש"ח {me.money}</span>}
+            {t.id === 'market' && game.pot > 0 && <span className="tab-sub gold">קופה {game.pot}</span>}
+          </button>
+        ))}
+      </nav>
 
-      <main className="game-board">
-        <Board
-          game={game}
-          shown={shown}
-          onSpace={(id) => isOwnable(BOARD[id]) && setInfo(id)}
-          center={
-            <div className="board-dice">
-              <Dice dice={game.dice} rolling={rolling} />
-            </div>
-          }
-        />
+      <main className="tab-page">
+        {tab === 'board' && (
+          <BoardTab game={game} shown={shown} rolling={rolling} busy={busy} myTurn={myTurn} act={act} onSpace={setInfo} />
+        )}
+        {tab === 'mine' && <MyPropsTab game={game} me={me.id} myTurn={myTurn && !busy} act={act} onSpace={setInfo} />}
+        {tab === 'market' && <MarketTab game={game} onSpace={setInfo} />}
+        {tab === 'profile' && <ProfileTab game={game} me={me.id} onExit={onExit} onNewGame={onNewGame} />}
+        <div className="toast" key={game.log.length + game.log[0]}>
+          {game.log[0]}
+        </div>
       </main>
 
-      <aside className="game-right" dir="rtl">
-        <RibbonBanner text={bannerText(game)} sub={`התור של ${cur.name}`} />
-        <div className="controls">{controls()}</div>
-        <ul className="log">
-          {game.log.slice(0, 8).map((l, i) => (
-            <li key={game.log.length - i}>{l}</li>
-          ))}
-        </ul>
-        <button className="btn btn-white btn-sm exit" onClick={onExit}>
-          ☰ תפריט
-        </button>
-      </aside>
-
       {phaseModal()}
-      {manageModal()}
       {info !== null && (
         <Modal onClose={() => setInfo(null)}>
           <PropertyCard

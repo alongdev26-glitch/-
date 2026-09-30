@@ -52,6 +52,8 @@ export interface GameState {
   phase: Phase;
   dice: [number, number];
   doubles: number;
+  /** "קופת הלוטו": taxes and fines collect here, "חניה חופשית" takes it all */
+  pot: number;
   /** current player may roll again after finishing this move */
   again: boolean;
   decks: Record<Deck, number[]>;
