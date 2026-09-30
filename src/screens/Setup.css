@@ -1,10 +1,9 @@
 .setup {
   height: 100%;
-  display: grid;
-  grid-template-columns: 1fr minmax(200px, 32%);
-  align-items: center;
-  gap: 4vw;
-  padding: 58px 5vw 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 72px 16px 24px;
   position: relative;
   background:
     linear-gradient(45deg, #f4f4f4 25%, transparent 25%, transparent 75%, #f4f4f4 75%),
@@ -18,6 +17,7 @@
   right: 0;
 }
 .setup-grid {
+  flex: none;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: clamp(8px, 1.5vw, 18px);
@@ -34,12 +34,13 @@
   justify-content: center;
   gap: 6px;
   font-weight: 700;
-  font-size: clamp(12px, 1.4vw, 17px);
+  font-size: 14px;
 }
 .setup-tile.selected {
   border-color: var(--red);
 }
 .setup-side {
+  flex: none;
   display: flex;
   flex-direction: column;
   gap: clamp(8px, 2vh, 16px);
@@ -104,7 +105,16 @@
 .setup {
   overflow-y: auto;
 }
-@media (max-height: 430px) {
+@media (orientation: landscape) and (min-aspect-ratio: 4/3) {
+  .setup {
+    display: grid;
+    grid-template-columns: 1fr minmax(200px, 32%);
+    align-items: center;
+    gap: 4vw;
+    padding: 58px 5vw 10px;
+  }
+}
+@media (orientation: landscape) and (max-height: 430px) {
   .setup-preview {
     display: none;
   }

@@ -228,10 +228,6 @@ export function Game({ initial, onExit, onNewGame }: Props) {
   return (
     <div className="game" dir="rtl">
       <nav className="tabbar" aria-label="עמודי המשחק">
-        <div className="turn-pill" style={{ borderColor: cur.color }} title={`התור של ${cur.name}`}>
-          <Token token={cur.token} color={cur.color} size="18px" />
-          <span>{cur.id === me.id ? 'התור שלך' : cur.name}</span>
-        </div>
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -248,6 +244,10 @@ export function Game({ initial, onExit, onNewGame }: Props) {
       </nav>
 
       <main className="tab-page">
+          <div className="turn-pill" style={{ borderColor: cur.color }} title={`התור של ${cur.name}`}>
+            <Token token={cur.token} color={cur.color} size="18px" />
+            <span>{cur.id === me.id ? 'התור שלך' : cur.name}</span>
+          </div>
         {tab === 'board' && (
           <BoardTab game={game} shown={shown} rolling={rolling} busy={busy} myTurn={myTurn} act={act} onSpace={setInfo} />
         )}

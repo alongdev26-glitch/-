@@ -1,6 +1,6 @@
 # Google Stitch Design Prompt — Hebrew board, 1:1 with the classic Israeli board
 
-> **איך משתמשים:** ב-Google Stitch בוחרים **Mobile** ומצב **Landscape**.
+> **איך משתמשים:** ב-Google Stitch בוחרים **Mobile** ומצב **Portrait** (לאורך).
 > 1. מדביקים את **חלק 1** (מערכת העיצוב).
 > 2. מדביקים את **חלק 2** (הלוח המדויק, 40 משבצות).
 > 3. אחר כך מדביקים את המסכים מ**חלק 3**, אחד בכל פעם.
@@ -12,7 +12,7 @@
 
 ## PART 1 — DESIGN SYSTEM (paste first)
 
-Design a premium mobile board-game UI in **Hebrew (RTL)**, landscape 1920×1080. The game board must be an **exact 1:1 reproduction of the classic Israeli Hebrew property-trading board** described in Part 2: same 40 spaces, same order, same Hebrew text, same color strips, same icons. Only the rendering is upgraded to a glossy, modern, top-grossing mobile-game look.
+Design a premium mobile board-game UI in **Hebrew (RTL)**, portrait 390×844 (phone held upright). The game board must be an **exact 1:1 reproduction of the classic Israeli Hebrew property-trading board** described in Part 2: same 40 spaces, same order, same Hebrew text, same color strips, same icons. Only the rendering is upgraded to a glossy, modern, top-grossing mobile-game look.
 
 **Style:** slightly tilted top-down board, flat and clean like the printed original but crisp and polished. Soft drop shadows, rounded UI corners (16–24px), glossy highlights. Around the board: a 3D cartoon miniature city (colorful buildings, parks with round trees, roads with dashed lines, a train loop, a turquoise sea with sand on one side, soft clouds at the edges).
 

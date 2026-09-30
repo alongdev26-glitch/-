@@ -36,10 +36,6 @@ export function App() {
           }}
         />
       )}
-      <div className="rotate-hint">
-        <span>📱</span>
-        סובב את הטלפון לרוחב
-      </div>
     </>
   );
 }
