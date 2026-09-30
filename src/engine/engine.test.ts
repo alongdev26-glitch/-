@@ -212,3 +212,29 @@ describe('lotto pot', () => {
     expect(s.pot).toBe(50);
   });
 });
+
+describe('mortgage rounds', () => {
+  it('returns the property to the bank after 7 of the owner\'s turns', () => {
+    let s = setup();
+    s.props[6].owner = 0;
+    s = run(s, { type: 'MORTGAGE', space: 6 });
+    expect(s.props[6].mortgageLeft).toBe(7);
+    expect(s.players[0].money).toBe(1550);
+    for (let round = 1; round <= 7; round++) {
+      // player 0 then player 1 each end a turn without moving
+      s.phase = { t: 'end' };
+      s = run(s, { type: 'END_TURN' });
+      s.phase = { t: 'end' };
+      s = run(s, { type: 'END_TURN' });
+      if (round < 7) expect(s.props[6]).toMatchObject({ owner: 0, mortgaged: true, mortgageLeft: 7 - round });
+    }
+    expect(s.props[6]).toEqual({ owner: null, houses: 0, mortgaged: false });
+  });
+  it('redeeming clears the countdown', () => {
+    let s = setup();
+    s.props[6].owner = 0;
+    s = run(s, { type: 'MORTGAGE', space: 6 }, { type: 'UNMORTGAGE', space: 6 });
+    expect(s.props[6].mortgaged).toBe(false);
+    expect(s.props[6].mortgageLeft).toBeUndefined();
+  });
+});

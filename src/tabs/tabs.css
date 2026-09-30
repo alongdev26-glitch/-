@@ -1,15 +1,67 @@
 /* ---------- board tab ---------- */
 .tab-board {
-  --board-size: calc(min(100cqw, 100cqh) - 20px);
+  --board-size: calc(min(100cqw, 100cqh - 150px) - 16px);
   height: 100%;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(180deg, transparent 88%, var(--sand) 88% 90%, var(--sea) 90%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: linear-gradient(180deg, transparent 90%, var(--sand) 90% 92%, var(--sea) 92%);
 }
 @media (orientation: landscape) and (min-aspect-ratio: 4/3) {
   .tab-board {
+    --board-size: calc(min(100cqw - 190px, 100cqh) - 16px);
+    flex-direction: row-reverse;
     background: linear-gradient(90deg, var(--sea) 0 6%, var(--sand) 6% 8%, transparent 8%);
   }
+  .players-strip {
+    grid-template-columns: 1fr;
+    width: 170px;
+  }
+}
+.players-strip {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  width: var(--board-size);
+  max-width: 100%;
+}
+.pchip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 4px 8px 4px 6px;
+  border-inline-start: 6px solid var(--pc);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+  min-width: 0;
+  transition: transform 0.2s ease;
+}
+.pchip.on {
+  background: color-mix(in srgb, var(--pc) 22%, #fff);
+  box-shadow: 0 0 0 2px var(--pc), 0 4px 10px rgba(0, 0, 0, 0.25);
+  transform: scale(1.03);
+}
+.pchip.out {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+.pchip-name {
+  font-weight: 700;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.pchip-money {
+  font-size: 13px;
+  color: var(--navy);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .board-dice {
   position: absolute;
@@ -186,6 +238,10 @@
 .tag.red {
   background: var(--red);
   color: #fff;
+}
+.tag.gold {
+  background: var(--gold);
+  color: #4a2c00;
 }
 .tag.green {
   background: #1fa24a;

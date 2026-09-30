@@ -14,7 +14,8 @@ import { Token } from '../ui/Token';
 import { Winner } from './Winner';
 import './Game.css';
 
-const STEP_MS = 130;
+/** Time per board space while a token walks: slow enough to follow on a phone. */
+const STEP_MS = 340;
 const SAVE_KEY = 'tycoon-save';
 
 export function saveGame(g: GameState | null) {
@@ -32,6 +33,7 @@ export function loadGame(): GameState | null {
     if (!raw) return null;
     const g = JSON.parse(raw) as GameState;
     g.pot ??= 0;
+    for (const st of g.props) if (st.mortgaged) st.mortgageLeft ??= 7;
     return g;
   } catch {
     return null;
@@ -72,7 +74,7 @@ export function Game({ initial, onExit, onNewGame }: Props) {
   const act = useCallback((a: Action) => {
     if (a.type === 'ROLL') {
       setRolling(true);
-      setTimeout(() => setRolling(false), 650);
+      setTimeout(() => setRolling(false), 900);
     }
     dispatch(a);
   }, []);
@@ -101,7 +103,7 @@ export function Game({ initial, onExit, onNewGame }: Props) {
     if (busy) return;
     const a = botAction(game);
     if (!a) return;
-    const delay = game.phase.t === 'card' ? 1600 : game.phase.t === 'auction' ? 500 : 800;
+    const delay = game.phase.t === 'card' ? 1600 : game.phase.t === 'auction' ? 500 : 1000;
     const t = setTimeout(() => act(a), delay);
     return () => clearTimeout(t);
   }, [game, busy, act]);

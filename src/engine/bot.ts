@@ -21,6 +21,10 @@ function lateGame(s: GameState) {
 function manage(s: GameState, me: number): Action | null {
   const money = s.players[me].money;
   const mine = ownedBy(s, me);
+  const urgent = mine.find(
+    (id) => canUnmortgage(s, me, id) && (s.props[id].mortgageLeft ?? 99) <= 2 && money - unmortgageCost(id) > 50,
+  );
+  if (urgent !== undefined) return { type: 'UNMORTGAGE', space: urgent };
   const unm = mine.find((id) => canUnmortgage(s, me, id) && money - unmortgageCost(id) > 500);
   if (unm !== undefined) return { type: 'UNMORTGAGE', space: unm };
   const build = mine

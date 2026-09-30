@@ -1,4 +1,4 @@
-import { BOARD } from '../data/board';
+import { BOARD, MORTGAGE_ROUNDS } from '../data/board';
 import {
   canBuild,
   canMortgage,
@@ -94,7 +94,11 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
                   <div className="row-tags">
                     {st.houses > 0 && st.houses < 5 && <span className="tag green">🏠 ×{st.houses}</span>}
                     {st.houses === 5 && <span className="tag red">🏨 מלון</span>}
-                    {st.mortgaged && <span className="tag red">ממושכן</span>}
+                    {st.mortgaged && (
+                      <span className={`tag ${(st.mortgageLeft ?? MORTGAGE_ROUNDS) <= 2 ? 'red' : 'gold'}`}>
+                        ממושכן · נשארו {st.mortgageLeft ?? MORTGAGE_ROUNDS} סבבים
+                      </span>
+                    )}
                     {sp.kind === 'property' && !ownsGroup(game, me, sp.group!) && <span className="tag">חסר לסדרה</span>}
                   </div>
                   {myTurn && (
@@ -126,7 +130,12 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
           </section>
         );
       })}
-      {!myTurn && sets.length > 0 && <div className="note">בנייה ומשכנתא אפשריות רק בתור שלך.</div>}
+      {sets.length > 0 && (
+        <div className="note">
+          משכנתא היא ל-{MORTGAGE_ROUNDS} סבבים. נכס שלא נפדה בזמן חוזר לבנק.
+          {!myTurn && ' בנייה ומשכנתא אפשריות רק בתור שלך.'}
+        </div>
+      )}
     </div>
   );
 }

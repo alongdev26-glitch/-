@@ -109,3 +109,28 @@ button {
   text-decoration: underline;
   padding: 0;
 }
+
+/* the 8 color-set strips of the board, used as a band on entry screens */
+.color-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: linear-gradient(
+    90deg,
+    var(--g-brown) 0 12.5%,
+    var(--g-lightblue) 12.5% 25%,
+    var(--g-pink) 25% 37.5%,
+    var(--g-orange) 37.5% 50%,
+    var(--g-red) 50% 62.5%,
+    var(--g-yellow) 62.5% 75%,
+    var(--g-green) 75% 87.5%,
+    var(--g-darkblue) 87.5% 100%
+  );
+}
+.color-band.top {
+  top: 0;
+}
+.color-band.bottom {
+  bottom: 0;
+}

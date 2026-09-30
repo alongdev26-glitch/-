@@ -22,12 +22,18 @@ export function Setup({ onStart, onBack }: { onStart: (p: PlayerSetup[]) => void
 
   return (
     <div className="setup">
+      <div className="color-band top" aria-hidden="true" />
       <div className="setup-banner">
         <RibbonBanner text="בחר כלי!" />
       </div>
       <div className="setup-grid">
         {TOKENS.map((t) => (
-          <button key={t.id} className={`setup-tile${t.id === token ? ' selected' : ''}`} onClick={() => setToken(t.id)}>
+          <button
+            key={t.id}
+            className={`setup-tile${t.id === token ? ' selected' : ''}`}
+            style={{ ['--tc' as string]: t.color }}
+            onClick={() => setToken(t.id)}
+          >
             <Token token={t.id} size="clamp(22px, 4vw, 48px)" />
             <span>{t.name}</span>
           </button>

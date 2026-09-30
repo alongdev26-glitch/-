@@ -21,6 +21,8 @@ export interface PropState {
   /** 0–4 houses, 5 = hotel */
   houses: number;
   mortgaged: boolean;
+  /** own turns left to redeem a mortgaged property before foreclosure */
+  mortgageLeft?: number;
 }
 
 export interface Owed {

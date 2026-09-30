@@ -221,13 +221,16 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 1px;
-  font-size: min(30cqw, 30cqh);
+  gap: 0;
+  font-size: min(40cqw, 40cqh);
   z-index: 3;
   pointer-events: none;
 }
 .corner .tokens {
-  font-size: 18cqw;
+  font-size: 24cqw;
+}
+.tokens .token + .token {
+  margin-inline-start: -0.45em;
 }
 
 /* ---------- center ---------- */

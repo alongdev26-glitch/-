@@ -3,6 +3,7 @@ import { rollDice } from '../engine/reducer';
 import type { Action, GameState } from '../engine/types';
 import { Board } from '../ui/Board';
 import { Dice } from '../ui/Dice';
+import { Token } from '../ui/Token';
 import './tabs.css';
 
 interface Props {
@@ -30,6 +31,22 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace }: P
 
   return (
     <div className="tab-board">
+      <div className="players-strip">
+        {game.players.map((p) => (
+          <div
+            key={p.id}
+            className={`pchip${p.id === game.current ? ' on' : ''}${p.bankrupt ? ' out' : ''}`}
+            style={{ ['--pc' as string]: p.color }}
+          >
+            <Token token={p.token} color={p.color} size="20px" />
+            <span className="pchip-name">
+              {p.name}
+              {p.inJail ? ' ⛓️' : ''}
+            </span>
+            <b className="pchip-money">{p.bankrupt ? 'פשט רגל' : `ש"ח ${p.money}`}</b>
+          </div>
+        ))}
+      </div>
       <Board
         game={game}
         shown={shown}

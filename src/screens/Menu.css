@@ -56,3 +56,27 @@
 .menu-play {
   font-size: clamp(20px, 3vw, 34px);
 }
+.menu-parade {
+  display: flex;
+  gap: clamp(6px, 2vw, 16px);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.menu-parade span {
+  animation: hop 1.8s ease-in-out infinite;
+}
+@keyframes hop {
+  0%,
+  60%,
+  100% {
+    transform: none;
+  }
+  30% {
+    transform: translateY(-10px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu-parade span {
+    animation: none;
+  }
+}
