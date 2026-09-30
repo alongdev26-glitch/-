@@ -1,5 +1,5 @@
 import { BOARD, FEE_ROUNDS, groupMembers, isOwnable, type Group } from '../data/board';
-import type { GameState } from './types';
+import type { GameState, TradeSide } from './types';
 
 export const ownsGroup = (s: GameState, player: number, g: Group) =>
   groupMembers(g).every((id) => s.props[id].owner === player);
@@ -115,4 +115,30 @@ export function buildingCounts(s: GameState, player: number) {
     else houses += h;
   }
   return { houses, hotels };
+}
+
+/** A property can change hands only if no house stands anywhere in its color set. */
+export function canTradeProp(s: GameState, pid: number, id: number): boolean {
+  const sp = BOARD[id];
+  if (!isOwnable(sp) || s.props[id].owner !== pid) return false;
+  if (sp.kind !== 'property') return true;
+  return groupMembers(sp.group!).every((g) => s.props[g].houses === 0);
+}
+
+export const emptySide = (): TradeSide => ({ props: [], money: 0, jailCards: 0 });
+
+export const sideIsEmpty = (t: TradeSide) => t.props.length === 0 && t.money <= 0 && t.jailCards <= 0;
+
+/** Can player `pid` hand over everything in `side`? */
+export function validSide(s: GameState, pid: number, side: TradeSide): boolean {
+  const p = s.players[pid];
+  return (
+    Number.isInteger(side.money) &&
+    side.money >= 0 &&
+    side.money <= p.money &&
+    side.jailCards >= 0 &&
+    side.jailCards <= p.jailCards.length &&
+    new Set(side.props).size === side.props.length &&
+    side.props.every((id) => canTradeProp(s, pid, id))
+  );
 }

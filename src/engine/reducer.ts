@@ -13,9 +13,11 @@ import {
   sellValue,
   unmortgageCost,
   feeDue,
+  sideIsEmpty,
+  validSide,
   type RentMod,
 } from './rules';
-import type { Action, Announcement, GameRules, GameState, Owed, PlayerSetup } from './types';
+import type { Action, Announcement, GameRules, GameState, Owed, PlayerSetup, TradeOffer, TradeSide } from './types';
 
 const MAX_LOG = 40;
 
@@ -67,6 +69,7 @@ export function newGame(
     paySeq: 0,
     announce: null,
     announceSeq: 0,
+    tradesThisTurn: 0,
     again: false,
     decks: { chance: shuffle(DECKS.chance.length, rng), chest: shuffle(DECKS.chest.length, rng) },
     log: ['המשחק התחיל! בהצלחה'],
@@ -360,6 +363,7 @@ function nextTurn(s: GameState) {
   s.doubles = 0;
   s.again = false;
   s.turn++;
+  s.tradesThisTurn = 0;
   s.phase = { t: 'roll' };
   if (i <= prev) {
     s.round++;
@@ -422,8 +426,32 @@ function afterAuctionMove(s: GameState) {
 }
 
 /** Whose input the game is waiting for. */
+export const MAX_TRADE_ROUNDS = 3;
+
+function describeSide(t: TradeSide): string {
+  const parts = t.props.map((id) => BOARD[id].name);
+  if (t.money > 0) parts.push(fmt(t.money));
+  if (t.jailCards > 0) parts.push(t.jailCards === 1 ? 'כרטיס יציאה מהכלא' : `${t.jailCards} כרטיסי יציאה מהכלא`);
+  return parts.length ? parts.join(', ') : 'כלום';
+}
+
+/** Move one side of a trade from player `a` to player `b`. */
+function transfer(s: GameState, a: number, b: number, t: TradeSide) {
+  for (const id of t.props) s.props[id].owner = b;
+  s.players[a].money -= t.money;
+  s.players[b].money += t.money;
+  for (let k = 0; k < t.jailCards; k++) s.players[b].jailCards.push(s.players[a].jailCards.shift()!);
+}
+
+function tradeOk(s: GameState, o: TradeOffer): boolean {
+  if (o.from === o.to || s.players[o.from].bankrupt || s.players[o.to].bankrupt) return false;
+  if (sideIsEmpty(o.give) && sideIsEmpty(o.get)) return false;
+  return validSide(s, o.from, o.give) && validSide(s, o.to, o.get);
+}
+
 export function actor(s: GameState): number {
   if (s.phase.t === 'auction') return s.phase.active[s.phase.turn];
+  if (s.phase.t === 'trade') return s.phase.awaiting;
   return s.current;
 }
 
@@ -605,6 +633,59 @@ export function reduce(prev: GameState, a: Action): GameState {
       if (!target || target.bankrupt || target.isBot === a.isBot) return prev;
       target.isBot = a.isBot;
       log(s, a.isBot ? `המחשב משחק עכשיו במקום ${target.name}` : `${target.name} חזר לשחק`);
+      return s;
+    }
+
+    case 'PROPOSE_TRADE': {
+      if (ph.t !== 'roll' && ph.t !== 'end') return prev;
+      const offer: TradeOffer = { from: p.id, to: a.to, give: a.give, get: a.get, round: 1 };
+      if (!s.players[a.to] || !tradeOk(s, offer)) return prev;
+      s.tradesThisTurn++;
+      s.phase = { t: 'trade', offer, awaiting: a.to, resume: ph.t };
+      log(s, `${p.name} מציע ל${s.players[a.to].name}: נותן ${describeSide(a.give)}, מבקש ${describeSide(a.get)}`);
+      return s;
+    }
+
+    case 'ACCEPT_TRADE': {
+      if (ph.t !== 'trade') return prev;
+      const o = ph.offer;
+      if (!tradeOk(s, o)) {
+        log(s, 'העסקה כבר לא אפשרית');
+        s.phase = { t: ph.resume };
+        return s;
+      }
+      transfer(s, o.from, o.to, o.give);
+      transfer(s, o.to, o.from, o.get);
+      const from = s.players[o.from];
+      const to = s.players[o.to];
+      log(s, `עסקה נסגרה בין ${from.name} ל${to.name}`);
+      announce(s, {
+        kind: 'trade',
+        player: o.from,
+        other: o.to,
+        space: o.give.props[0] ?? o.get.props[0] ?? null,
+        price: o.give.money + o.get.money,
+        detail: `${from.name} נותן: ${describeSide(o.give)} · ${to.name} נותן: ${describeSide(o.get)}`,
+      });
+      s.phase = { t: ph.resume };
+      return s;
+    }
+
+    case 'REJECT_TRADE': {
+      if (ph.t !== 'trade') return prev;
+      log(s, `${s.players[ph.awaiting].name} סירב להצעה`);
+      s.phase = { t: ph.resume };
+      return s;
+    }
+
+    case 'COUNTER_TRADE': {
+      if (ph.t !== 'trade' || ph.offer.round >= MAX_TRADE_ROUNDS) return prev;
+      const me = ph.awaiting;
+      const other = ph.offer.from === me ? ph.offer.to : ph.offer.from;
+      const offer: TradeOffer = { from: me, to: other, give: a.give, get: a.get, round: ph.offer.round + 1 };
+      if (!tradeOk(s, offer)) return prev;
+      s.phase = { t: 'trade', offer, awaiting: other, resume: ph.resume };
+      log(s, `${s.players[me].name} מציע הצעה נגדית: נותן ${describeSide(a.give)}, מבקש ${describeSide(a.get)}`);
       return s;
     }
 

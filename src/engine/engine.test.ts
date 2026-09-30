@@ -352,3 +352,75 @@ describe('careful bots', () => {
     expect(botAction(s)).toEqual({ type: 'BUY' });
   });
 });
+
+describe('trades', () => {
+  const side = (props: number[] = [], money = 0, jailCards = 0) => ({ props, money, jailCards });
+
+  it('moves properties, money and jail cards when accepted', () => {
+    let s = setup();
+    s.props[6].owner = 0;
+    s.props[8].owner = 1;
+    s.players[0].jailCards = ['chance'];
+    s = reduce(s, { type: 'PROPOSE_TRADE', to: 1, give: side([6], 50, 1), get: side([8]) });
+    expect(s.phase).toMatchObject({ t: 'trade', awaiting: 1, resume: 'roll' });
+    expect(actor(s)).toBe(1);
+    s = reduce(s, { type: 'ACCEPT_TRADE' });
+    expect(s.props[6].owner).toBe(1);
+    expect(s.props[8].owner).toBe(0);
+    expect(s.players[0].money).toBe(1450);
+    expect(s.players[1].money).toBe(1550);
+    expect(s.players[1].jailCards).toEqual(['chance']);
+    expect(s.phase.t).toBe('roll');
+    expect(s.announce).toMatchObject({ kind: 'trade', player: 0, other: 1 });
+  });
+
+  it('reject changes nothing', () => {
+    let s = setup();
+    s.props[6].owner = 0;
+    s = run(s, { type: 'PROPOSE_TRADE', to: 1, give: side([6]), get: side([], 100) }, { type: 'REJECT_TRADE' });
+    expect(s.props[6].owner).toBe(0);
+    expect(s.players[1].money).toBe(1500);
+    expect(s.phase.t).toBe('roll');
+  });
+
+  it('refuses properties with houses in the set and money you do not have', () => {
+    const s = setup();
+    s.props[1].owner = 0;
+    s.props[3].owner = 0;
+    s.props[3].houses = 1;
+    expect(reduce(s, { type: 'PROPOSE_TRADE', to: 1, give: side([1]), get: side([], 10) })).toBe(s);
+    expect(reduce(s, { type: 'PROPOSE_TRADE', to: 1, give: side([], 5000), get: side([], 0, 0) })).toBe(s);
+  });
+
+  it('counter-offers swap roles and stop after 3 rounds', () => {
+    let s = setup();
+    s.props[6].owner = 1;
+    s = reduce(s, { type: 'PROPOSE_TRADE', to: 1, give: side([], 100), get: side([6]) });
+    s = reduce(s, { type: 'COUNTER_TRADE', give: side([6]), get: side([], 150) });
+    expect(s.phase).toMatchObject({ t: 'trade', awaiting: 0, offer: { from: 1, round: 2 } });
+    s = reduce(s, { type: 'COUNTER_TRADE', give: side([], 120), get: side([6]) });
+    expect(s.phase).toMatchObject({ awaiting: 1, offer: { round: 3 } });
+    expect(reduce(s, { type: 'COUNTER_TRADE', give: side([6]), get: side([], 130) })).toBe(s);
+  });
+
+  it('bots accept good deals, refuse bad ones, and ask for a missing street', () => {
+    let s = newGame(
+      [
+        { name: 'H', token: 'cat', isBot: false },
+        { name: 'B', token: 'dog', isBot: true },
+      ],
+      () => 0.5,
+    );
+    s.props[6].owner = 1;
+    const good = reduce(s, { type: 'PROPOSE_TRADE', to: 1, give: side([], 200), get: side([6]) });
+    expect(botAction(good)).toEqual({ type: 'ACCEPT_TRADE' });
+    const bad = reduce(s, { type: 'PROPOSE_TRADE', to: 1, give: side([], 10), get: side([6]) });
+    expect(botAction(bad)).toEqual({ type: 'REJECT_TRADE' });
+
+    s.props[6].owner = 0;
+    s.props[8].owner = 1;
+    s.props[9].owner = 1;
+    s.current = 1;
+    expect(botAction(s)).toMatchObject({ type: 'PROPOSE_TRADE', to: 0, get: { props: [6] } });
+  });
+});

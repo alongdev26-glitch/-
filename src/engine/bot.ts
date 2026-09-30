@@ -1,7 +1,8 @@
 import { BOARD, JAIL_FINE, groupMembers, isOwnable } from '../data/board';
-import { actor, rollDice } from './reducer';
+import { MAX_TRADE_ROUNDS, actor, rollDice } from './reducer';
 import {
   canBuild,
+  canTradeProp,
   canMortgage,
   canSell,
   canUnmortgage,
@@ -13,7 +14,7 @@ import {
   sellValue,
   unmortgageCost,
 } from './rules';
-import type { Action, GameState } from './types';
+import type { Action, GameState, TradeSide } from './types';
 
 /**
  * How much cash a bot wants to keep: a base amount, plus the worst rent an
@@ -40,6 +41,63 @@ function completes(s: GameState, player: number, space: number): boolean {
 
 function lateGame(s: GameState) {
   return BOARD.filter((sp) => isOwnable(sp) && s.props[sp.id].owner === null).length < 5;
+}
+
+/** How much a property is worth to `me` in a trade, receiving or giving it away. */
+export function tradeValue(s: GameState, me: number, id: number): number {
+  const sp = BOARD[id];
+  let v = sp.price!;
+  if (s.props[id].mortgaged) v = v / 2;
+  if (sp.kind === 'property') {
+    const group = groupMembers(sp.group!);
+    const others = group.filter((g) => g !== id);
+    const mineOthers = others.filter((g) => s.props[g].owner === me).length;
+    if (mineOthers === others.length) v *= 2; // completes (or holds) a full set
+    else if (mineOthers > 0) v *= 1.5; // part of a set I'm building
+  } else if (sp.kind === 'railroad') {
+    const rails = BOARD.filter((b) => b.kind === 'railroad' && b.id !== id && s.props[b.id].owner === me).length;
+    v *= 1 + rails * 0.25;
+  }
+  return v;
+}
+
+const sideValue = (s: GameState, me: number, side: TradeSide) =>
+  side.props.reduce((a, id) => a + tradeValue(s, me, id), 0) + side.money + side.jailCards * 50;
+
+/** Should bot `me` accept: I receive `get`, I hand over `give`. Returns 'accept' | 'counter' | 'reject'. */
+function judge(s: GameState, me: number, receive: TradeSide, hand: TradeSide) {
+  const inValue = sideValue(s, me, receive);
+  const outValue = sideValue(s, me, hand);
+  const cashAfter = s.players[me].money - hand.money + receive.money;
+  if (cashAfter < cushion(s, me) / 2) return { verdict: 'reject' as const, shortBy: 0 };
+  if (inValue >= outValue * 1.1) return { verdict: 'accept' as const, shortBy: 0 };
+  const shortBy = outValue * 1.1 - inValue;
+  if (shortBy <= outValue * 0.4) return { verdict: 'counter' as const, shortBy };
+  return { verdict: 'reject' as const, shortBy };
+}
+
+/** A bot looks for one street it is missing from a color set and offers cash for it. */
+function proposeTrade(s: GameState, me: number): Action | null {
+  const p = s.players[me];
+  const keep = cushion(s, me);
+  const groups = [...new Set(BOARD.filter((b) => b.kind === 'property').map((b) => b.group!))];
+  for (const g of groups) {
+    const members = groupMembers(g);
+    const missing = members.filter((id) => s.props[id].owner !== me);
+    if (missing.length !== 1) continue;
+    const id = missing[0];
+    const owner = s.props[id].owner;
+    if (owner === null || s.players[owner].bankrupt || !canTradeProp(s, owner, id)) continue;
+    const offer = Math.round((BOARD[id].price! * 1.5) / 10) * 10;
+    if (p.money - offer < keep) continue;
+    return {
+      type: 'PROPOSE_TRADE',
+      to: owner,
+      give: { props: [], money: offer, jailCards: 0 },
+      get: { props: [id], money: 0, jailCards: 0 },
+    };
+  }
+  return null;
 }
 
 /** Build / unmortgage when comfortably rich. */
@@ -70,7 +128,29 @@ export function botAction(s: GameState, rng: () => number = Math.random): Action
         if (p.jailCards.length) return { type: 'USE_JAIL_CARD' };
         if (!lateGame(s) && p.money >= JAIL_FINE + cushion(s, me)) return { type: 'PAY_JAIL' };
       }
-      return manage(s, me) ?? { type: 'ROLL', dice: rollDice(rng) };
+      return (
+        manage(s, me) ??
+        (s.tradesThisTurn === 0 ? proposeTrade(s, me) : null) ?? { type: 'ROLL', dice: rollDice(rng) }
+      );
+    }
+    case 'trade': {
+      const o = ph.offer;
+      // I am `awaiting`; if I made the offer (a counter came back) `from` is me
+      const receive = o.to === me ? o.give : o.get;
+      const hand = o.to === me ? o.get : o.give;
+      const { verdict, shortBy } = judge(s, me, receive, hand);
+      if (verdict === 'accept') return { type: 'ACCEPT_TRADE' };
+      const other = o.from === me ? o.to : o.from;
+      const ask = Math.round((shortBy * 1.2) / 10) * 10;
+      if (verdict === 'counter' && o.round < MAX_TRADE_ROUNDS && o.round === 1 && s.players[other].money >= receive.money + ask) {
+        // same deal, but they add cash
+        return {
+          type: 'COUNTER_TRADE',
+          give: hand,
+          get: { ...receive, money: receive.money + ask },
+        };
+      }
+      return { type: 'REJECT_TRADE' };
     }
     case 'buy': {
       const price = BOARD[ph.space].price!;

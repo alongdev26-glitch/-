@@ -50,14 +50,35 @@ export type Phase =
   /** resume: where play continues once the debt is paid (end of this move, or a fresh roll) */
   | { t: 'debt'; owed: Owed[]; resume?: 'roll' | 'end' }
   | { t: 'end' }
+  | { t: 'trade'; offer: TradeOffer; awaiting: number; resume: 'roll' | 'end' }
   | { t: 'gameover'; winner: number };
+
+/** One side of a trade. */
+export interface TradeSide {
+  props: number[];
+  money: number;
+  jailCards: number;
+}
+
+/** `from` gives `give` and asks for `get` from `to`. */
+export interface TradeOffer {
+  from: number;
+  to: number;
+  give: TradeSide;
+  get: TradeSide;
+  /** 1 for the first offer, +1 for every counter-offer */
+  round: number;
+}
 
 /** A big on-screen announcement: a purchase, an auction win, or a new house or hotel. */
 export interface Announcement {
-  kind: 'buy' | 'auction' | 'house' | 'hotel';
+  kind: 'buy' | 'auction' | 'house' | 'hotel' | 'trade';
   player: number;
-  space: number;
+  space: number | null;
   price: number;
+  /** trades: the other player */
+  other?: number;
+  detail?: string;
 }
 
 export interface Payment {
@@ -94,6 +115,8 @@ export interface GameState {
   paySeq: number;
   announce: Announcement | null;
   announceSeq: number;
+  /** trade offers the current player has made this turn */
+  tradesThisTurn: number;
   /** current player may roll again after finishing this move */
   again: boolean;
   decks: Record<Deck, number[]>;
@@ -118,7 +141,11 @@ export type Action =
   | { type: 'BANKRUPT' }
   | { type: 'END_TURN' }
   /** online: hand a seat to the computer (or back to its player) */
-  | { type: 'SET_BOT'; player: number; isBot: boolean };
+  | { type: 'SET_BOT'; player: number; isBot: boolean }
+  | { type: 'PROPOSE_TRADE'; to: number; give: TradeSide; get: TradeSide }
+  | { type: 'ACCEPT_TRADE' }
+  | { type: 'REJECT_TRADE' }
+  | { type: 'COUNTER_TRADE'; give: TradeSide; get: TradeSide };
 
 export interface PlayerSetup {
   uid?: string;

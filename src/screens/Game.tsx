@@ -11,6 +11,7 @@ import { BoardTab } from '../tabs/BoardTab';
 import { MarketTab } from '../tabs/MarketTab';
 import { MyPropsTab } from '../tabs/MyPropsTab';
 import { ProfileTab } from '../tabs/ProfileTab';
+import { TradeTab, type TradeDraft } from '../tabs/TradeTab';
 import { Modal } from '../ui/Modal';
 import { PropertyCard } from '../ui/PropertyCard';
 import { Token } from '../ui/Token';
@@ -52,12 +53,13 @@ export function loadGame(): GameState | null {
   }
 }
 
-type Tab = 'board' | 'mine' | 'market' | 'profile';
+type Tab = 'board' | 'mine' | 'market' | 'trade' | 'profile';
 
 const TABS: { id: Tab; icon: string; label: string }[] = [
   { id: 'board', icon: '🎲', label: 'לוח' },
   { id: 'mine', icon: '💼', label: 'הנכסים שלי' },
   { id: 'market', icon: '🏷️', label: 'נכסים פנויים' },
+  { id: 'trade', icon: '🤝', label: 'העברות' },
   { id: 'profile', icon: '👤', label: 'פרופיל' },
 ];
 
@@ -119,7 +121,9 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
   const acting = actor(game);
   const actingPlayer = game.players[acting];
   const cur = game.players[game.current];
-  const handoff = !online && !busy && !cur.isBot && cur.id !== viewer && game.phase.t !== 'gameover';
+  const handoff =
+    !online && !busy && !actingPlayer.isBot && acting !== viewer && game.phase.t !== 'gameover';
+  const [tradeDraft, setTradeDraft] = useState<TradeDraft | null>(null);
   const myTurn = game.current === viewer && controls(viewer) && game.phase.t !== 'gameover';
   const needsBoard = myTurn && !busy && (game.phase.t === 'roll' || game.phase.t === 'end');
 
@@ -267,10 +271,10 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
       return (
         <Modal title="העבירו את הטלפון">
           <div className="handoff">
-            <Token token={cur.token} color={cur.color} size="56px" />
-            <b>התור של {cur.name}</b>
-            <button className="btn btn-red" onClick={() => setViewer(cur.id)}>
-              אני {cur.name}, בוא נשחק
+            <Token token={actingPlayer.token} color={actingPlayer.color} size="56px" />
+            <b>{ph.t === 'trade' ? `הצעת עסקה ל${actingPlayer.name}` : `התור של ${actingPlayer.name}`}</b>
+            <button className="btn btn-red" onClick={() => setViewer(acting)}>
+              אני {actingPlayer.name}, בוא נשחק
             </button>
           </div>
         </Modal>
@@ -298,6 +302,62 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
       );
     }
     if (ph.t === 'auction') return auctionModal();
+    if (ph.t === 'trade') {
+      const o = ph.offer;
+      const from = game.players[o.from];
+      const list = (t: typeof o.give) => {
+        const parts = t.props.map((id) => BOARD[id].name);
+        if (t.money > 0) parts.push(`ש"ח ${t.money}`);
+        if (t.jailCards > 0) parts.push(`${t.jailCards} כרטיס יציאה מהכלא`);
+        return parts.length ? parts : ['כלום'];
+      };
+      if (!controls(ph.awaiting)) {
+        return (
+          <div className="trade-wait" role="status">
+            <Token token={actingPlayer.token} color={actingPlayer.color} size="20px" />
+            {actingPlayer.name} חושב על ההצעה...
+          </div>
+        );
+      }
+      if (tab === 'trade' && tradeDraft?.counter) return null;
+      return (
+        <Modal title={o.round > 1 ? `הצעה נגדית מ${from.name}` : `הצעת עסקה מ${from.name}`}>
+          <div className="trade-offer">
+            <div className="to-col gain">
+              <b>אתה מקבל</b>
+              {list(o.give).map((x) => (
+                <span key={x}>{x}</span>
+              ))}
+            </div>
+            <div className="to-col loss">
+              <b>אתה נותן</b>
+              {list(o.get).map((x) => (
+                <span key={x}>{x}</span>
+              ))}
+            </div>
+          </div>
+          <div className="modal-actions">
+            <button className="btn btn-red" onClick={() => act({ type: 'ACCEPT_TRADE' })}>
+              אשר
+            </button>
+            <button className="btn btn-black" onClick={() => act({ type: 'REJECT_TRADE' })}>
+              סרב
+            </button>
+            {o.round < 3 && (
+              <button
+                className="btn btn-white"
+                onClick={() => {
+                  setTradeDraft({ to: o.from, give: o.get, get: o.give, counter: true });
+                  setTab('trade');
+                }}
+              >
+                הצעה נגדית
+              </button>
+            )}
+          </div>
+        </Modal>
+      );
+    }
     if (ph.t === 'card') {
       const card = DECKS[ph.deck][ph.card];
       return (
@@ -377,6 +437,19 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
         )}
         {tab === 'mine' && <MyPropsTab game={game} me={me.id} myTurn={myTurn && !busy} act={act} onSpace={setInfo} />}
         {tab === 'market' && <MarketTab game={game} onSpace={setInfo} />}
+        {tab === 'trade' && (
+          <TradeTab
+            game={game}
+            me={me.id}
+            canPropose={myTurn && !busy && (ph.t === 'roll' || ph.t === 'end')}
+            act={act}
+            draft={tradeDraft?.counter && ph.t === 'trade' && controls(ph.awaiting) ? tradeDraft : null}
+            onSent={() => {
+              setTradeDraft(null);
+              setTab('board');
+            }}
+          />
+        )}
         {tab === 'profile' && (
           <ProfileTab
             game={game}
