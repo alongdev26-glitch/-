@@ -1,16 +1,8 @@
 import type { TokenId } from '../engine/types';
+import { TOKENS, tokenColor } from '../data/tokens';
 import './Token.css';
 
-export const TOKENS: { id: TokenId; emoji: string; name: string; color: string }[] = [
-  { id: 'cat', emoji: '🐈', name: 'חתול', color: '#FF9F1C' },
-  { id: 'car', emoji: '🏎️', name: 'מכונית', color: '#E3001B' },
-  { id: 'dog', emoji: '🐕', name: 'כלב', color: '#8E5A2B' },
-  { id: 'trex', emoji: '🦖', name: 'דינוזאור', color: '#1FA24A' },
-  { id: 'hat', emoji: '🎩', name: 'כובע', color: '#5B3FD9' },
-  { id: 'duck', emoji: '🦆', name: 'ברווז', color: '#F7C600' },
-];
-
-export const tokenColor = (id: TokenId) => TOKENS.find((t) => t.id === id)!.color;
+export { TOKENS, tokenColor };
 
 export const tokenEmoji = (id: TokenId) => TOKENS.find((t) => t.id === id)!.emoji;
 

@@ -1,5 +1,6 @@
 import { BOARD, FEE_ROUNDS, GO_SALARY, JAIL, JAIL_FINE, START_MONEY, isOwnable } from '../data/board';
 import { DECKS, type Deck } from '../data/cards';
+import { tokenColor } from '../data/tokens';
 import {
   buildingCounts,
   canBuild,
@@ -16,7 +17,6 @@ import {
 } from './rules';
 import type { Action, GameRules, GameState, Owed, PlayerSetup } from './types';
 
-export const PLAYER_COLORS = ['#8E2DE2', '#7ED321', '#FF2D78', '#19D3C5'];
 const MAX_LOG = 40;
 
 const fmt = (n: number) => `ש"ח ${n}`;
@@ -45,7 +45,7 @@ export function newGame(
       name: p.name,
       token: p.token,
       isBot: p.isBot,
-      color: PLAYER_COLORS[id % PLAYER_COLORS.length],
+      color: tokenColor(p.token),
       money: START_MONEY,
       pos: 0,
       inJail: false,

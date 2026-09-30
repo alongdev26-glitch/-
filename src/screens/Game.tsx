@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { BOARD } from '../data/board';
 import { DECKS } from '../data/cards';
+import { tokenColor } from '../data/tokens';
 import { botAction } from '../engine/bot';
 import { actor, reduce } from '../engine/reducer';
 import type { Action, GameState } from '../engine/types';
@@ -33,6 +34,7 @@ export function loadGame(): GameState | null {
     if (!raw) return null;
     const g = JSON.parse(raw) as GameState;
     g.pot ??= 0;
+    for (const p of g.players) p.color = tokenColor(p.token);
     g.rules ??= { mortgage: true };
     g.round ??= 1;
     g.feeStart ??= null;
