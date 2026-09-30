@@ -123,8 +123,8 @@ export const JAIL = 10;
 export const GO_SALARY = 200;
 export const JAIL_FINE = 50;
 export const START_MONEY = 1500;
-/** Rounds (own turns) a mortgage may run before the bank takes the property back. */
-export const MORTGAGE_ROUNDS = 7;
+/** Every this many rounds (counted from the first purchase) owners pay the mortgage price of each property. */
+export const FEE_ROUNDS = 7;
 
 export const isOwnable = (s: Space) =>
   s.kind === 'property' || s.kind === 'railroad' || s.kind === 'utility';

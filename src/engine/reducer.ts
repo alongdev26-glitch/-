@@ -1,4 +1,4 @@
-import { BOARD, GO_SALARY, JAIL, JAIL_FINE, MORTGAGE_ROUNDS, START_MONEY, isOwnable } from '../data/board';
+import { BOARD, FEE_ROUNDS, GO_SALARY, JAIL, JAIL_FINE, START_MONEY, isOwnable } from '../data/board';
 import { DECKS, type Deck } from '../data/cards';
 import {
   buildingCounts,
@@ -11,6 +11,7 @@ import {
   rentFor,
   sellValue,
   unmortgageCost,
+  feeDue,
   type RentMod,
 } from './rules';
 import type { Action, GameRules, GameState, Owed, PlayerSetup } from './types';
@@ -40,6 +41,7 @@ export function newGame(
     rules: { ...rules },
     players: setup.map((p, id) => ({
       id,
+      ...(p.uid ? { uid: p.uid } : {}),
       name: p.name,
       token: p.token,
       isBot: p.isBot,
@@ -57,6 +59,9 @@ export function newGame(
     dice: [1, 1],
     doubles: 0,
     pot: 0,
+    round: 1,
+    feeStart: null,
+    rollSeq: 0,
     again: false,
     decks: { chance: shuffle(DECKS.chance.length, rng), chest: shuffle(DECKS.chest.length, rng) },
     log: ['המשחק התחיל! בהצלחה'],
@@ -118,7 +123,6 @@ export function autoRaise(s: GameState, player: number, need: number) {
       .sort((a, b) => mortgageValue(a) - mortgageValue(b))[0];
     if (mort === undefined) return;
     s.props[mort].mortgaged = true;
-    s.props[mort].mortgageLeft = MORTGAGE_ROUNDS;
     p.money += mortgageValue(mort);
   }
 }
@@ -262,7 +266,7 @@ function goBankrupt(s: GameState, player: number, creditor: number | null) {
     if (creditor !== null) {
       // buildings are sold to the bank, the creditor takes the land as-is
       if (st.houses) s.players[creditor].money += st.houses * sellValue(id);
-      s.props[id] = { owner: creditor, houses: 0, mortgaged: st.mortgaged, mortgageLeft: st.mortgageLeft };
+      s.props[id] = { owner: creditor, houses: 0, mortgaged: st.mortgaged };
     } else {
       s.props[id] = { owner: null, houses: 0, mortgaged: false };
     }
@@ -279,24 +283,31 @@ function goBankrupt(s: GameState, player: number, creditor: number | null) {
   }
 }
 
-/** A new turn for the current player uses up one round on each of their mortgages. */
-function tickMortgages(s: GameState) {
-  const p = cur(s);
-  for (const id of ownedBy(s, p.id)) {
-    const st = s.props[id];
-    if (!st.mortgaged) continue;
-    st.mortgageLeft = (st.mortgageLeft ?? MORTGAGE_ROUNDS) - 1;
-    if (st.mortgageLeft <= 0) {
-      s.props[id] = { owner: null, houses: 0, mortgaged: false };
-      log(s, `המשכנתא על ${BOARD[id].name} פגה. הנכס חזר לבנק`);
-    } else if (st.mortgageLeft <= 2) {
-      log(s, `${p.name}: נשארו ${st.mortgageLeft} סבבים לפדות את ${BOARD[id].name}`);
-    }
+/** Start the mortgage-payment count at the first purchase of the game. */
+function noteFirstPurchase(s: GameState) {
+  if (s.feeStart === null && s.rules.mortgage) {
+    s.feeStart = s.round;
+    log(s, `הנכס הראשון נקנה! כל ${FEE_ROUNDS} סבבים משלמים משכנתא על כל נכס`);
+  }
+}
+
+/** Every FEE_ROUNDS rounds: each owner pays half the price of each unmortgaged property into the pot. */
+function collectFees(s: GameState) {
+  for (const p of alive(s)) {
+    const due = feeDue(s, p.id);
+    if (due <= 0) continue;
+    autoRaise(s, p.id, due);
+    const paid = Math.min(p.money, due);
+    p.money -= paid;
+    s.pot += paid;
+    log(s, `${p.name} שילם משכנתא: ${fmt(paid)} לקופת הלוטו`);
+    if (paid < due) goBankrupt(s, p.id, null);
   }
 }
 
 function nextTurn(s: GameState) {
   const n = s.players.length;
+  const prev = s.current;
   let i = s.current;
   do i = (i + 1) % n;
   while (s.players[i].bankrupt);
@@ -305,7 +316,14 @@ function nextTurn(s: GameState) {
   s.again = false;
   s.turn++;
   s.phase = { t: 'roll' };
-  tickMortgages(s);
+  if (i <= prev) {
+    s.round++;
+    if (s.rules.mortgage && s.feeStart !== null && (s.round - s.feeStart) % FEE_ROUNDS === 0) {
+      log(s, `סבב ${s.round}: זמן תשלום המשכנתא!`);
+      collectFees(s);
+      if (cur(s).bankrupt && (s.phase as GameState['phase']).t !== 'gameover') nextTurn(s);
+    }
+  }
 }
 
 function startAuction(s: GameState, space: number) {
@@ -328,6 +346,7 @@ function closeAuction(s: GameState) {
     const w = s.players[ph.bidder];
     w.money -= ph.bid;
     s.props[ph.space].owner = w.id;
+    noteFirstPurchase(s);
     log(s, `${w.name} זכה במכירה הפומבית על ${BOARD[ph.space].name} ב-${fmt(ph.bid)}`);
   } else {
     log(s, `אף אחד לא קנה את ${BOARD[ph.space].name}`);
@@ -368,6 +387,7 @@ export function reduce(prev: GameState, a: Action): GameState {
       const [d1, d2] = a.dice;
       const isDouble = d1 === d2;
       s.dice = [d1, d2];
+      s.rollSeq++;
       log(s, `${p.name} הטיל ${d1} + ${d2}`);
 
       if (p.inJail) {
@@ -434,6 +454,7 @@ export function reduce(prev: GameState, a: Action): GameState {
       if (p.money < price) return prev;
       p.money -= price;
       s.props[ph.space].owner = p.id;
+      noteFirstPurchase(s);
       log(s, `${p.name} קנה את ${BOARD[ph.space].name} ב-${fmt(price)}`);
       finishMove(s);
       return s;
@@ -486,7 +507,6 @@ export function reduce(prev: GameState, a: Action): GameState {
     case 'MORTGAGE':
       if (!manageAllowed(s) || !canMortgage(s, p.id, a.space)) return prev;
       s.props[a.space].mortgaged = true;
-      s.props[a.space].mortgageLeft = MORTGAGE_ROUNDS;
       p.money += mortgageValue(a.space);
       log(s, `${p.name} משכן את ${BOARD[a.space].name}`);
       return s;
@@ -494,7 +514,6 @@ export function reduce(prev: GameState, a: Action): GameState {
     case 'UNMORTGAGE':
       if (!manageAllowed(s) || !canUnmortgage(s, p.id, a.space)) return prev;
       s.props[a.space].mortgaged = false;
-      delete s.props[a.space].mortgageLeft;
       p.money -= unmortgageCost(a.space);
       log(s, `${p.name} פדה את ${BOARD[a.space].name}`);
       return s;

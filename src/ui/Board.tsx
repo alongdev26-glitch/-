@@ -102,10 +102,10 @@ export function Board({ game, shown, onSpace, center }: Props) {
         return (
           <button
             key={sp.id}
-            className={`space side-${side}${sp.id % 10 === 0 ? ` corner corner-${sp.id}` : ''}`}
-            style={{ gridRow: row, gridColumn: col }}
+            className={`space side-${side}${sp.id % 10 === 0 ? ` corner corner-${sp.id}` : ''}${owner ? ' owned' : ''}`}
+            style={{ gridRow: row, gridColumn: col, ...(owner ? { ['--owner' as string]: owner.color } : {}) }}
             onClick={() => onSpace(sp.id)}
-            aria-label={sp.name}
+            aria-label={owner ? `${sp.name}, בבעלות ${owner.name}` : sp.name}
           >
             <div className={`face${st.mortgaged ? ' mortgaged' : ''}`} dir="rtl">
               {side === 'corner' ? <Corner sp={sp} /> : <SpaceFace sp={sp} />}
@@ -118,7 +118,11 @@ export function Board({ game, shown, onSpace, center }: Props) {
                   )}
                 </div>
               )}
-              {owner && <i className="owner-flag" style={{ background: owner.color }} />}
+              {owner && (
+                <span className="owner-badge" title={`בבעלות ${owner.name}`}>
+                  <Token token={owner.token} color="#fff" size="1em" />
+                </span>
+              )}
               {st.mortgaged && <span className="mort-tag">ממושכן</span>}
             </div>
             {here.length > 0 && (

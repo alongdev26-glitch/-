@@ -4,6 +4,8 @@ export type TokenId = 'cat' | 'car' | 'dog' | 'trex' | 'hat' | 'duck';
 
 export interface Player {
   id: number;
+  /** online games: the claude.ai viewer id that controls this seat */
+  uid?: string;
   name: string;
   token: TokenId;
   color: string;
@@ -21,8 +23,6 @@ export interface PropState {
   /** 0–4 houses, 5 = hotel */
   houses: number;
   mortgaged: boolean;
-  /** own turns left to redeem a mortgaged property before foreclosure */
-  mortgageLeft?: number;
 }
 
 export interface Owed {
@@ -48,7 +48,7 @@ export type Phase =
   | { t: 'gameover'; winner: number };
 
 export interface GameRules {
-  /** allow mortgaging properties (with the 7-round limit) */
+  /** the mortgage system: the 7-round payment and voluntary mortgages */
   mortgage: boolean;
 }
 
@@ -62,6 +62,12 @@ export interface GameState {
   doubles: number;
   /** "קופת הלוטו": taxes and fines collect here, "חניה חופשית" takes it all */
   pot: number;
+  /** full rounds played (a round ends when play wraps to the first seat) */
+  round: number;
+  /** round of the first purchase, when the mortgage-payment count starts */
+  feeStart: number | null;
+  /** increments on every dice roll, so every screen can animate it */
+  rollSeq: number;
   /** current player may roll again after finishing this move */
   again: boolean;
   decks: Record<Deck, number[]>;
@@ -87,6 +93,7 @@ export type Action =
   | { type: 'END_TURN' };
 
 export interface PlayerSetup {
+  uid?: string;
   name: string;
   token: TokenId;
   isBot: boolean;

@@ -1,4 +1,4 @@
-import { BOARD, MORTGAGE_ROUNDS } from '../data/board';
+import { BOARD, FEE_ROUNDS } from '../data/board';
 import {
   canBuild,
   canMortgage,
@@ -6,7 +6,10 @@ import {
   canUnmortgage,
   mortgageValue,
   ownsGroup,
+  feeDue,
+  feeFor,
   rentFor,
+  roundsToFee,
   sellValue,
   unmortgageCost,
 } from '../engine/rules';
@@ -43,6 +46,15 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
           <small>נכסים</small>
           <b>{sets.reduce((n, s) => n + s.mine.length, 0)}</b>
         </div>
+        {game.rules.mortgage && (
+          <div className="stat gold">
+            <small>תשלום המשכנתא הבא</small>
+            <b>ש"ח {feeDue(game, me)}</b>
+            <small>
+              {roundsToFee(game) === null ? 'מתחיל אחרי הקנייה הראשונה' : `בעוד ${roundsToFee(game)} סבבים`}
+            </small>
+          </div>
+        )}
         {player.jailCards.length > 0 && (
           <div className="stat">
             <small>כרטיסי יציאה מהכלא</small>
@@ -93,15 +105,16 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
                 <div className="row" key={id}>
                   <button className="row-main" onClick={() => onSpace(id)}>
                     <b>{sp.name}</b>
-                    <small>שכירות עכשיו: {st.mortgaged ? 'אין (ממושכן)' : rent}</small>
+                    <small>
+                      שכירות עכשיו: {st.mortgaged ? 'אין (ממושכן)' : rent}
+                      {game.rules.mortgage && !st.mortgaged && ` · משכנתא: ש"ח ${feeFor(id)}`}
+                    </small>
                   </button>
                   <div className="row-tags">
                     {st.houses > 0 && st.houses < 5 && <span className="tag green">🏠 ×{st.houses}</span>}
                     {st.houses === 5 && <span className="tag red">🏨 מלון</span>}
                     {st.mortgaged && (
-                      <span className={`tag ${(st.mortgageLeft ?? MORTGAGE_ROUNDS) <= 2 ? 'red' : 'gold'}`}>
-                        ממושכן · נשארו {st.mortgageLeft ?? MORTGAGE_ROUNDS} סבבים
-                      </span>
+                      <span className="tag red">ממושכן · בלי שכירות</span>
                     )}
                     {sp.kind === 'property' && !ownsGroup(game, me, sp.group!) && <span className="tag">חסר לסדרה</span>}
                   </div>
@@ -137,7 +150,7 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
       {sets.length > 0 && (
         <div className="note">
           {game.rules.mortgage
-            ? `משכנתא היא ל-${MORTGAGE_ROUNDS} סבבים. נכס שלא נפדה בזמן חוזר לבנק.`
+            ? `כל ${FEE_ROUNDS} סבבים משלמים לקופת הלוטו חצי ממחיר כל נכס. נכס ממושכן לא משלם, אבל גם לא גובה שכירות.`
             : 'במשחק הזה אין משכנתא.'}
           {!myTurn && ' בנייה ומכירה אפשריות רק בתור שלך.'}
         </div>

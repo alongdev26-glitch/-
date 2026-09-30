@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MORTGAGE_ROUNDS } from '../data/board';
+import { FEE_ROUNDS } from '../data/board';
 import type { GameRules, PlayerSetup, TokenId } from '../engine/types';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { TOKENS, Token } from '../ui/Token';
@@ -20,6 +20,7 @@ const defaultHumans = (): Human[] =>
 
 interface Props {
   onStart: (players: PlayerSetup[], rules: GameRules) => void;
+  onOnline: () => void;
   onBack: () => void;
 }
 
@@ -30,7 +31,7 @@ interface Props {
  * 3. name + token for each real player
  * 4. rules (mortgage yes/no)
  */
-export function Setup({ onStart, onBack }: Props) {
+export function Setup({ onStart, onOnline, onBack }: Props) {
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState<Mode>('bots');
   const [humanCount, setHumanCount] = useState(1);
@@ -109,8 +110,13 @@ export function Setup({ onStart, onBack }: Props) {
           </button>
           <button className={`choice${mode === 'people' ? ' on' : ''}`} onClick={() => chooseMode('people')}>
             <span className="choice-icon">👫</span>
-            <b>עם אנשים אמיתיים</b>
+            <b>עם חברים על הטלפון הזה</b>
             <small>2 עד 4 שחקנים, מעבירים את הטלפון ביניכם</small>
+          </button>
+          <button className="choice" onClick={onOnline}>
+            <span className="choice-icon">🌐</span>
+            <b>עם חברים בקוד</b>
+            <small>כל אחד מהטלפון שלו: צור קוד או רשום קוד</small>
           </button>
         </div>
       )}
@@ -219,12 +225,12 @@ export function Setup({ onStart, onBack }: Props) {
               <button className={`choice${mortgage ? ' on' : ''}`} onClick={() => setMortgage(true)}>
                 <span className="choice-icon">🏦</span>
                 <b>כן</b>
-                <small>אפשר למשכן נכסים ל-{MORTGAGE_ROUNDS} סבבים</small>
+                <small>כל {FEE_ROUNDS} סבבים משלמים חצי ממחיר כל נכס. אפשר למשכן נכס ולקבל את מחירו המלא</small>
               </button>
               <button className={`choice${!mortgage ? ' on' : ''}`} onClick={() => setMortgage(false)}>
                 <span className="choice-icon">🚫</span>
                 <b>לא</b>
-                <small>בלי משכנתא. מי שאין לו כסף מוכר בתים</small>
+                <small>בלי תשלומי משכנתא ובלי משכון</small>
               </button>
             </div>
           </div>

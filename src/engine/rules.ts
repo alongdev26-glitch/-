@@ -1,4 +1,4 @@
-import { BOARD, groupMembers, isOwnable, type Group } from '../data/board';
+import { BOARD, FEE_ROUNDS, groupMembers, isOwnable, type Group } from '../data/board';
 import type { GameState } from './types';
 
 export const ownsGroup = (s: GameState, player: number, g: Group) =>
@@ -63,8 +63,24 @@ export function canMortgage(s: GameState, player: number, id: number): boolean {
   return true;
 }
 
-export const mortgageValue = (id: number) => BOARD[id].price! / 2;
-export const unmortgageCost = (id: number) => Math.ceil(mortgageValue(id) * 1.1);
+/** Voluntary mortgage pays the property's full price. */
+export const mortgageValue = (id: number) => BOARD[id].price!;
+export const unmortgageCost = (id: number) => Math.round(mortgageValue(id) * 1.1);
+/** The payment due every FEE_ROUNDS rounds on an owned, unmortgaged property. */
+export const feeFor = (id: number) => BOARD[id].price! / 2;
+
+export function feeDue(s: GameState, player: number): number {
+  return ownedBy(s, player)
+    .filter((id) => !s.props[id].mortgaged)
+    .reduce((sum, id) => sum + feeFor(id), 0);
+}
+
+/** Rounds until the next mortgage payment, or null when the count hasn't started. */
+export function roundsToFee(s: GameState): number | null {
+  if (!s.rules?.mortgage || s.feeStart == null) return null;
+  const done = (s.round - s.feeStart) % FEE_ROUNDS;
+  return FEE_ROUNDS - done;
+}
 export const sellValue = (id: number) => BOARD[id].houseCost! / 2;
 
 export function canUnmortgage(s: GameState, player: number, id: number): boolean {
@@ -86,7 +102,7 @@ export function netWorth(s: GameState, player: number): number {
   return ownedBy(s, player).reduce((sum, id) => {
     const st = s.props[id];
     const houses = BOARD[id].kind === 'property' ? st.houses * BOARD[id].houseCost! : 0;
-    return sum + houses + (st.mortgaged ? mortgageValue(id) : BOARD[id].price!);
+    return sum + houses + (st.mortgaged ? 0 : BOARD[id].price!);
   }, p.money);
 }
 

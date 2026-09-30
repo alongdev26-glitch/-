@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { BOARD } from '../data/board';
 import { DECKS } from '../data/cards';
 import { botAction } from '../engine/bot';
@@ -34,7 +34,9 @@ export function loadGame(): GameState | null {
     const g = JSON.parse(raw) as GameState;
     g.pot ??= 0;
     g.rules ??= { mortgage: true };
-    for (const st of g.props) if (st.mortgaged) st.mortgageLeft ??= 7;
+    g.round ??= 1;
+    g.feeStart ??= null;
+    g.rollSeq ??= 0;
     return g;
   } catch {
     return null;
@@ -50,23 +52,41 @@ const TABS: { id: Tab; icon: string; label: string }[] = [
   { id: 'profile', icon: '👤', label: 'פרופיל' },
 ];
 
+/** An online game: the shared state comes from the room, and moves are sent back to it. */
+export interface OnlineLink {
+  myUid: string;
+  isHost: boolean;
+  state: GameState;
+  send: (next: GameState) => void;
+}
+
 interface Props {
   initial: GameState;
+  online?: OnlineLink;
   onExit: () => void;
   onNewGame: () => void;
 }
 
-export function Game({ initial, onExit, onNewGame }: Props) {
-  const [game, dispatch] = useReducer(reduce, initial);
+export function Game({ initial, online, onExit, onNewGame }: Props) {
+  const [localGame, dispatch] = useReducer(reduce, initial);
+  const game = online ? online.state : localGame;
+  const gameRef = useRef(game);
+  gameRef.current = game;
+  const onlineRef = useRef(online);
+  onlineRef.current = online;
   const [shown, setShown] = useState(() => initial.players.map((p) => p.pos));
   const [rolling, setRolling] = useState(false);
   const [info, setInfo] = useState<number | null>(null);
   const [tab, setTab] = useState<Tab>('board');
 
-  // With several real players on one phone, the "viewer" is the real player the screens belong to.
+  // The "viewer" is the real player the screens belong to: fixed online, handed around on one phone.
   const humans = game.players.filter((p) => !p.isBot);
+  const mySeat = online ? game.players.findIndex((p) => p.uid === online.myUid) : -1;
   const firstViewer = initial.players[initial.current].isBot ? humans[0].id : initial.current;
-  const [viewer, setViewer] = useState(firstViewer);
+  const [localViewer, setViewer] = useState(firstViewer);
+  const viewer = online ? Math.max(0, mySeat) : localViewer;
+  /** May this screen make the move for player `pid`? */
+  const controls = (pid: number) => (online ? game.players[pid].uid === online.myUid : !game.players[pid].isBot);
 
   const moving = shown.some((pos, i) => pos !== game.players[i].pos);
   const busy = rolling || moving;
@@ -74,19 +94,32 @@ export function Game({ initial, onExit, onNewGame }: Props) {
   const acting = actor(game);
   const actingPlayer = game.players[acting];
   const cur = game.players[game.current];
-  const handoff = !busy && !cur.isBot && cur.id !== viewer && game.phase.t !== 'gameover';
+  const handoff = !online && !busy && !cur.isBot && cur.id !== viewer && game.phase.t !== 'gameover';
   const myTurn = game.current === viewer && game.phase.t !== 'gameover';
   const needsBoard = myTurn && !busy && (game.phase.t === 'roll' || game.phase.t === 'end');
 
   const act = useCallback((a: Action) => {
-    if (a.type === 'ROLL') {
-      setRolling(true);
-      setTimeout(() => setRolling(false), 900);
-    }
-    dispatch(a);
+    const link = onlineRef.current;
+    if (!link) return dispatch(a);
+    const now = gameRef.current;
+    const next = reduce(now, a);
+    if (next !== now) link.send(next);
   }, []);
 
-  useEffect(() => saveGame(game), [game]);
+  // animate the dice on every roll, whoever rolled (rollSeq travels with the shared state)
+  const lastRoll = useRef(game.rollSeq);
+  const rollTimer = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    if (game.rollSeq === lastRoll.current) return;
+    lastRoll.current = game.rollSeq;
+    setRolling(true);
+    window.clearTimeout(rollTimer.current);
+    rollTimer.current = window.setTimeout(() => setRolling(false), 900);
+  }, [game.rollSeq]);
+
+  useEffect(() => {
+    if (!online) saveGame(game);
+  }, [game, online]);
 
   // walk tokens one space at a time
   useEffect(() => {
@@ -107,13 +140,13 @@ export function Game({ initial, onExit, onNewGame }: Props) {
 
   // computer players
   useEffect(() => {
-    if (busy) return;
+    if (busy || (online && !online.isHost)) return;
     const a = botAction(game);
     if (!a) return;
     const delay = game.phase.t === 'card' ? 1600 : game.phase.t === 'auction' ? 500 : 1000;
     const t = setTimeout(() => act(a), delay);
     return () => clearTimeout(t);
-  }, [game, busy, act]);
+  }, [game, busy, act, online]);
 
   const ph = game.phase;
 
@@ -121,7 +154,7 @@ export function Game({ initial, onExit, onNewGame }: Props) {
     if (ph.t !== 'auction') return null;
     const bidder = ph.bidder !== null ? game.players[ph.bidder] : null;
     const step = (n: number) => ph.bid + n;
-    const humanBids = !actingPlayer.isBot && !busy;
+    const humanBids = controls(acting) && !busy;
     return (
       <Modal title={`מכירה פומבית: ${BOARD[ph.space].name}`}>
         <div className="auction">
@@ -160,7 +193,7 @@ export function Game({ initial, onExit, onNewGame }: Props) {
                 </button>
               </div>
             ) : (
-              <div className="waiting">{actingPlayer.name} חושב...</div>
+              <div className="waiting">{actingPlayer.name} {actingPlayer.isBot ? 'חושב...' : 'מחליט...'}</div>
             )}
           </div>
         </div>

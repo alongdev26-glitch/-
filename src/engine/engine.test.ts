@@ -3,7 +3,7 @@ import { BOARD, JAIL } from '../data/board';
 import { CHANCE, CHEST } from '../data/cards';
 import { botAction } from './bot';
 import { actor, newGame, reduce } from './reducer';
-import { canBuild, rentFor } from './rules';
+import { canBuild, feeDue, rentFor } from './rules';
 import type { Action, GameState } from './types';
 
 const setup = (n = 2) =>
@@ -213,29 +213,38 @@ describe('lotto pot', () => {
   });
 });
 
-describe('mortgage rounds', () => {
-  it('returns the property to the bank after 7 of the owner\'s turns', () => {
-    let s = setup();
-    s.props[6].owner = 0;
-    s = run(s, { type: 'MORTGAGE', space: 6 });
-    expect(s.props[6].mortgageLeft).toBe(7);
-    expect(s.players[0].money).toBe(1550);
-    for (let round = 1; round <= 7; round++) {
-      // player 0 then player 1 each end a turn without moving
+describe('mortgage payments', () => {
+  const endRound = (s: GameState) => {
+    for (let k = 0; k < s.players.length; k++) {
       s.phase = { t: 'end' };
-      s = run(s, { type: 'END_TURN' });
-      s.phase = { t: 'end' };
-      s = run(s, { type: 'END_TURN' });
-      if (round < 7) expect(s.props[6]).toMatchObject({ owner: 0, mortgaged: true, mortgageLeft: 7 - round });
+      s = reduce(s, { type: 'END_TURN' });
     }
-    expect(s.props[6]).toEqual({ owner: null, houses: 0, mortgaged: false });
+    return s;
+  };
+
+  it('starts counting at the first purchase and charges every 7 rounds into the pot', () => {
+    let s = run(setup(), { type: 'ROLL', dice: [2, 4] }, { type: 'BUY' });
+    expect(s.feeStart).toBe(1);
+    s.props[5].owner = 1; // railway for the other player
+    for (let r = 1; r < 7; r++) s = endRound(s);
+    expect(s.round).toBe(7);
+    expect(s.pot).toBe(0);
+    const before = [s.players[0].money, s.players[1].money];
+    s = endRound(s);
+    expect(s.round).toBe(8);
+    expect(s.players[0].money).toBe(before[0] - 50); // half of 100
+    expect(s.players[1].money).toBe(before[1] - 100); // half of 200
+    expect(s.pot).toBe(150);
   });
-  it('redeeming clears the countdown', () => {
+
+  it('voluntary mortgage pays the full price and skips the payment', () => {
     let s = setup();
-    s.props[6].owner = 0;
-    s = run(s, { type: 'MORTGAGE', space: 6 }, { type: 'UNMORTGAGE', space: 6 });
-    expect(s.props[6].mortgaged).toBe(false);
-    expect(s.props[6].mortgageLeft).toBeUndefined();
+    s.props[5].owner = 0;
+    s = run(s, { type: 'MORTGAGE', space: 5 });
+    expect(s.players[0].money).toBe(1700);
+    expect(feeDue(s, 0)).toBe(0);
+    s = run(s, { type: 'UNMORTGAGE', space: 5 });
+    expect(s.players[0].money).toBe(1480);
   });
 });
 

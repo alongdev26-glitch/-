@@ -3,9 +3,10 @@ import { newGame } from './engine/reducer';
 import type { GameState } from './engine/types';
 import { Game, loadGame, saveGame } from './screens/Game';
 import { Menu } from './screens/Menu';
+import { Online } from './screens/Online';
 import { Setup } from './screens/Setup';
 
-type Screen = { s: 'menu' } | { s: 'setup' } | { s: 'game'; game: GameState; key: number };
+type Screen = { s: 'menu' } | { s: 'setup' } | { s: 'online' } | { s: 'game'; game: GameState; key: number };
 
 export function App() {
   const [screen, setScreen] = useState<Screen>({ s: 'menu' });
@@ -22,9 +23,11 @@ export function App() {
       {screen.s === 'setup' && (
         <Setup
           onBack={() => setScreen({ s: 'menu' })}
+          onOnline={() => setScreen({ s: 'online' })}
           onStart={(players, rules) => setScreen({ s: 'game', game: newGame(players, Math.random, rules), key: Date.now() })}
         />
       )}
+      {screen.s === 'online' && <Online onBack={() => setScreen({ s: 'setup' })} />}
       {screen.s === 'game' && (
         <Game
           key={screen.key}
