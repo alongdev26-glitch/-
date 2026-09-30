@@ -12,7 +12,7 @@ export function Menu({ onPlay, onResume }: { onPlay: () => void; onResume?: () =
       </div>
       <div className="menu-logo">
         <span className="menu-mascot">🎩</span>
-        <div className="menu-plaque">טייקון</div>
+        <div className="menu-plaque">ביג דיל</div>
         <p>משחק המסחר בנכסים: ירושלים, תל-אביב, חיפה ועוד</p>
       </div>
       <div className="menu-parade" aria-hidden="true">

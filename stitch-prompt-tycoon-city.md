@@ -6,7 +6,7 @@
 > 3. אחר כך מדביקים את המסכים מ**חלק 3**, אחד בכל פעם.
 >
 > שמות רחובות שלא הצלחתי לקרוא בוודאות בתמונה מסומנים ב-`[verify]`. מחליפים את השם ומוחקים את הסימון לפני שמדביקים.
-> שם המשחק במרכז הלוח הוא "טייקון" כברירת מחדל. אפשר להחליף אותו, אבל "מונופול" והדמות עם הכובע הם סימנים מסחריים של Hasbro: זה בסדר לסקיצה פרטית, לא לאפליקציה שמפרסמים.
+> שם המשחק במרכז הלוח הוא "ביג דיל" כברירת מחדל. אפשר להחליף אותו, אבל "מונופול" והדמות עם הכובע הם סימנים מסחריים של Hasbro: זה בסדר לסקיצה פרטית, לא לאפליקציה שמפרסמים.
 
 ---
 
@@ -93,7 +93,7 @@ Reproduce this board **exactly**. Do not add, remove, reorder, translate or rena
 
 ### Board center
 - Plain mint-grey surface `#CFE3DA`, no city inside the play area (the 3D city is only around the outside of the board).
-- A large **red rounded-rectangle logo plaque** laid **diagonally** from the bottom-right up to the top-left across the center (about 45°), with a thin white inner outline and a darker red edge. Inside it, big white 3D bevelled Hebrew letters: **"טייקון"**. Sitting on top of the middle of the plaque: the elegant old tycoon mascot (white mustache, black top hat, tuxedo, cane) waving.
+- A large **red rounded-rectangle logo plaque** laid **diagonally** from the bottom-right up to the top-left across the center (about 45°), with a thin white inner outline and a darker red edge. Inside it, big white 3D bevelled Hebrew letters: **"ביג דיל"**. Sitting on top of the middle of the plaque: the elegant old tycoon mascot (white mustache, black top hat, tuxedo, cane) waving.
 - Two card-deck places, each a square **dashed-line rectangle rotated 45°**:
   - Upper-right area: labelled **"תיבת המזל"**, with a face-down stack of blue chest cards.
   - Lower-left area: labelled **"הפתעה"**, with a face-down stack of orange "?" cards.
@@ -116,7 +116,7 @@ A cinematic low-angle 3D close-up of the "דרך צלחה" corner with its red a
 Soft white quilted-diamond background. A 3×5 grid of light grey rounded tiles with 3D tokens; gold tokens have a gold border, a "!מבצע" tag and a timer "2י 23ש" with a lock; colorful tokens have an orange "!מוגבל" ribbon and a lock. The selected race car has a thick red border. On the left: title "בחר כלי", a large preview of the race car, a red "בחר" pill button. Banner: "!בחר כלי".
 
 ### Screen 5 — Stats ("!אלוף")
-Dimmed background. White modal with a red header "סטטיסטיקות טייקון". A 4×2 grid of grey tiles: "משחקים שניצחת 25", "הכי הרבה כסף ש"ח 1550", "הכלי האהוב" (silver cat), "הקוביות האהובות" (white dice), "הסדרה הנאספת ביותר – תל-אביב – 1" (dark-blue card icon), "הסדרה הרווחית ביותר – תל-אביב – ש"ח 980", "בתים שנבנו 51" (green house), "מלונות שנבנו 15" (red hotel). Black pill button "עוד סטטיסטיקות". Close X top-left. The tycoon mascot peeks from the left. Banner: "!אלוף".
+Dimmed background. White modal with a red header "סטטיסטיקות ביג דיל". A 4×2 grid of grey tiles: "משחקים שניצחת 25", "הכי הרבה כסף ש"ח 1550", "הכלי האהוב" (silver cat), "הקוביות האהובות" (white dice), "הסדרה הנאספת ביותר – תל-אביב – 1" (dark-blue card icon), "הסדרה הרווחית ביותר – תל-אביב – ש"ח 980", "בתים שנבנו 51" (green house), "מלונות שנבנו 15" (red hotel). Black pill button "עוד סטטיסטיקות". Close X top-left. The tycoon mascot peeks from the left. Banner: "!אלוף".
 
 ### Screen 6 — Quiz popup ("!אתגר")
 Modal with a thick white border and a deep blue gradient with glowing circuit lines and sparkles. The mascot holds a red "?" card, surrounded by a trophy, a pink milkshake, a wooden gavel and a silver piggy bank. Title "!עשה את החידון וגלה", text "אתה אספן? מכרזן? טייקון גביעים? תעשה את החידון וגלה איזה כלי מתאים לך!". Red pill "התחל". Close X. Banner: "!אתגר".
@@ -125,7 +125,7 @@ Modal with a thick white border and a deep blue gradient with glowing circuit li
 The exact board from above, darkened, with purple triangle flags on every property the winner owns. A yellow spotlight on a white podium with the silver cat token. A full-width dark-navy translucent band with white lines: "!הנרי ניצח". Below it the mascot throwing his arms up in a burst of colorful ש"ח banknotes and confetti. Banner: "!ניצחון".
 
 ### Screen 8 — Main menu
-The board blurred in the background. Top bar: avatar with a level badge, coin balance with a "+", settings gear. Center: the red diagonal "טייקון" plaque logo with the mascot. A big red "שחק עכשיו" button, and white buttons "שחק עם חברים" and "נגד המחשב". Bottom nav: "הגדרות", "חברים", "חנות", "לוחות".
+The board blurred in the background. Top bar: avatar with a level badge, coin balance with a "+", settings gear. Center: the red diagonal "ביג דיל" plaque logo with the mascot. A big red "שחק עכשיו" button, and white buttons "שחק עם חברים" and "נגד המחשב". Bottom nav: "הגדרות", "חברים", "חנות", "לוחות".
 
 ---
 
