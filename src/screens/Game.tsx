@@ -42,7 +42,7 @@ export function loadGame(): GameState | null {
     g.round ??= 1;
     g.feeStart ??= null;
     g.rollSeq ??= 0;
-    g.payment ??= null;
+    g.payEvents ??= [];
     g.paySeq ??= 0;
     g.announce ??= null;
     g.announceSeq ??= 0;
@@ -148,12 +148,14 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
 
   // show each payment between players once the token has landed
   const lastPay = useRef(game.paySeq);
-  const [flash, setFlash] = useState<{ payment: Payment; key: number } | null>(null);
+  const [payQueue, setPayQueue] = useState<{ payment: Payment; key: string }[]>([]);
   useEffect(() => {
     if (busy || game.paySeq === lastPay.current) return;
     lastPay.current = game.paySeq;
-    if (game.payment) setFlash({ payment: game.payment, key: game.paySeq });
-  }, [game.paySeq, game.payment, busy]);
+    const fresh = game.payEvents.map((payment, i) => ({ payment, key: `${game.paySeq}-${i}` }));
+    if (fresh.length) setPayQueue((q) => [...q, ...fresh].slice(-6));
+  }, [game.paySeq, game.payEvents, busy]);
+  const flash = payQueue[0] ?? null;
   // big banner for purchases, auction wins and new buildings
   const lastAnnounce = useRef(game.announceSeq);
   const [banner, setBanner] = useState<{ a: Announcement; key: number } | null>(null);
@@ -170,7 +172,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
 
   useEffect(() => {
     if (!flash) return;
-    const t = window.setTimeout(() => setFlash(null), 2600);
+    const t = window.setTimeout(() => setPayQueue((q) => q.slice(1)), 1850);
     return () => window.clearTimeout(t);
   }, [flash]);
 

@@ -17,7 +17,7 @@ import {
   validSide,
   type RentMod,
 } from './rules';
-import type { Action, Announcement, GameRules, GameState, Owed, PlayerSetup, TradeOffer, TradeSide } from './types';
+import type { Action, Announcement, GameRules, GameState, Owed, Payment, PlayerSetup, TradeOffer, TradeSide } from './types';
 
 const MAX_LOG = 40;
 
@@ -65,7 +65,7 @@ export function newGame(
     round: 1,
     feeStart: null,
     rollSeq: 0,
-    payment: null,
+    payEvents: [],
     paySeq: 0,
     announce: null,
     announceSeq: 0,
@@ -106,16 +106,25 @@ function charge(s: GameState, owed: Owed[]) {
   }
 }
 
+/** Record a money movement for the animation (cleared at the start of every action). */
+function moneyEvent(s: GameState, e: Payment) {
+  s.payEvents.push(e);
+}
+
 function settle(s: GameState, from: number, owed: Owed[]) {
   for (const o of owed) {
     s.players[from].money -= o.amount;
     if (o.to !== null) {
       s.players[o.to].money += o.amount;
+      if (o.amount > 0)
+        moneyEvent(s, { kind: o.space !== undefined ? 'rent' : 'player', from, to: o.to, amount: o.amount, space: o.space ?? null });
+    } else {
+      s.pot += o.amount;
       if (o.amount > 0) {
-        s.payment = { from, to: o.to, amount: o.amount, space: o.space ?? null };
-        s.paySeq++;
+        const isTax = o.space !== undefined && BOARD[o.space].kind === 'tax';
+        moneyEvent(s, { kind: isTax ? 'tax' : 'pot', from, to: null, amount: o.amount, space: o.space ?? null });
       }
-    } else s.pot += o.amount;
+    }
   }
 }
 
@@ -152,8 +161,11 @@ function sendToJail(s: GameState) {
 function moveTo(s: GameState, target: number, passGo = true) {
   const p = cur(s);
   if (passGo && target < p.pos) {
-    p.money += GO_SALARY;
-    log(s, `${p.name} עבר ב"דרך צלחה" וקיבל ${fmt(GO_SALARY)}`);
+    // landing exactly on "דרך צלחה" pays double
+    const pay = target === 0 ? GO_SALARY * 2 : GO_SALARY;
+    p.money += pay;
+    moneyEvent(s, { kind: target === 0 ? 'go-land' : 'go', from: null, to: p.id, amount: pay, space: 0 });
+    log(s, target === 0 ? `${p.name} נחת ב"דרך צלחה" וקיבל ${fmt(pay)}!` : `${p.name} עבר ב"דרך צלחה" וקיבל ${fmt(pay)}`);
   }
   p.pos = target;
 }
@@ -185,7 +197,7 @@ function land(s: GameState, mod?: RentMod) {
   switch (sp.kind) {
     case 'tax':
       log(s, `${p.name} משלם ${sp.name}: ${fmt(sp.amount!)}`);
-      return charge(s, [{ to: null, amount: sp.amount! }]);
+      return charge(s, [{ to: null, amount: sp.amount!, space: sp.id }]);
     case 'chance':
     case 'chest': {
       const deck: Deck = sp.kind;
@@ -199,6 +211,7 @@ function land(s: GameState, mod?: RentMod) {
     case 'parking':
       if (s.pot > 0) {
         p.money += s.pot;
+        moneyEvent(s, { kind: 'lotto', from: null, to: p.id, amount: s.pot, space: 20 });
         log(s, `${p.name} זכה בקופת הלוטו: ${fmt(s.pot)}!`);
         s.pot = 0;
       }
@@ -236,6 +249,7 @@ function applyCard(s: GameState, deck: Deck, cardIdx: number) {
     case 'money':
       if (effect.amount >= 0) {
         p.money += effect.amount;
+        moneyEvent(s, { kind: 'bank', from: null, to: p.id, amount: effect.amount, space: null });
         return finishMove(s);
       }
       return charge(s, [{ to: null, amount: -effect.amount }]);
@@ -464,6 +478,13 @@ function manageAllowed(s: GameState) {
 export function reduce(prev: GameState, a: Action): GameState {
   if (prev.phase.t === 'gameover') return prev;
   const s: GameState = structuredClone(prev);
+  s.payEvents = [];
+  const out = step(prev, s, a);
+  if (out !== prev && out.payEvents.length) out.paySeq++;
+  return out;
+}
+
+function step(prev: GameState, s: GameState, a: Action): GameState {
   const p = cur(s);
   const ph = s.phase;
 

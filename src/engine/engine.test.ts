@@ -160,7 +160,7 @@ describe('cards', () => {
     expect(s.phase).toEqual({ t: 'card', deck: 'chance', card: goCard });
     s = reduce(s, { type: 'ACK_CARD' });
     expect(s.players[0].pos).toBe(0);
-    expect(s.players[0].money).toBe(1700);
+    expect(s.players[0].money).toBe(1900);
     expect(s.decks.chance.at(-1)).toBe(goCard);
   });
 });
@@ -297,7 +297,7 @@ describe('payment events', () => {
     s.props[6].owner = 1;
     s = run(s, { type: 'ROLL', dice: [2, 4] });
     expect(s.paySeq).toBe(1);
-    expect(s.payment).toEqual({ from: 0, to: 1, amount: 6, space: 6 });
+    expect(s.payEvents).toEqual([{ kind: 'rent', from: 0, to: 1, amount: 6, space: 6 }]);
   });
 });
 
@@ -422,5 +422,40 @@ describe('trades', () => {
     s.props[9].owner = 1;
     s.current = 1;
     expect(botAction(s)).toMatchObject({ type: 'PROPOSE_TRADE', to: 0, get: { props: [6] } });
+  });
+});
+
+describe('דרך צלחה and taxes', () => {
+  it('pays 200 for passing and 400 for landing exactly', () => {
+    let s = setup();
+    s.players[0].pos = 38;
+    s = run(s, { type: 'ROLL', dice: [2, 3] });
+    expect(s.players[0].money).toBe(1700);
+    expect(s.payEvents[0]).toEqual({ kind: 'go', from: null, to: 0, amount: 200, space: 0 });
+
+    let t = setup();
+    t.players[0].pos = 36;
+    t = run(t, { type: 'ROLL', dice: [1, 3] });
+    expect(t.players[0].pos).toBe(0);
+    expect(t.players[0].money).toBe(1900);
+    expect(t.payEvents).toEqual([{ kind: 'go-land', from: null, to: 0, amount: 400, space: 0 }]);
+  });
+
+  it('the card to GO pays 400', () => {
+    let s = setup();
+    const goCard = CHANCE.findIndex((c) => c.effect.type === 'move' && c.effect.to === 0);
+    s.decks.chance = [goCard, ...s.decks.chance.filter((c) => c !== goCard)];
+    s = run(s, { type: 'ROLL', dice: [3, 4] }, { type: 'ACK_CARD' });
+    expect(s.players[0].money).toBe(1900);
+  });
+
+  it('records passing GO and then a tax, in order', () => {
+    let s = setup();
+    s.players[0].pos = 38;
+    s = run(s, { type: 'ROLL', dice: [2, 4] });
+    expect(s.players[0].pos).toBe(4);
+    expect(s.payEvents.map((e) => e.kind)).toEqual(['go', 'tax']);
+    expect(s.payEvents[1]).toEqual({ kind: 'tax', from: 0, to: null, amount: 200, space: 4 });
+    expect(s.pot).toBe(200);
   });
 });

@@ -17,7 +17,7 @@ export interface Card {
 }
 
 export const CHANCE: Card[] = [
-  { text: 'התקדם ל"דרך צלחה" וקבל ש"ח 200', effect: { type: 'move', to: 0 } },
+  { text: 'התקדם ל"דרך צלחה" וקבל ש"ח 400', effect: { type: 'move', to: 0 } },
   { text: "התקדם לרח' ביאליק, רמת-גן", effect: { type: 'move', to: 24 } },
   { text: "התקדם לרח' הרצל, באר-שבע", effect: { type: 'move', to: 11 } },
   {
@@ -48,7 +48,7 @@ export const CHANCE: Card[] = [
 ];
 
 export const CHEST: Card[] = [
-  { text: 'התקדם ל"דרך צלחה" וקבל ש"ח 200', effect: { type: 'move', to: 0 } },
+  { text: 'התקדם ל"דרך צלחה" וקבל ש"ח 400', effect: { type: 'move', to: 0 } },
   { text: 'טעות של הבנק לטובתך: קבל ש"ח 200', effect: { type: 'money', amount: 200 } },
   { text: 'ביקור אצל רופא: שלם ש"ח 50', effect: { type: 'money', amount: -50 } },
   { text: 'מכרת מניות: קבל ש"ח 50', effect: { type: 'money', amount: 50 } },

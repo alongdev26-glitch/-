@@ -81,9 +81,14 @@ export interface Announcement {
   detail?: string;
 }
 
+/**
+ * One movement of money, for the on-screen animation.
+ * `from: null` is the bank (or the lotto pot for 'lotto'); `to: null` is the lotto pot.
+ */
 export interface Payment {
-  from: number;
-  to: number;
+  kind: 'rent' | 'go' | 'go-land' | 'tax' | 'pot' | 'bank' | 'lotto' | 'player';
+  from: number | null;
+  to: number | null;
   amount: number;
   space: number | null;
 }
@@ -109,9 +114,9 @@ export interface GameState {
   feeStart: number | null;
   /** increments on every dice roll, so every screen can animate it */
   rollSeq: number;
-  /** the latest payment between two players, for the on-screen money animation */
-  payment: Payment | null;
-  /** increments on every payment between players */
+  /** money movements caused by the last action, in order, for the on-screen animation */
+  payEvents: Payment[];
+  /** increments on every action that moved money */
   paySeq: number;
   announce: Announcement | null;
   announceSeq: number;

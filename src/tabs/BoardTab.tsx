@@ -61,6 +61,20 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
         game={game}
         shown={shown}
         onSpace={(id) => isOwnable(BOARD[id]) && onSpace(id)}
+        highlight={
+          flash && flash.space !== null
+            ? {
+                space: flash.space,
+                tone: flash.from === null || flash.kind === 'lotto' ? 'gain' : 'loss',
+                badge:
+                  flash.kind === 'go' || flash.kind === 'go-land'
+                    ? `+${flash.amount}`
+                    : flash.kind === 'tax'
+                      ? `−${flash.amount}`
+                      : undefined,
+              }
+            : null
+        }
         center={
           <>
             <div className="board-dice">

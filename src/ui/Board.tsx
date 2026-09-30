@@ -88,9 +88,11 @@ interface Props {
   shown: number[];
   onSpace: (id: number) => void;
   center?: ReactNode;
+  /** a space to light up while its money animation plays */
+  highlight?: { space: number; tone: 'gain' | 'loss'; badge?: string } | null;
 }
 
-export function Board({ game, shown, onSpace, center }: Props) {
+export function Board({ game, shown, onSpace, center, highlight }: Props) {
   return (
     <div className="board" dir="ltr">
       {BOARD.map((sp) => {
@@ -102,7 +104,9 @@ export function Board({ game, shown, onSpace, center }: Props) {
         return (
           <button
             key={sp.id}
-            className={`space side-${side}${sp.id % 10 === 0 ? ` corner corner-${sp.id}` : ''}${owner ? ' owned' : ''}`}
+            className={`space side-${side}${sp.id % 10 === 0 ? ` corner corner-${sp.id}` : ''}${owner ? ' owned' : ''}${
+              highlight?.space === sp.id ? ` glow glow-${highlight.tone}` : ''
+            }`}
             style={{ gridRow: row, gridColumn: col, ...(owner ? { ['--owner' as string]: owner.color } : {}) }}
             onClick={() => onSpace(sp.id)}
             aria-label={owner ? `${sp.name}, בבעלות ${owner.name}` : sp.name}
@@ -125,6 +129,11 @@ export function Board({ game, shown, onSpace, center }: Props) {
               )}
               {st.mortgaged && <span className="mort-tag">ממושכן</span>}
             </div>
+            {highlight?.space === sp.id && highlight.badge && (
+              <span key={highlight.badge} dir="ltr" className={`space-badge ${highlight.tone}`}>
+                {highlight.badge}
+              </span>
+            )}
             {here.length > 0 && (
               <div className="tokens">
                 {here.map((p) => (

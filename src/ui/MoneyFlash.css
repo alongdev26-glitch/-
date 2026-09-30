@@ -145,3 +145,47 @@
     animation: none;
   }
 }
+
+.mf-row.source {
+  background: #f1f3f7;
+  color: var(--navy);
+}
+.mf-row.pot {
+  background: #fff4cc;
+  --pc: var(--gold-dark);
+}
+.pot .mf-amount {
+  color: #9a6a00;
+}
+.pot .mf-bills i {
+  top: -16px;
+  background: #ffe08a;
+  color: #6b4a00;
+  animation: bill-fall 1.3s ease-in infinite;
+}
+.mf-icon {
+  font-size: 24px;
+  width: 42px;
+  text-align: center;
+}
+.source .mf-name {
+  color: var(--navy);
+  filter: none;
+}
+.k-go .mf-title,
+.k-go-land .mf-title,
+.k-lotto .mf-title {
+  color: #15803d;
+  font-size: 18px;
+}
+.k-go-land .mf-title {
+  font-size: 22px;
+  animation: mf-pop 0.5s ease 0.1s both;
+}
+.k-tax .mf-title {
+  color: #d90429;
+  font-size: 18px;
+}
+.money-flash {
+  animation: mf-in 0.3s cubic-bezier(0.2, 1.4, 0.4, 1), mf-out 0.35s ease 1.5s forwards;
+}
