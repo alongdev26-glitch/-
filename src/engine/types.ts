@@ -47,7 +47,13 @@ export type Phase =
   | { t: 'end' }
   | { t: 'gameover'; winner: number };
 
+export interface GameRules {
+  /** allow mortgaging properties (with the 7-round limit) */
+  mortgage: boolean;
+}
+
 export interface GameState {
+  rules: GameRules;
   players: Player[];
   props: PropState[];
   current: number;

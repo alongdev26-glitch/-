@@ -1,35 +1,197 @@
 .setup {
   height: 100%;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 18px;
-  padding: 72px 16px 24px;
+  padding: 70px 16px 24px;
   position: relative;
+  color: #fff;
   background:
     radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.18) 0 12%, transparent 13%),
     radial-gradient(circle at 85% 70%, rgba(255, 255, 255, 0.12) 0 16%, transparent 17%),
     linear-gradient(160deg, #0b3d91 0%, #1e73e8 55%, #5b3fd9 100%);
-  color: #fff;
+}
+.setup > * {
+  flex: none;
+  width: 100%;
+  max-width: 520px;
 }
 .setup-banner {
   position: absolute;
-  top: 14px;
+  top: 18px;
   right: 0;
+  width: auto;
+}
+.steps {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+.steps i {
+  width: 34px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.3);
+}
+.steps i.done {
+  background: rgba(255, 255, 255, 0.75);
+}
+.steps i.on {
+  background: var(--gold);
+}
+
+/* step 1 & rules: big choice cards */
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.choices.small {
+  flex-direction: row;
+}
+.choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 18px 12px;
+  border-radius: 18px;
+  border: 3px solid transparent;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--ink);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+  flex: 1 1 0;
+  font: inherit;
+}
+.choice b {
+  font-size: 20px;
+  font-weight: 900;
+}
+.choice small {
+  font-size: 13px;
+  color: #555;
+}
+.choice.on {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 4px rgba(245, 184, 46, 0.45), 0 8px 18px rgba(0, 0, 0, 0.3);
+}
+.choice-icon {
+  font-size: 40px;
+  line-height: 1;
+}
+.choices.small .choice-icon {
+  font-size: 28px;
+}
+
+/* counts and names */
+.setup-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.setup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 900;
+  font-size: 16px;
+  text-align: center;
+}
+.setup-field input {
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+  padding: 10px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  color: var(--ink);
+}
+.setup-field input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+.seg {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.seg button {
+  width: 56px;
+  height: 48px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: #fff;
+  color: var(--ink);
+  font-weight: 900;
+  font-size: 18px;
+}
+.seg button.on {
+  background: var(--red);
+  color: #fff;
+  border-color: #fff;
+}
+.bot-names {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+.bot-names input {
+  width: 32%;
+  min-width: 0;
+  font-size: 14px;
+  padding: 8px 4px;
+}
+.setup-summary {
+  text-align: center;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 8px;
+}
+
+/* token pick */
+.setup-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.who {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.who button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  padding: 4px 12px 4px 6px;
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-weight: 700;
+}
+.who button.on {
+  background: #fff;
+  color: var(--ink);
+  border-color: var(--gold);
 }
 .setup-grid {
-  flex: none;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: clamp(8px, 1.5vw, 18px);
+  gap: 10px;
 }
 .setup-tile {
   aspect-ratio: 1.1;
   border: 3px solid transparent;
+  border-bottom: 6px solid var(--tc);
   border-radius: 16px;
   color: var(--ink);
   background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--tc) 28%, #fff) 100%);
-  border-bottom: 6px solid var(--tc);
-  box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -43,92 +205,38 @@
   box-shadow: 0 0 0 4px rgba(245, 184, 46, 0.45), 0 8px 18px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
 }
-.setup-side {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 2vh, 16px);
-  align-items: stretch;
-  text-align: center;
+.setup-tile:disabled {
+  opacity: 0.35;
+  filter: grayscale(1);
 }
-.setup-preview {
-  display: grid;
-  place-items: center;
-  padding: 10px;
-}
-.setup-field {
+
+/* rules summary */
+.lineup {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-weight: 900;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.lineup > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 3px 12px 3px 4px;
+  font-weight: 700;
   font-size: 14px;
 }
-.setup-field input {
-  font: inherit;
-  font-weight: 700;
-  text-align: center;
-  padding: 8px;
-  border-radius: 10px;
-  border: 2px solid #ddd;
-}
-.seg {
+
+.setup-nav {
   display: flex;
-  gap: 6px;
-  justify-content: center;
-}
-.seg button {
-  width: 48px;
-  height: 40px;
-  border-radius: 10px;
-  border: 2px solid #ddd;
-  background: #fff;
-  font-weight: 900;
-  font-size: 16px;
-}
-.seg button {
-  color: var(--ink);
-}
-.seg button.on {
-  background: var(--red);
-  border-color: var(--red);
-  color: #fff;
-}
-.bot-names {
-  display: flex;
-  gap: 6px;
-  justify-content: center;
-}
-.bot-names input {
-  width: 30%;
-  min-width: 0;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  text-align: center;
-  padding: 5px 4px;
-  border-radius: 8px;
-  border: 2px solid #ddd;
-}
-.setup {
-  overflow-y: auto;
-}
-@media (orientation: landscape) and (min-aspect-ratio: 4/3) {
-  .setup {
-    display: grid;
-    grid-template-columns: 1fr minmax(200px, 32%);
-    align-items: center;
-    gap: 4vw;
-    padding: 58px 5vw 10px;
-  }
-}
-@media (orientation: landscape) and (max-height: 430px) {
-  .setup-preview {
-    display: none;
-  }
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  margin-top: auto;
 }
 .setup .link {
   color: #fff;
-}
-.setup-field input {
-  color: var(--ink);
+  align-self: center;
 }

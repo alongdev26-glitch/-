@@ -238,3 +238,34 @@ describe('mortgage rounds', () => {
     expect(s.props[6].mortgageLeft).toBeUndefined();
   });
 });
+
+describe('public auction', () => {
+  it('excludes the player who sent the property to auction', () => {
+    let s = setup(3);
+    s = run(s, { type: 'ROLL', dice: [2, 4] }, { type: 'DECLINE' });
+    expect(s.phase).toMatchObject({ t: 'auction', active: [1, 2] });
+    expect(actor(s)).toBe(1);
+  });
+  it('goes unsold when nobody else is left to bid', () => {
+    let s = setup(2);
+    s.players[1].bankrupt = true;
+    s = run(s, { type: 'ROLL', dice: [2, 4] }, { type: 'DECLINE' });
+    expect(s.phase.t).toBe('end');
+    expect(s.props[6].owner).toBeNull();
+  });
+});
+
+describe('game options', () => {
+  it('blocks mortgages when the mortgage rule is off', () => {
+    let s = newGame(
+      [
+        { name: 'A', token: 'cat', isBot: false },
+        { name: 'B', token: 'dog', isBot: false },
+      ],
+      () => 0.5,
+      { mortgage: false },
+    );
+    s.props[6].owner = 0;
+    expect(reduce(s, { type: 'MORTGAGE', space: 6 })).toBe(s);
+  });
+});

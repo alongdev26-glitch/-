@@ -22,7 +22,7 @@ export function App() {
       {screen.s === 'setup' && (
         <Setup
           onBack={() => setScreen({ s: 'menu' })}
-          onStart={(players) => setScreen({ s: 'game', game: newGame(players), key: Date.now() })}
+          onStart={(players, rules) => setScreen({ s: 'game', game: newGame(players, Math.random, rules), key: Date.now() })}
         />
       )}
       {screen.s === 'game' && (

@@ -55,6 +55,7 @@ export function canSell(s: GameState, player: number, id: number): boolean {
 export function canMortgage(s: GameState, player: number, id: number): boolean {
   const sp = BOARD[id];
   const st = s.props[id];
+  if (s.rules?.mortgage === false) return false;
   if (!isOwnable(sp) || st.owner !== player || st.mortgaged) return false;
   if (sp.kind === 'property') {
     return groupMembers(sp.group!).every((g) => s.props[g].houses === 0);

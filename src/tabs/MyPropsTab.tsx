@@ -117,7 +117,7 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
                           </button>
                         </>
                       )}
-                      {st.mortgaged ? (
+                      {!game.rules.mortgage ? null : st.mortgaged ? (
                         <button className="btn btn-gold" disabled={!canUnmortgage(game, me, id)} onClick={() => act({ type: 'UNMORTGAGE', space: id })}>
                           פדה ({unmortgageCost(id)})
                         </button>
@@ -136,8 +136,10 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
       })}
       {sets.length > 0 && (
         <div className="note">
-          משכנתא היא ל-{MORTGAGE_ROUNDS} סבבים. נכס שלא נפדה בזמן חוזר לבנק.
-          {!myTurn && ' בנייה ומשכנתא אפשריות רק בתור שלך.'}
+          {game.rules.mortgage
+            ? `משכנתא היא ל-${MORTGAGE_ROUNDS} סבבים. נכס שלא נפדה בזמן חוזר לבנק.`
+            : 'במשחק הזה אין משכנתא.'}
+          {!myTurn && ' בנייה ומכירה אפשריות רק בתור שלך.'}
         </div>
       )}
     </div>

@@ -33,6 +33,7 @@ export function loadGame(): GameState | null {
     if (!raw) return null;
     const g = JSON.parse(raw) as GameState;
     g.pot ??= 0;
+    g.rules ??= { mortgage: true };
     for (const st of g.props) if (st.mortgaged) st.mortgageLeft ??= 7;
     return g;
   } catch {
@@ -62,13 +63,19 @@ export function Game({ initial, onExit, onNewGame }: Props) {
   const [info, setInfo] = useState<number | null>(null);
   const [tab, setTab] = useState<Tab>('board');
 
+  // With several real players on one phone, the "viewer" is the real player the screens belong to.
+  const humans = game.players.filter((p) => !p.isBot);
+  const firstViewer = initial.players[initial.current].isBot ? humans[0].id : initial.current;
+  const [viewer, setViewer] = useState(firstViewer);
+
   const moving = shown.some((pos, i) => pos !== game.players[i].pos);
   const busy = rolling || moving;
-  const me = game.players.find((p) => !p.isBot)!;
+  const me = game.players[viewer];
   const acting = actor(game);
-  const myTurn = game.current === me.id && game.phase.t !== 'gameover';
-  const myInput = acting === me.id && !busy;
+  const actingPlayer = game.players[acting];
   const cur = game.players[game.current];
+  const handoff = !busy && !cur.isBot && cur.id !== viewer && game.phase.t !== 'gameover';
+  const myTurn = game.current === viewer && game.phase.t !== 'gameover';
   const needsBoard = myTurn && !busy && (game.phase.t === 'roll' || game.phase.t === 'end');
 
   const act = useCallback((a: Action) => {
@@ -113,8 +120,8 @@ export function Game({ initial, onExit, onNewGame }: Props) {
   const auctionModal = () => {
     if (ph.t !== 'auction') return null;
     const bidder = ph.bidder !== null ? game.players[ph.bidder] : null;
-    const inIt = ph.active.includes(me.id);
     const step = (n: number) => ph.bid + n;
+    const humanBids = !actingPlayer.isBot && !busy;
     return (
       <Modal title={`מכירה פומבית: ${BOARD[ph.space].name}`}>
         <div className="auction">
@@ -127,20 +134,22 @@ export function Game({ initial, onExit, onNewGame }: Props) {
             </div>
             <div className="auction-list">
               {game.players
-                .filter((p) => !p.bankrupt)
+                .filter((p) => !p.bankrupt && p.id !== game.current)
                 .map((p) => (
                   <span key={p.id} className={ph.active.includes(p.id) ? '' : 'passed'} style={{ borderColor: p.color }}>
                     {p.name}
                   </span>
                 ))}
             </div>
-            {myInput && inIt ? (
+            <div className="auction-seller">{cur.name} הוציא את הנכס למכירה ולא יכול להציע עליו</div>
+            {humanBids ? (
               <div className="auction-btns">
+                <div className="auction-turn">התור של {actingPlayer.name} להציע</div>
                 {[10, 50, 100].map((n) => (
                   <button
                     key={n}
                     className="btn btn-red btn-sm"
-                    disabled={step(n) > me.money}
+                    disabled={step(n) > actingPlayer.money}
                     onClick={() => act({ type: 'BID', amount: step(n) })}
                   >
                     +{n}
@@ -151,7 +160,7 @@ export function Game({ initial, onExit, onNewGame }: Props) {
                 </button>
               </div>
             ) : (
-              <div className="waiting">{inIt ? `${game.players[acting].name} חושב...` : 'פרשת מהמכירה הפומבית'}</div>
+              <div className="waiting">{actingPlayer.name} חושב...</div>
             )}
           </div>
         </div>
@@ -161,6 +170,19 @@ export function Game({ initial, onExit, onNewGame }: Props) {
 
   const phaseModal = () => {
     if (busy) return null;
+    if (handoff) {
+      return (
+        <Modal title="העבירו את הטלפון">
+          <div className="handoff">
+            <Token token={cur.token} color={cur.color} size="56px" />
+            <b>התור של {cur.name}</b>
+            <button className="btn btn-red" onClick={() => setViewer(cur.id)}>
+              אני {cur.name}, בוא נשחק
+            </button>
+          </div>
+        </Modal>
+      );
+    }
     if (ph.t === 'buy' && myTurn) {
       const price = BOARD[ph.space].price!;
       return (
@@ -248,7 +270,7 @@ export function Game({ initial, onExit, onNewGame }: Props) {
       <main className="tab-page">
           <div className="turn-pill" style={{ borderColor: cur.color }} title={`התור של ${cur.name}`}>
             <Token token={cur.token} color={cur.color} size="18px" />
-            <span>{cur.id === me.id ? 'התור שלך' : cur.name}</span>
+            <span>{cur.id === me.id ? (humans.length > 1 ? `התור שלך, ${me.name}` : 'התור שלך') : cur.name}</span>
           </div>
         {tab === 'board' && (
           <BoardTab game={game} shown={shown} rolling={rolling} busy={busy} myTurn={myTurn} act={act} onSpace={setInfo} onBuild={() => setTab('mine')} />

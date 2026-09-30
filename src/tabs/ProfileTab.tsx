@@ -57,7 +57,7 @@ export function ProfileTab({ game, me, onExit, onNewGame }: Props) {
             <Token token={o.token} color={o.color} size="22px" />
             <span>
               {o.name}
-              {o.isBot ? ' 🤖' : ' (אתה)'}
+              {o.isBot ? ' 🤖' : o.id === me ? ' (אתה)' : ''}
               {o.inJail ? ' ⛓️' : ''}
               {o.bankrupt ? ' · פשט רגל' : ''}
             </span>

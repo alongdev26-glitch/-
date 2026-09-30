@@ -13,7 +13,7 @@ import {
   unmortgageCost,
   type RentMod,
 } from './rules';
-import type { Action, GameState, Owed, PlayerSetup } from './types';
+import type { Action, GameRules, GameState, Owed, PlayerSetup } from './types';
 
 export const PLAYER_COLORS = ['#8E2DE2', '#7ED321', '#FF2D78', '#19D3C5'];
 const MAX_LOG = 40;
@@ -29,8 +29,15 @@ function shuffle(n: number, rng: () => number): number[] {
   return a;
 }
 
-export function newGame(setup: PlayerSetup[], rng: () => number = Math.random): GameState {
+export const DEFAULT_RULES: GameRules = { mortgage: true };
+
+export function newGame(
+  setup: PlayerSetup[],
+  rng: () => number = Math.random,
+  rules: GameRules = DEFAULT_RULES,
+): GameState {
   return {
+    rules: { ...rules },
     players: setup.map((p, id) => ({
       id,
       name: p.name,
@@ -304,12 +311,14 @@ function nextTurn(s: GameState) {
 function startAuction(s: GameState, space: number) {
   const n = s.players.length;
   const order: number[] = [];
-  for (let k = 1; k <= n; k++) {
+  // the player who sent the property to auction may not bid on it
+  for (let k = 1; k < n; k++) {
     const id = (s.current + k) % n;
     if (!s.players[id].bankrupt) order.push(id);
   }
   s.phase = { t: 'auction', space, bid: 0, bidder: null, active: order, turn: 0 };
   log(s, `מכירה פומבית על ${BOARD[space].name}`);
+  afterAuctionMove(s);
 }
 
 function closeAuction(s: GameState) {
