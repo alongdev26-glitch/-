@@ -309,7 +309,7 @@ function startAuction(s: GameState, space: number) {
     if (!s.players[id].bankrupt) order.push(id);
   }
   s.phase = { t: 'auction', space, bid: 0, bidder: null, active: order, turn: 0 };
-  log(s, `מכרז על ${BOARD[space].name}`);
+  log(s, `מכירה פומבית על ${BOARD[space].name}`);
 }
 
 function closeAuction(s: GameState) {
@@ -319,7 +319,7 @@ function closeAuction(s: GameState) {
     const w = s.players[ph.bidder];
     w.money -= ph.bid;
     s.props[ph.space].owner = w.id;
-    log(s, `${w.name} זכה במכרז על ${BOARD[ph.space].name} ב-${fmt(ph.bid)}`);
+    log(s, `${w.name} זכה במכירה הפומבית על ${BOARD[ph.space].name} ב-${fmt(ph.bid)}`);
   } else {
     log(s, `אף אחד לא קנה את ${BOARD[ph.space].name}`);
   }

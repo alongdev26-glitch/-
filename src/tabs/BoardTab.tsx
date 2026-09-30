@@ -1,5 +1,6 @@
 import { BOARD, JAIL_FINE, isOwnable } from '../data/board';
 import { rollDice } from '../engine/reducer';
+import { canBuild, ownedBy } from '../engine/rules';
 import type { Action, GameState } from '../engine/types';
 import { Board } from '../ui/Board';
 import { Dice } from '../ui/Dice';
@@ -14,13 +15,16 @@ interface Props {
   myTurn: boolean;
   act: (a: Action) => void;
   onSpace: (id: number) => void;
+  onBuild: () => void;
 }
 
 /** Page 1: the board, as large as the screen allows, with a floating action button. */
-export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace }: Props) {
+export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onBuild }: Props) {
   const me = game.players[game.current];
   const ph = game.phase;
   const ready = myTurn && !busy;
+  const canBuildAny =
+    ready && (ph.t === 'roll' || ph.t === 'end') && ownedBy(game, me.id).some((id) => canBuild(game, me.id, id));
 
   let main: { label: string; action: Action } | null = null;
   if (ready && (ph.t === 'roll' || (ph.t === 'end' && game.again))) {
@@ -63,6 +67,11 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace }: P
                 </button>
               ) : (
                 <div className="fab fab-wait">{busy ? '...' : `${me.name} משחק`}</div>
+              )}
+              {canBuildAny && (
+                <button className="btn btn-gold btn-sm" onClick={onBuild}>
+                  🏠 בנה בתים
+                </button>
               )}
               {ready && ph.t === 'roll' && me.inJail && (
                 <div className="fab-extra">

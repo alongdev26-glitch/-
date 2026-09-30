@@ -65,6 +65,10 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
         </div>
       )}
 
+      <div className="note">
+        🏠 בתים ומלון: כשיש לך את כל הרחובות באותה עיר, מופיע כאן כפתור "בנה". 4 בתים ואחריהם מלון, והבנייה חייבת להיות שווה בין הרחובות.
+      </div>
+
       {sets.length === 0 && <div className="empty">עוד לא קנית נכסים. נחת על נכס פנוי בלוח כדי לקנות אותו.</div>}
 
       {sets.map((set) => {

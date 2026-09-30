@@ -116,7 +116,7 @@ export function Game({ initial, onExit, onNewGame }: Props) {
     const inIt = ph.active.includes(me.id);
     const step = (n: number) => ph.bid + n;
     return (
-      <Modal title={`מכרז: ${BOARD[ph.space].name}`}>
+      <Modal title={`מכירה פומבית: ${BOARD[ph.space].name}`}>
         <div className="auction">
           <PropertyCard id={ph.space} />
           <div className="auction-side">
@@ -151,7 +151,7 @@ export function Game({ initial, onExit, onNewGame }: Props) {
                 </button>
               </div>
             ) : (
-              <div className="waiting">{inIt ? `${game.players[acting].name} חושב...` : 'פרשת מהמכרז'}</div>
+              <div className="waiting">{inIt ? `${game.players[acting].name} חושב...` : 'פרשת מהמכירה הפומבית'}</div>
             )}
           </div>
         </div>
@@ -171,12 +171,12 @@ export function Game({ initial, onExit, onNewGame }: Props) {
               קנה ב-ש"ח {price}
             </button>
             <button className="btn btn-black" onClick={() => act({ type: 'DECLINE' })}>
-              למכרז
+              למכירה פומבית
             </button>
           </div>
           {me.money < price && (
             <div className="modal-note">
-              אין מספיק כסף. אפשר למשכן נכסים בעמוד "הנכסים שלי" ולחזור, או להוציא למכרז.
+              אין מספיק כסף. אפשר למשכן נכסים בעמוד "הנכסים שלי" ולחזור, או להוציא למכירה פומבית.
             </div>
           )}
         </Modal>
@@ -251,7 +251,7 @@ export function Game({ initial, onExit, onNewGame }: Props) {
             <span>{cur.id === me.id ? 'התור שלך' : cur.name}</span>
           </div>
         {tab === 'board' && (
-          <BoardTab game={game} shown={shown} rolling={rolling} busy={busy} myTurn={myTurn} act={act} onSpace={setInfo} />
+          <BoardTab game={game} shown={shown} rolling={rolling} busy={busy} myTurn={myTurn} act={act} onSpace={setInfo} onBuild={() => setTab('mine')} />
         )}
         {tab === 'mine' && <MyPropsTab game={game} me={me.id} myTurn={myTurn && !busy} act={act} onSpace={setInfo} />}
         {tab === 'market' && <MarketTab game={game} onSpace={setInfo} />}
