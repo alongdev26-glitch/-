@@ -15,6 +15,8 @@ export interface Player {
   inJail: boolean;
   jailTurns: number;
   jailCards: Deck[];
+  /** debts that arose outside this player's turn; settled at the start of their next turn */
+  owes: Owed[];
   bankrupt: boolean;
 }
 
@@ -45,9 +47,18 @@ export type Phase =
       turn: number;
     }
   | { t: 'card'; deck: Deck; card: number }
-  | { t: 'debt'; owed: Owed[] }
+  /** resume: where play continues once the debt is paid (end of this move, or a fresh roll) */
+  | { t: 'debt'; owed: Owed[]; resume?: 'roll' | 'end' }
   | { t: 'end' }
   | { t: 'gameover'; winner: number };
+
+/** A big on-screen announcement: a purchase, an auction win, or a new house or hotel. */
+export interface Announcement {
+  kind: 'buy' | 'auction' | 'house' | 'hotel';
+  player: number;
+  space: number;
+  price: number;
+}
 
 export interface Payment {
   from: number;
@@ -81,6 +92,8 @@ export interface GameState {
   payment: Payment | null;
   /** increments on every payment between players */
   paySeq: number;
+  announce: Announcement | null;
+  announceSeq: number;
   /** current player may roll again after finishing this move */
   again: boolean;
   decks: Record<Deck, number[]>;

@@ -1,9 +1,34 @@
 import { BOARD, JAIL_FINE, groupMembers, isOwnable } from '../data/board';
 import { actor, rollDice } from './reducer';
-import { canBuild, canMortgage, canSell, canUnmortgage, mortgageValue, ownedBy, sellValue, unmortgageCost } from './rules';
+import {
+  canBuild,
+  canMortgage,
+  canSell,
+  canUnmortgage,
+  feeDue,
+  mortgageValue,
+  ownedBy,
+  rentFor,
+  roundsToFee,
+  sellValue,
+  unmortgageCost,
+} from './rules';
 import type { Action, GameState } from './types';
 
-const RESERVE = 150;
+/**
+ * How much cash a bot wants to keep: a base amount, plus the worst rent an
+ * opponent could charge right now, plus a mortgage payment that is coming soon.
+ */
+export function cushion(s: GameState, me: number): number {
+  let worstRent = 0;
+  for (const sp of BOARD) {
+    const owner = s.props[sp.id].owner;
+    if (isOwnable(sp) && owner !== null && owner !== me) worstRent = Math.max(worstRent, rentFor(s, sp.id, 7));
+  }
+  const soon = roundsToFee(s);
+  const fee = soon !== null && soon <= 2 ? feeDue(s, me) : 0;
+  return 150 + Math.min(worstRent, 600) + fee;
+}
 
 /** Would owning `space` give `player` a full color set (or another railroad)? */
 function completes(s: GameState, player: number, space: number): boolean {
@@ -20,11 +45,12 @@ function lateGame(s: GameState) {
 /** Build / unmortgage when comfortably rich. */
 function manage(s: GameState, me: number): Action | null {
   const money = s.players[me].money;
+  const keep = cushion(s, me);
   const mine = ownedBy(s, me);
-  const unm = mine.find((id) => canUnmortgage(s, me, id) && money - unmortgageCost(id) > 500);
+  const unm = mine.find((id) => canUnmortgage(s, me, id) && money - unmortgageCost(id) >= keep + 300);
   if (unm !== undefined) return { type: 'UNMORTGAGE', space: unm };
   const build = mine
-    .filter((id) => canBuild(s, me, id) && money - BOARD[id].houseCost! > 300)
+    .filter((id) => canBuild(s, me, id) && money - BOARD[id].houseCost! >= keep + 150)
     .sort((a, b) => BOARD[b].price! - BOARD[a].price!)[0];
   if (build !== undefined) return { type: 'BUILD', space: build };
   return null;
@@ -42,19 +68,26 @@ export function botAction(s: GameState, rng: () => number = Math.random): Action
     case 'roll': {
       if (p.inJail) {
         if (p.jailCards.length) return { type: 'USE_JAIL_CARD' };
-        if (!lateGame(s) && p.money >= JAIL_FINE + RESERVE) return { type: 'PAY_JAIL' };
+        if (!lateGame(s) && p.money >= JAIL_FINE + cushion(s, me)) return { type: 'PAY_JAIL' };
       }
       return manage(s, me) ?? { type: 'ROLL', dice: rollDice(rng) };
     }
     case 'buy': {
       const price = BOARD[ph.space].price!;
-      const want = p.money - price >= RESERVE || (completes(s, me, ph.space) && p.money >= price);
+      const keep = cushion(s, me);
+      const left = p.money - price;
+      const want =
+        BOARD[ph.space].kind === 'utility'
+          ? left >= keep + 200
+          : left >= keep || (completes(s, me, ph.space) && left >= keep / 2);
       return want ? { type: 'BUY' } : { type: 'DECLINE' };
     }
     case 'auction': {
       const price = BOARD[ph.space].price!;
-      const value = completes(s, me, ph.space) ? price * 1.5 : price;
-      const max = Math.min(value, p.money - RESERVE / 2);
+      const keep = cushion(s, me);
+      let value = completes(s, me, ph.space) ? price * 1.5 : price;
+      if (p.money < 2 * keep) value *= 0.6;
+      const max = Math.min(value, p.money - keep);
       const next = ph.bid + (ph.bid < 100 ? 10 : 20);
       return ph.bidder !== me && next <= max ? { type: 'BID', amount: next } : { type: 'PASS' };
     }

@@ -1,0 +1,120 @@
+.buy-flash {
+  position: fixed;
+  top: 16%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(90vw, 380px);
+  background: #fff;
+  border-radius: 22px;
+  border: 5px solid var(--pc);
+  box-shadow: 0 0 0 4px #fff, 0 18px 44px rgba(0, 0, 0, 0.4);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 72;
+  pointer-events: none;
+  overflow: hidden;
+  animation: bf-in 0.4s cubic-bezier(0.2, 1.5, 0.4, 1), bf-out 0.4s ease 2s forwards;
+}
+.bf-who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.bf-name {
+  font-weight: 900;
+  font-size: 18px;
+  color: var(--pc);
+  filter: brightness(0.85);
+}
+.bf-head {
+  font-weight: 900;
+  font-style: italic;
+  font-size: clamp(24px, 7vw, 32px);
+  line-height: 1.05;
+  color: var(--navy);
+}
+.bf-build {
+  margin-inline-start: auto;
+  font-size: 40px;
+  animation: bf-bounce 0.6s ease 0.2s 2;
+}
+.bf-card {
+  border: 2px solid #111;
+  border-radius: 6px;
+  overflow: hidden;
+  text-align: center;
+}
+.bf-strip {
+  color: #fff;
+  font-weight: 900;
+  padding: 4px;
+  font-size: 15px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  min-height: 10px;
+}
+.bf-prop {
+  font-weight: 900;
+  font-size: clamp(22px, 6.5vw, 30px);
+  padding: 8px 6px 2px;
+}
+.bf-price {
+  font-weight: 700;
+  color: #555;
+  padding-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.bf-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.bf-confetti i {
+  position: absolute;
+  top: -12px;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--pc);
+  animation: bf-fall 1.4s ease-in forwards;
+}
+.bf-confetti i:nth-child(3n) {
+  background: var(--gold);
+}
+.bf-confetti i:nth-child(4n) {
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--pc);
+}
+@keyframes bf-fall {
+  to {
+    transform: translateY(260px) rotate(540deg);
+    opacity: 0;
+  }
+}
+@keyframes bf-in {
+  from {
+    transform: translate(-50%, 30px) scale(0.6);
+    opacity: 0;
+  }
+}
+@keyframes bf-out {
+  to {
+    transform: translate(-50%, -16px) scale(0.95);
+    opacity: 0;
+  }
+}
+@keyframes bf-bounce {
+  50% {
+    transform: translateY(-10px) scale(1.15);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .buy-flash,
+  .bf-build {
+    animation: none;
+  }
+  .bf-confetti {
+    display: none;
+  }
+}

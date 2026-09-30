@@ -300,3 +300,55 @@ describe('payment events', () => {
     expect(s.payment).toEqual({ from: 0, to: 1, amount: 6, space: 6 });
   });
 });
+
+describe('announcements', () => {
+  it('announces a purchase and a new house', () => {
+    let s = run(setup(), { type: 'ROLL', dice: [2, 4] }, { type: 'BUY' });
+    expect(s.announceSeq).toBe(1);
+    expect(s.announce).toEqual({ kind: 'buy', player: 0, space: 6, price: 100 });
+    s.props[8].owner = 0;
+    s.props[9].owner = 0;
+    s = reduce(s, { type: 'BUILD', space: 6 });
+    expect(s.announce).toMatchObject({ kind: 'house', player: 0, space: 6 });
+  });
+});
+
+describe('no mortgaging without permission', () => {
+  it('defers a real player\'s unpaid mortgage payment to their next turn', () => {
+    let s = run(setup(), { type: 'ROLL', dice: [2, 4] }, { type: 'BUY' });
+    s.players[0].money = 10;
+    for (let r = 1; r <= 7; r++) {
+      for (let k = 0; k < 2; k++) {
+        s.phase = { t: 'end' };
+        s = reduce(s, { type: 'END_TURN' });
+      }
+    }
+    expect(s.props[6].mortgaged).toBe(false);
+    expect(s.current).toBe(0);
+    expect(s.phase).toMatchObject({ t: 'debt', resume: 'roll' });
+    s.players[0].money = 100;
+    s = reduce(s, { type: 'PAY_DEBT' });
+    expect(s.phase.t).toBe('roll');
+    expect(s.players[0].money).toBe(50);
+  });
+});
+
+describe('careful bots', () => {
+  it('keeps cash when an opponent has a hotel', () => {
+    let s = newGame(
+      [
+        { name: 'B', token: 'cat', isBot: true },
+        { name: 'H', token: 'dog', isBot: false },
+      ],
+      () => 0.5,
+    );
+    s.props[37].owner = 1;
+    s.props[39].owner = 1;
+    s.props[39].houses = 5;
+    s.players[0].money = 300;
+    s.phase = { t: 'buy', space: 29 };
+    expect(botAction(s)).toEqual({ type: 'DECLINE' });
+    s.players[0].money = 1500;
+    expect(botAction(s)).toEqual({ type: 'BUY' });
+  });
+});

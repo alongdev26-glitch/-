@@ -15,7 +15,7 @@ import {
   feeDue,
   type RentMod,
 } from './rules';
-import type { Action, GameRules, GameState, Owed, PlayerSetup } from './types';
+import type { Action, Announcement, GameRules, GameState, Owed, PlayerSetup } from './types';
 
 const MAX_LOG = 40;
 
@@ -51,6 +51,7 @@ export function newGame(
       inJail: false,
       jailTurns: 0,
       jailCards: [],
+      owes: [],
       bankrupt: false,
     })),
     props: BOARD.map(() => ({ owner: null, houses: 0, mortgaged: false })),
@@ -64,6 +65,8 @@ export function newGame(
     rollSeq: 0,
     payment: null,
     paySeq: 0,
+    announce: null,
+    announceSeq: 0,
     again: false,
     decks: { chance: shuffle(DECKS.chance.length, rng), chest: shuffle(DECKS.chest.length, rng) },
     log: ['המשחק התחיל! בהצלחה'],
@@ -95,7 +98,7 @@ function charge(s: GameState, owed: Owed[]) {
     settle(s, p.id, owed);
     finishMove(s);
   } else {
-    s.phase = { t: 'debt', owed };
+    s.phase = { t: 'debt', owed, resume: 'end' };
     log(s, `${p.name} חייב ${fmt(total)} ואין לו מספיק מזומן`);
   }
 }
@@ -243,11 +246,7 @@ function applyCard(s: GameState, deck: Deck, cardIdx: number) {
     case 'collectEach':
       for (const o of alive(s)) {
         if (o.id === p.id) continue;
-        autoRaise(s, o.id, effect.amount);
-        const paid = Math.min(o.money, effect.amount);
-        o.money -= paid;
-        p.money += paid;
-        if (paid < effect.amount) goBankrupt(s, o.id, p.id);
+        chargeOffTurn(s, o.id, [{ to: p.id, amount: effect.amount }]);
       }
       return finishMove(s);
     case 'repairs': {
@@ -298,17 +297,56 @@ function noteFirstPurchase(s: GameState) {
   }
 }
 
+function announce(s: GameState, a: Announcement) {
+  s.announce = a;
+  s.announceSeq++;
+}
+
+/**
+ * Take money from a player outside their own turn. A bot raises the cash itself;
+ * a real player's properties are never sold or mortgaged for them: if they are
+ * short, the debt waits for the start of their next turn, where they decide.
+ * Returns true if the player went bankrupt.
+ */
+function chargeOffTurn(s: GameState, pid: number, owed: Owed[]): boolean {
+  const p = s.players[pid];
+  const total = owed.reduce((a, o) => a + o.amount, 0);
+  if (total <= 0) return false;
+  if (p.money >= total) {
+    settle(s, pid, owed);
+    return false;
+  }
+  if (!p.isBot) {
+    p.owes.push(...owed);
+    log(s, `${p.name} חייב ${fmt(total)} וישלם בתור הבא`);
+    return false;
+  }
+  autoRaise(s, pid, total);
+  if (p.money >= total) {
+    settle(s, pid, owed);
+    return false;
+  }
+  // pay what there is, then out of the game
+  let left = p.money;
+  for (const o of owed) {
+    const part = Math.min(left, o.amount);
+    left -= part;
+    p.money -= part;
+    if (o.to !== null) s.players[o.to].money += part;
+    else s.pot += part;
+  }
+  const creditors = owed.filter((o) => o.to !== null);
+  goBankrupt(s, pid, owed.length === 1 && creditors.length === 1 ? creditors[0].to : null);
+  return true;
+}
+
 /** Every FEE_ROUNDS rounds: each owner pays half the price of each unmortgaged property into the pot. */
 function collectFees(s: GameState) {
   for (const p of alive(s)) {
     const due = feeDue(s, p.id);
     if (due <= 0) continue;
-    autoRaise(s, p.id, due);
-    const paid = Math.min(p.money, due);
-    p.money -= paid;
-    s.pot += paid;
-    log(s, `${p.name} שילם משכנתא: ${fmt(paid)} לקופת הלוטו`);
-    if (paid < due) goBankrupt(s, p.id, null);
+    log(s, `${p.name} צריך לשלם משכנתא: ${fmt(due)} לקופת הלוטו`);
+    chargeOffTurn(s, p.id, [{ to: null, amount: due }]);
   }
 }
 
@@ -328,7 +366,20 @@ function nextTurn(s: GameState) {
     if (s.rules.mortgage && s.feeStart !== null && (s.round - s.feeStart) % FEE_ROUNDS === 0) {
       log(s, `סבב ${s.round}: זמן תשלום המשכנתא!`);
       collectFees(s);
-      if (cur(s).bankrupt && (s.phase as GameState['phase']).t !== 'gameover') nextTurn(s);
+      if (cur(s).bankrupt && (s.phase as GameState['phase']).t !== 'gameover') return nextTurn(s);
+    }
+  }
+  const c = cur(s);
+  if (c.owes.length && (s.phase as GameState['phase']).t === 'roll') {
+    const owed = c.owes;
+    c.owes = [];
+    const total = owed.reduce((a, o) => a + o.amount, 0);
+    if (c.money >= total) {
+      settle(s, c.id, owed);
+      log(s, `${c.name} שילם את החוב מהסבב הקודם: ${fmt(total)}`);
+    } else {
+      s.phase = { t: 'debt', owed, resume: 'roll' };
+      log(s, `${c.name} צריך לסגור חוב של ${fmt(total)} לפני שמטילים`);
     }
   }
 }
@@ -354,6 +405,7 @@ function closeAuction(s: GameState) {
     w.money -= ph.bid;
     s.props[ph.space].owner = w.id;
     noteFirstPurchase(s);
+    announce(s, { kind: 'auction', player: w.id, space: ph.space, price: ph.bid });
     log(s, `${w.name} זכה במכירה הפומבית על ${BOARD[ph.space].name} ב-${fmt(ph.bid)}`);
   } else {
     log(s, `אף אחד לא קנה את ${BOARD[ph.space].name}`);
@@ -409,14 +461,10 @@ export function reduce(prev: GameState, a: Action): GameState {
             finishMove(s);
             return s;
           }
-          autoRaise(s, p.id, JAIL_FINE);
-          if (p.money < JAIL_FINE) {
-            goBankrupt(s, p.id, null);
-            if (s.phase.t !== 'gameover') nextTurn(s);
+          if (chargeOffTurn(s, p.id, [{ to: null, amount: JAIL_FINE }])) {
+            if ((s.phase as GameState['phase']).t !== 'gameover') nextTurn(s);
             return s;
           }
-          p.money -= JAIL_FINE;
-          s.pot += JAIL_FINE;
           p.inJail = false;
           p.jailTurns = 0;
           log(s, `${p.name} שילם ${fmt(JAIL_FINE)} ויצא מהכלא`);
@@ -462,6 +510,7 @@ export function reduce(prev: GameState, a: Action): GameState {
       p.money -= price;
       s.props[ph.space].owner = p.id;
       noteFirstPurchase(s);
+      announce(s, { kind: 'buy', player: p.id, space: ph.space, price });
       log(s, `${p.name} קנה את ${BOARD[ph.space].name} ב-${fmt(price)}`);
       finishMove(s);
       return s;
@@ -501,6 +550,12 @@ export function reduce(prev: GameState, a: Action): GameState {
       if (!manageAllowed(s) || !canBuild(s, p.id, a.space)) return prev;
       p.money -= BOARD[a.space].houseCost!;
       s.props[a.space].houses++;
+      announce(s, {
+        kind: s.props[a.space].houses === 5 ? 'hotel' : 'house',
+        player: p.id,
+        space: a.space,
+        price: BOARD[a.space].houseCost!,
+      });
       log(s, `${p.name} בנה ${s.props[a.space].houses === 5 ? 'מלון' : 'בית'} ב${BOARD[a.space].name}`);
       return s;
 
@@ -531,7 +586,8 @@ export function reduce(prev: GameState, a: Action): GameState {
       if (p.money < total) return prev;
       settle(s, p.id, ph.owed);
       log(s, `${p.name} שילם את החוב`);
-      finishMove(s);
+      if (ph.resume === 'roll') s.phase = { t: 'roll' };
+      else finishMove(s);
       return s;
     }
 

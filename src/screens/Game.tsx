@@ -4,8 +4,9 @@ import { DECKS } from '../data/cards';
 import { tokenColor } from '../data/tokens';
 import { botAction } from '../engine/bot';
 import { actor, reduce } from '../engine/reducer';
-import type { Action, GameState, Payment } from '../engine/types';
+import type { Action, Announcement, GameState, Payment } from '../engine/types';
 import { MoneyFlash } from '../ui/MoneyFlash';
+import { BuyFlash } from '../ui/BuyFlash';
 import { BoardTab } from '../tabs/BoardTab';
 import { MarketTab } from '../tabs/MarketTab';
 import { MyPropsTab } from '../tabs/MyPropsTab';
@@ -42,6 +43,9 @@ export function loadGame(): GameState | null {
     g.rollSeq ??= 0;
     g.payment ??= null;
     g.paySeq ??= 0;
+    g.announce ??= null;
+    g.announceSeq ??= 0;
+    for (const p of g.players) p.owes ??= [];
     return g;
   } catch {
     return null;
@@ -146,6 +150,20 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
     lastPay.current = game.paySeq;
     if (game.payment) setFlash({ payment: game.payment, key: game.paySeq });
   }, [game.paySeq, game.payment, busy]);
+  // big banner for purchases, auction wins and new buildings
+  const lastAnnounce = useRef(game.announceSeq);
+  const [banner, setBanner] = useState<{ a: Announcement; key: number } | null>(null);
+  useEffect(() => {
+    if (busy || game.announceSeq === lastAnnounce.current) return;
+    lastAnnounce.current = game.announceSeq;
+    if (game.announce) setBanner({ a: game.announce, key: game.announceSeq });
+  }, [game.announceSeq, game.announce, busy]);
+  useEffect(() => {
+    if (!banner) return;
+    const t = window.setTimeout(() => setBanner(null), 2400);
+    return () => window.clearTimeout(t);
+  }, [banner]);
+
   useEffect(() => {
     if (!flash) return;
     const t = window.setTimeout(() => setFlash(null), 2600);
@@ -302,10 +320,11 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
       return (
         <Modal title="חוב!">
           <div className="debt">
+            {ph.resume === 'roll' && <p>נשאר לך חוב מהסבב הקודם. צריך לסגור אותו לפני שמטילים.</p>}
             <p>
-              עליך לשלם <b>ש"ח {total}</b> אבל יש לך רק <b>ש"ח {me.money}</b>.
+              עליך לשלם <b>ש"ח {total}</b> ויש לך <b>ש"ח {me.money}</b>.
             </p>
-            <p>מכור בתים או משכן נכסים בעמוד "הנכסים שלי".</p>
+            <p>אתה מחליט מה למכור או למשכן, בעמוד "הנכסים שלי". המשחק לא ימשכן כלום בשבילך.</p>
             <div className="modal-actions">
               <button className="btn btn-red" disabled={me.money < total} onClick={() => act({ type: 'PAY_DEBT' })}>
                 שלם
@@ -373,7 +392,11 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
         </div>
       </main>
 
-      {flash && <MoneyFlash key={flash.key} game={game} payment={flash.payment} />}
+      {banner ? (
+        <BuyFlash key={`b${banner.key}`} game={game} a={banner.a} />
+      ) : (
+        flash && <MoneyFlash key={flash.key} game={game} payment={flash.payment} />
+      )}
       {phaseModal()}
       {info !== null && (
         <Modal onClose={() => setInfo(null)}>
