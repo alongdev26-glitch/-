@@ -1,5 +1,5 @@
 .setup {
-  height: 100dvh;
+  height: 100%;
   display: grid;
   grid-template-columns: 1fr minmax(200px, 32%);
   align-items: center;

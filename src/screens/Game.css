@@ -1,7 +1,7 @@
 .game {
   --side: clamp(150px, 19vw, 300px);
   --board-size: min(calc(100dvh - 20px), calc(100vw - 2 * var(--side) - 40px));
-  height: 100dvh;
+  height: 100%;
   display: grid;
   grid-template-columns: var(--side) auto var(--side);
   justify-content: center;
