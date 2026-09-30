@@ -335,3 +335,22 @@
   flex-wrap: wrap;
   font-weight: 700;
 }
+
+.pchip.paid .pchip-money {
+  animation: money-down 0.7s ease 3;
+  color: #d90429;
+}
+.pchip.earned .pchip-money {
+  animation: money-up 0.7s ease 3;
+  color: #15803d;
+}
+@keyframes money-down {
+  50% {
+    transform: translateY(3px) scale(1.15);
+  }
+}
+@keyframes money-up {
+  50% {
+    transform: translateY(-3px) scale(1.15);
+  }
+}

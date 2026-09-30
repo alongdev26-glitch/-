@@ -28,6 +28,8 @@ export interface PropState {
 export interface Owed {
   to: number | null;
   amount: number;
+  /** the property this is rent for, if any */
+  space?: number;
 }
 
 export type Phase =
@@ -46,6 +48,13 @@ export type Phase =
   | { t: 'debt'; owed: Owed[] }
   | { t: 'end' }
   | { t: 'gameover'; winner: number };
+
+export interface Payment {
+  from: number;
+  to: number;
+  amount: number;
+  space: number | null;
+}
 
 export interface GameRules {
   /** the mortgage system: the 7-round payment and voluntary mortgages */
@@ -68,6 +77,10 @@ export interface GameState {
   feeStart: number | null;
   /** increments on every dice roll, so every screen can animate it */
   rollSeq: number;
+  /** the latest payment between two players, for the on-screen money animation */
+  payment: Payment | null;
+  /** increments on every payment between players */
+  paySeq: number;
   /** current player may roll again after finishing this move */
   again: boolean;
   decks: Record<Deck, number[]>;

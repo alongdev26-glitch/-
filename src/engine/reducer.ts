@@ -62,6 +62,8 @@ export function newGame(
     round: 1,
     feeStart: null,
     rollSeq: 0,
+    payment: null,
+    paySeq: 0,
     again: false,
     decks: { chance: shuffle(DECKS.chance.length, rng), chest: shuffle(DECKS.chest.length, rng) },
     log: ['המשחק התחיל! בהצלחה'],
@@ -101,8 +103,13 @@ function charge(s: GameState, owed: Owed[]) {
 function settle(s: GameState, from: number, owed: Owed[]) {
   for (const o of owed) {
     s.players[from].money -= o.amount;
-    if (o.to !== null) s.players[o.to].money += o.amount;
-    else s.pot += o.amount;
+    if (o.to !== null) {
+      s.players[o.to].money += o.amount;
+      if (o.amount > 0) {
+        s.payment = { from, to: o.to, amount: o.amount, space: o.space ?? null };
+        s.paySeq++;
+      }
+    } else s.pot += o.amount;
   }
 }
 
@@ -166,7 +173,7 @@ function land(s: GameState, mod?: RentMod) {
     const rent = rentFor(s, sp.id, diceTotal, mod);
     const owner = s.players[st.owner];
     log(s, `${p.name} משלם ${fmt(rent)} ל${owner.name} על ${sp.name}`);
-    return charge(s, [{ to: owner.id, amount: rent }]);
+    return charge(s, [{ to: owner.id, amount: rent, space: sp.id }]);
   }
 
   switch (sp.kind) {

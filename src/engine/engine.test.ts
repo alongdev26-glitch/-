@@ -290,3 +290,13 @@ describe('seat takeover', () => {
     expect(s.players[0].isBot).toBe(false);
   });
 });
+
+describe('payment events', () => {
+  it('records rent paid to the owner', () => {
+    let s = setup();
+    s.props[6].owner = 1;
+    s = run(s, { type: 'ROLL', dice: [2, 4] });
+    expect(s.paySeq).toBe(1);
+    expect(s.payment).toEqual({ from: 0, to: 1, amount: 6, space: 6 });
+  });
+});

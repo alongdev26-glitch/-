@@ -4,7 +4,8 @@ import { DECKS } from '../data/cards';
 import { tokenColor } from '../data/tokens';
 import { botAction } from '../engine/bot';
 import { actor, reduce } from '../engine/reducer';
-import type { Action, GameState } from '../engine/types';
+import type { Action, GameState, Payment } from '../engine/types';
+import { MoneyFlash } from '../ui/MoneyFlash';
 import { BoardTab } from '../tabs/BoardTab';
 import { MarketTab } from '../tabs/MarketTab';
 import { MyPropsTab } from '../tabs/MyPropsTab';
@@ -39,6 +40,8 @@ export function loadGame(): GameState | null {
     g.round ??= 1;
     g.feeStart ??= null;
     g.rollSeq ??= 0;
+    g.payment ??= null;
+    g.paySeq ??= 0;
     return g;
   } catch {
     return null;
@@ -134,6 +137,20 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
     window.clearTimeout(rollTimer.current);
     rollTimer.current = window.setTimeout(() => setRolling(false), 900);
   }, [game.rollSeq]);
+
+  // show each payment between players once the token has landed
+  const lastPay = useRef(game.paySeq);
+  const [flash, setFlash] = useState<{ payment: Payment; key: number } | null>(null);
+  useEffect(() => {
+    if (busy || game.paySeq === lastPay.current) return;
+    lastPay.current = game.paySeq;
+    if (game.payment) setFlash({ payment: game.payment, key: game.paySeq });
+  }, [game.paySeq, game.payment, busy]);
+  useEffect(() => {
+    if (!flash) return;
+    const t = window.setTimeout(() => setFlash(null), 2600);
+    return () => window.clearTimeout(t);
+  }, [flash]);
 
   useEffect(() => {
     if (!online) saveGame(game);
@@ -335,6 +352,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
             act={act}
             onSpace={setInfo}
             onBuild={() => setTab('mine')}
+            flash={flash?.payment ?? null}
             onTakeover={stalled && canTakeOver(game.current) && !cur.isBot ? () => setBot(game.current, true) : undefined}
           />
         )}
@@ -355,6 +373,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
         </div>
       </main>
 
+      {flash && <MoneyFlash key={flash.key} game={game} payment={flash.payment} />}
       {phaseModal()}
       {info !== null && (
         <Modal onClose={() => setInfo(null)}>

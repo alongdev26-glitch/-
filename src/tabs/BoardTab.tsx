@@ -1,7 +1,7 @@
 import { BOARD, JAIL_FINE, isOwnable } from '../data/board';
 import { rollDice } from '../engine/reducer';
 import { canBuild, ownedBy } from '../engine/rules';
-import type { Action, GameState } from '../engine/types';
+import type { Action, GameState, Payment } from '../engine/types';
 import { Board } from '../ui/Board';
 import { Dice } from '../ui/Dice';
 import { Token } from '../ui/Token';
@@ -18,10 +18,12 @@ interface Props {
   onBuild: () => void;
   /** online host: take over a remote player who stopped responding */
   onTakeover?: () => void;
+  /** a payment being shown right now: the payer's and owner's chips pulse */
+  flash?: Payment | null;
 }
 
 /** Page 1: the board, as large as the screen allows, with a floating action button. */
-export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onBuild, onTakeover }: Props) {
+export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onBuild, onTakeover, flash }: Props) {
   const me = game.players[game.current];
   const ph = game.phase;
   const ready = myTurn && !busy;
@@ -41,7 +43,9 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
         {game.players.map((p) => (
           <div
             key={p.id}
-            className={`pchip${p.id === game.current ? ' on' : ''}${p.bankrupt ? ' out' : ''}`}
+            className={`pchip${p.id === game.current ? ' on' : ''}${p.bankrupt ? ' out' : ''}${
+              flash?.from === p.id ? ' paid' : flash?.to === p.id ? ' earned' : ''
+            }`}
             style={{ ['--pc' as string]: p.color }}
           >
             <Token token={p.token} color={p.color} size="20px" />
