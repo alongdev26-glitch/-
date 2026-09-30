@@ -1,0 +1,23 @@
+.token {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6em;
+  height: 1.6em;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #dfe3e8 35%, #9aa3ad 75%, #6b737c 100%);
+  box-shadow: 0 0 0 0.12em var(--ring), 0 0.15em 0.3em rgba(0, 0, 0, 0.45);
+  flex: none;
+}
+.token-glyph {
+  font-size: 1em;
+  line-height: 1;
+  filter: grayscale(1) contrast(1.4) brightness(1.05) drop-shadow(0 1px 0 #fff);
+}
+.token-active {
+  animation: bob 0.9s ease-in-out infinite;
+}
+@keyframes bob {
+  50% {
+    transform: translateY(-18%);
+  }
+}

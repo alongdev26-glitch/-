@@ -1,0 +1,292 @@
+.board {
+  --c: 1.55fr;
+  width: var(--board-size);
+  height: var(--board-size);
+  display: grid;
+  grid-template-columns: var(--c) repeat(9, 1fr) var(--c);
+  grid-template-rows: var(--c) repeat(9, 1fr) var(--c);
+  background: var(--board);
+  border: calc(var(--board-size) * 0.006) solid var(--board-border);
+  outline: calc(var(--board-size) * 0.012) solid #6a4a2c;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), inset 0 0 0 1px var(--board-line);
+  border-radius: 4px;
+  position: relative;
+  container-type: size;
+}
+
+.space {
+  position: relative;
+  border: 0.5px solid var(--board-line);
+  background: var(--board);
+  padding: 0;
+  margin: 0;
+  container-type: size;
+  overflow: hidden;
+  font-family: var(--font);
+  color: var(--ink);
+}
+.space:hover .face {
+  background: #e3f1ea;
+}
+
+.face {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100cqw;
+  height: 100cqh;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  container-type: inline-size;
+}
+.side-left .face {
+  width: 100cqh;
+  height: 100cqw;
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+.side-right .face {
+  width: 100cqh;
+  height: 100cqw;
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+.side-top .face {
+  transform: translate(-50%, -50%) rotate(180deg);
+}
+.corner-0 .face {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.corner-10 .face {
+  transform: translate(-50%, -50%) rotate(135deg);
+}
+.corner-20 .face {
+  transform: translate(-50%, -50%) rotate(-135deg);
+}
+.corner-30 .face {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+.corner .face {
+  justify-content: center;
+}
+
+.strip {
+  width: 100%;
+  height: 24%;
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 900;
+  font-size: 17cqi;
+  line-height: 1;
+  border-bottom: 0.5px solid var(--board-line);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+}
+.sp-name {
+  font-weight: 700;
+  font-size: 15cqi;
+  line-height: 1.1;
+  padding: 3cqi 4cqi 0;
+}
+.sp-price {
+  font-size: 13cqi;
+  font-weight: 500;
+  padding-bottom: 5cqi;
+  white-space: nowrap;
+}
+.sp-icon {
+  font-size: 38cqi;
+  line-height: 1;
+}
+.sp-q {
+  font-size: 80cqi;
+  font-weight: 900;
+  line-height: 1;
+  padding-bottom: 6cqi;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+}
+
+.buildings {
+  position: absolute;
+  top: 3%;
+  display: flex;
+  gap: 4cqi;
+}
+.house,
+.hotel {
+  display: block;
+  width: 14cqi;
+  height: 14cqi;
+  background: #1fa24a;
+  border: 1px solid #0b5e25;
+  clip-path: polygon(50% 0, 100% 40%, 100% 100%, 0 100%, 0 40%);
+}
+.hotel {
+  width: 30cqi;
+  background: #e3001b;
+  border-color: #7a000f;
+}
+.owner-flag {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 7%;
+  border-radius: 3px 3px 0 0;
+  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.3);
+}
+.mortgaged > :not(.mort-tag):not(.owner-flag) {
+  opacity: 0.35;
+}
+.mort-tag {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  background: var(--red);
+  color: #fff;
+  font-weight: 900;
+  font-size: 13cqi;
+  padding: 1cqi 4cqi;
+  border-radius: 3px;
+}
+
+/* ---------- corners ---------- */
+.corner-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2cqi;
+  font-size: 14cqi;
+  line-height: 1;
+}
+.corner-inner b {
+  font-weight: 900;
+}
+.corner-icon {
+  font-size: 34cqi;
+}
+.go b {
+  font-size: 20cqi;
+}
+.go small {
+  font-size: 7cqi;
+  max-width: 70cqi;
+}
+.go-arrow {
+  display: block;
+  width: 60cqi;
+  height: 7cqi;
+  background: var(--red);
+  position: relative;
+  margin-top: 3cqi;
+}
+.go-arrow::after {
+  content: '';
+  position: absolute;
+  right: -9cqi;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 8cqi solid transparent;
+  border-left: 11cqi solid var(--red);
+  border-right: 0;
+}
+.jail-cell {
+  width: 62cqi;
+  height: 52cqi;
+  background: repeating-linear-gradient(90deg, #f28c1e 0 14%, #2b1a0a 14% 19%);
+  border: 0.5px solid var(--board-line);
+  display: grid;
+  place-items: center;
+  margin-bottom: 3cqi;
+}
+.jail-cell b {
+  background: #f28c1e;
+  color: #fff;
+  padding: 0 3cqi;
+  font-size: 14cqi;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- tokens on the board ---------- */
+.tokens {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font-size: min(30cqw, 30cqh);
+  z-index: 3;
+  pointer-events: none;
+}
+.corner .tokens {
+  font-size: 18cqw;
+}
+
+/* ---------- center ---------- */
+.board-center {
+  grid-row: 2 / 11;
+  grid-column: 2 / 11;
+  position: relative;
+  border: 0.5px solid var(--board-line);
+}
+.plaque {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 78%;
+  height: 17%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: linear-gradient(180deg, #ff2a3d 0%, var(--red) 55%, var(--red-dark) 100%);
+  border-radius: 3cqw;
+  box-shadow: inset 0 0 0 0.6cqw #fff, inset 0 0 0 1cqw var(--red), 0 1.2cqw 2.5cqw rgba(0, 0, 0, 0.4);
+  display: grid;
+  place-items: center;
+}
+.plaque span {
+  font-weight: 900;
+  font-style: italic;
+  font-size: 10cqw;
+  color: #fff;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0.4cqw 0 #c7c7c7, 0 0.8cqw 0 #8e8e8e, 0 1.2cqw 1.5cqw rgba(0, 0, 0, 0.5);
+}
+.mascot {
+  position: absolute;
+  top: -55%;
+  left: 50%;
+  transform: translateX(-50%) rotate(-10deg);
+  font-size: 7cqw;
+  font-style: normal;
+  filter: drop-shadow(0 0.5cqw 0.5cqw rgba(0, 0, 0, 0.4));
+}
+.deck {
+  position: absolute;
+  width: 17%;
+  aspect-ratio: 1;
+  border: 0.35cqw dashed #1a1a1a;
+  display: grid;
+  place-items: center;
+  transform: rotate(45deg);
+}
+.deck span {
+  font-weight: 700;
+  font-size: 2cqw;
+  white-space: nowrap;
+}
+.deck-chest {
+  top: 12%;
+  right: 12%;
+  transform: rotate(-135deg);
+}
+.deck-chance {
+  bottom: 12%;
+  left: 12%;
+}

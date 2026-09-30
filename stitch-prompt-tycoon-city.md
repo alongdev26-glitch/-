@@ -64,7 +64,7 @@ Reproduce this board **exactly**. Do not add, remove, reorder, translate or rena
 3. Pink strip "באר-שבע", street "רח' רגר" [verify], "מחיר ש"ח 140"
 4. Pink strip "באר-שבע", street "שד' רגר" [verify], "מחיר ש"ח 160"
 5. "רכבת מרכז" [verify] (railway), black steam-train icon, "מחיר ש"ח 200"
-6. Orange strip "נתניה" [verify], street "רח' הרצל" [verify], "מחיר ש"ח 180"
+6. Orange strip "נתניה" [verify], street "רח' ויצמן" [verify], "מחיר ש"ח 180"
 7. "תיבת המזל" (community chest) with the blue chest icon
 8. Orange strip "נתניה" [verify], street "רח' סמילנסקי" [verify], "מחיר ש"ח 180"
 9. Orange strip "נתניה" [verify], street "כיכר העצמאות" [verify], "מחיר ש"ח 200"

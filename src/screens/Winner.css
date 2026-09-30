@@ -1,0 +1,67 @@
+.winner {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(10, 12, 30, 0.72);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  overflow: hidden;
+  color: #fff;
+}
+.spot {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 40vw;
+  height: 60vh;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(255, 230, 100, 0.55), transparent);
+  clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
+}
+.podium {
+  position: relative;
+  background: radial-gradient(circle at 50% 30%, #fff, #d9d9d9);
+  border-radius: 50%;
+  padding: 18px;
+  box-shadow: 0 0 0 8px #8e2de2, 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+.win-band {
+  position: relative;
+  width: 100%;
+  text-align: center;
+  background: rgba(40, 48, 90, 0.9);
+  border-block: 3px solid #fff;
+  font-weight: 900;
+  font-size: clamp(26px, 5vw, 64px);
+  padding: 0.2em;
+}
+.win-worth {
+  font-weight: 700;
+}
+.bills {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.bills span {
+  position: absolute;
+  top: -40px;
+  width: 54px;
+  height: 28px;
+  border-radius: 3px;
+  color: #3a3a3a;
+  font-weight: 900;
+  font-size: 12px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: fall linear infinite;
+}
+@keyframes fall {
+  to {
+    transform: translateY(110vh) rotate(540deg);
+  }
+}

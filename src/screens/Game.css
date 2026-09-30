@@ -1,0 +1,212 @@
+.game {
+  --side: clamp(150px, 19vw, 300px);
+  --board-size: min(calc(100dvh - 20px), calc(100vw - 2 * var(--side) - 40px));
+  height: 100dvh;
+  display: grid;
+  grid-template-columns: var(--side) auto var(--side);
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  direction: ltr;
+  background:
+    linear-gradient(90deg, transparent 88%, var(--sand) 88% 90.5%, var(--sea) 90.5%),
+    radial-gradient(ellipse at 45% 50%, #86cf5d 0%, var(--grass) 50%, var(--park) 100%);
+}
+.game-board {
+  display: grid;
+  place-items: center;
+}
+.game-left,
+.game-right {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+.game-right {
+  justify-content: flex-start;
+  gap: clamp(6px, 1.6vh, 16px);
+  padding-top: 4px;
+}
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+}
+.controls .big {
+  font-size: clamp(15px, 2vw, 26px);
+  padding: 0.6em 0.8em;
+}
+.waiting {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 12px;
+  padding: 0.6em;
+  text-align: center;
+  font-weight: 700;
+  font-size: clamp(12px, 1.3vw, 16px);
+}
+.log {
+  list-style: none;
+  margin: 0;
+  padding: 0.4em 0.6em;
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 12px;
+  font-size: clamp(10px, 1.05vw, 14px);
+  line-height: 1.35;
+  overflow: hidden;
+  flex: 1 1 auto;
+  min-height: 0;
+  box-shadow: var(--shadow);
+}
+.log li {
+  border-bottom: 1px solid #eee;
+  padding: 0.1em 0;
+}
+.log li:first-child {
+  font-weight: 700;
+}
+.exit {
+  align-self: flex-start;
+}
+.board-dice {
+  position: absolute;
+  bottom: 5%;
+  right: 5%;
+  font-size: 7cqw;
+  z-index: 4;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.modal-note {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.card-pop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  padding: 6px 10px;
+}
+.card-deck {
+  font-weight: 900;
+  font-size: clamp(20px, 2.6vw, 32px);
+}
+.card-who {
+  opacity: 0.85;
+}
+.card-text {
+  font-weight: 700;
+  font-size: clamp(16px, 2vw, 24px);
+  max-width: 28ch;
+}
+
+.auction {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.auction .deed {
+  width: min(220px, 40vw);
+  font-size: 11px;
+}
+.auction-side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  min-width: 170px;
+}
+.auction-bid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.auction-bid b {
+  font-size: 32px;
+  color: var(--red);
+}
+.auction-list {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.auction-list span {
+  border: 2px solid;
+  border-radius: 999px;
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.auction-list .passed {
+  opacity: 0.35;
+  text-decoration: line-through;
+}
+.auction-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.manage-money {
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+.manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.manage-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: var(--tile);
+  border-radius: 10px;
+  padding: 6px 8px;
+}
+.manage-name {
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.manage-name i {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.manage-name em {
+  font-style: normal;
+  font-weight: 400;
+}
+.manage-btns {
+  display: flex;
+  gap: 4px;
+}
+.manage-btns .btn {
+  min-height: 30px;
+  padding: 0.3em 0.7em;
+  font-size: 12px;
+}
+.debt p {
+  margin: 0 0 8px;
+  text-align: center;
+}

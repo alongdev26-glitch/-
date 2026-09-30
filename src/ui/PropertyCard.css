@@ -1,0 +1,71 @@
+.deed {
+  width: min(300px, 80vw);
+  background: #fff;
+  border: 2px solid #111;
+  padding: 6px;
+  font-size: clamp(11px, 1.3vw, 15px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  margin: 0 auto;
+}
+.deed-head {
+  color: #fff;
+  text-align: center;
+  padding: 0.4em;
+  border: 1.5px solid #111;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 4px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+.deed-head b {
+  font-size: 1.5em;
+  font-weight: 900;
+}
+.deed-plain {
+  color: var(--ink);
+  background: #f4f4f4;
+  text-shadow: none;
+}
+.deed-icon {
+  font-size: 2em;
+}
+.deed-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.18em 0.4em;
+  font-variant-numeric: tabular-nums;
+}
+.deed-row.hl {
+  background: #d9ecf8;
+}
+.mini-house,
+.mini-hotel {
+  display: inline-grid;
+  place-items: center;
+  width: 1.2em;
+  height: 1.1em;
+  margin-inline-start: 0.3em;
+  background: #1fa24a;
+  color: #fff;
+  font-size: 0.8em;
+  font-style: normal;
+  font-weight: 900;
+  clip-path: polygon(50% 0, 100% 40%, 100% 100%, 0 100%, 0 40%);
+  vertical-align: middle;
+}
+.mini-hotel {
+  width: 1.8em;
+  background: var(--red);
+}
+.deed-foot {
+  border-top: 1px solid #111;
+  margin-top: 4px;
+  padding-top: 4px;
+  text-align: center;
+  font-size: 0.9em;
+}
+.deed-owner {
+  text-align: center;
+  font-weight: 900;
+  margin-top: 4px;
+}

@@ -1,0 +1,45 @@
+import { useState } from 'react';
+import { newGame } from './engine/reducer';
+import type { GameState } from './engine/types';
+import { Game, loadGame, saveGame } from './screens/Game';
+import { Menu } from './screens/Menu';
+import { Setup } from './screens/Setup';
+
+type Screen = { s: 'menu' } | { s: 'setup' } | { s: 'game'; game: GameState; key: number };
+
+export function App() {
+  const [screen, setScreen] = useState<Screen>({ s: 'menu' });
+  const saved = screen.s === 'menu' ? loadGame() : null;
+
+  return (
+    <>
+      {screen.s === 'menu' && (
+        <Menu
+          onPlay={() => setScreen({ s: 'setup' })}
+          onResume={saved ? () => setScreen({ s: 'game', game: saved, key: Date.now() }) : undefined}
+        />
+      )}
+      {screen.s === 'setup' && (
+        <Setup
+          onBack={() => setScreen({ s: 'menu' })}
+          onStart={(players) => setScreen({ s: 'game', game: newGame(players), key: Date.now() })}
+        />
+      )}
+      {screen.s === 'game' && (
+        <Game
+          key={screen.key}
+          initial={screen.game}
+          onExit={() => setScreen({ s: 'menu' })}
+          onNewGame={() => {
+            saveGame(null);
+            setScreen({ s: 'setup' });
+          }}
+        />
+      )}
+      <div className="rotate-hint">
+        <span>📱</span>
+        סובב את הטלפון לרוחב
+      </div>
+    </>
+  );
+}
