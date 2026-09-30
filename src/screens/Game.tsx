@@ -196,7 +196,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
             {humanBids ? (
               <div className="auction-btns">
                 <div className="auction-turn">התור של {actingPlayer.name} להציע</div>
-                {[10, 50, 100].map((n) => (
+                {[5, 10, 25, 50, 100, 150, 200].map((n) => (
                   <button
                     key={n}
                     className="btn btn-red btn-sm"
