@@ -302,6 +302,7 @@ export function Online({ onBack }: { onBack: () => void }) {
 /** Runs the shared game: everyone renders the room's state; whoever is acting writes the next state. */
 function OnlineGame({ net, code, room, onExit }: { net: Net; code: string; room: Room; onExit: () => void }) {
   const pending = useRef(false);
+  const [writeError, setWriteError] = useState(false);
   const latest = useRef(room);
   latest.current = room;
   const send = async (next: GameState) => {
@@ -310,19 +311,28 @@ function OnlineGame({ net, code, room, onExit }: { net: Net; code: string; room:
     try {
       // a full replace: update() would merge the old phase object into the new one
       await roomRef(net, code).set({ ...latest.current, state: next } as unknown as Record<string, unknown>);
+      setWriteError(false);
     } catch {
-      /* a failed write leaves the shared state as it was; the player can act again */
+      // the shared state stays as it was; usually the viewer lacks Editor access
+      setWriteError(true);
     } finally {
       pending.current = false;
     }
   };
   return (
-    <Game
-      key={code}
-      initial={room.state!}
-      online={{ myUid: net.uid, isHost: room.host === net.uid, state: room.state!, send }}
-      onExit={onExit}
-      onNewGame={onExit}
-    />
+    <>
+      <Game
+        key={code}
+        initial={room.state!}
+        online={{ myUid: net.uid, isHost: room.host === net.uid, state: room.state!, send }}
+        onExit={onExit}
+        onNewGame={onExit}
+      />
+      {writeError && (
+        <div className="write-error" role="alert">
+          אין לך הרשאה לשמור מהלכים. בקש מבעל המשחק להזמין אותך כעורך (Editor) בתפריט Share.
+        </div>
+      )}
+    </>
   );
 }

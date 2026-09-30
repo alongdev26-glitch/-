@@ -537,6 +537,14 @@ export function reduce(prev: GameState, a: Action): GameState {
       return s;
     }
 
+    case 'SET_BOT': {
+      const target = s.players[a.player];
+      if (!target || target.bankrupt || target.isBot === a.isBot) return prev;
+      target.isBot = a.isBot;
+      log(s, a.isBot ? `המחשב משחק עכשיו במקום ${target.name}` : `${target.name} חזר לשחק`);
+      return s;
+    }
+
     case 'END_TURN':
       if (ph.t !== 'end' || s.again) return prev;
       nextTurn(s);

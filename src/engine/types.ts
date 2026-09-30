@@ -90,7 +90,9 @@ export type Action =
   | { type: 'UNMORTGAGE'; space: number }
   | { type: 'PAY_DEBT' }
   | { type: 'BANKRUPT' }
-  | { type: 'END_TURN' };
+  | { type: 'END_TURN' }
+  /** online: hand a seat to the computer (or back to its player) */
+  | { type: 'SET_BOT'; player: number; isBot: boolean };
 
 export interface PlayerSetup {
   uid?: string;

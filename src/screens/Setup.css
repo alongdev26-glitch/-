@@ -285,3 +285,19 @@
 .choice:disabled {
   opacity: 0.6;
 }
+
+.write-error {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 420px);
+  background: var(--red);
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  z-index: 80;
+}

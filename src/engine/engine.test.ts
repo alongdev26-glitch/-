@@ -278,3 +278,15 @@ describe('game options', () => {
     expect(reduce(s, { type: 'MORTGAGE', space: 6 })).toBe(s);
   });
 });
+
+describe('seat takeover', () => {
+  it('hands a seat to the computer and back', () => {
+    let s = setup(2);
+    expect(botAction(s)).toBeNull();
+    s = reduce(s, { type: 'SET_BOT', player: 0, isBot: true });
+    expect(s.players[0].isBot).toBe(true);
+    expect(botAction(s)).not.toBeNull();
+    s = reduce(s, { type: 'SET_BOT', player: 0, isBot: false });
+    expect(s.players[0].isBot).toBe(false);
+  });
+});

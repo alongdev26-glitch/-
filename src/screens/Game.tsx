@@ -86,7 +86,23 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
   const [localViewer, setViewer] = useState(firstViewer);
   const viewer = online ? Math.max(0, mySeat) : localViewer;
   /** May this screen make the move for player `pid`? */
-  const controls = (pid: number) => (online ? game.players[pid].uid === online.myUid : !game.players[pid].isBot);
+  const controls = (pid: number) =>
+    online ? game.players[pid].uid === online.myUid && !game.players[pid].isBot : !game.players[pid].isBot;
+  /** Online host only: a remote player's seat can be handed to the computer (and back). */
+  const canTakeOver = (pid: number) => {
+    const p = game.players[pid];
+    return !!online?.isHost && !!p.uid && p.uid !== online.myUid && !p.bankrupt && game.phase.t !== 'gameover';
+  };
+  const setBot = (pid: number, isBot: boolean) => act({ type: 'SET_BOT', player: pid, isBot });
+
+  // offer the takeover only after a remote player has been silent for a while
+  const [stalled, setStalled] = useState(false);
+  useEffect(() => {
+    setStalled(false);
+    if (!online?.isHost) return;
+    const t = window.setTimeout(() => setStalled(true), 15000);
+    return () => window.clearTimeout(t);
+  }, [game, online?.isHost]);
 
   const moving = shown.some((pos, i) => pos !== game.players[i].pos);
   const busy = rolling || moving;
@@ -95,7 +111,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
   const actingPlayer = game.players[acting];
   const cur = game.players[game.current];
   const handoff = !online && !busy && !cur.isBot && cur.id !== viewer && game.phase.t !== 'gameover';
-  const myTurn = game.current === viewer && game.phase.t !== 'gameover';
+  const myTurn = game.current === viewer && controls(viewer) && game.phase.t !== 'gameover';
   const needsBoard = myTurn && !busy && (game.phase.t === 'roll' || game.phase.t === 'end');
 
   const act = useCallback((a: Action) => {
@@ -193,7 +209,14 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
                 </button>
               </div>
             ) : (
-              <div className="waiting">{actingPlayer.name} {actingPlayer.isBot ? 'חושב...' : 'מחליט...'}</div>
+              <div className="waiting">
+                {actingPlayer.name} {actingPlayer.isBot ? 'חושב...' : 'מחליט...'}
+                {stalled && canTakeOver(acting) && !actingPlayer.isBot && (
+                  <button className="btn btn-black btn-sm takeover" onClick={() => setBot(acting, true)}>
+                    🤖 העבר לבוט
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -306,11 +329,25 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
             <span>{cur.id === me.id ? (humans.length > 1 ? `התור שלך, ${me.name}` : 'התור שלך') : cur.name}</span>
           </div>
         {tab === 'board' && (
-          <BoardTab game={game} shown={shown} rolling={rolling} busy={busy} myTurn={myTurn} act={act} onSpace={setInfo} onBuild={() => setTab('mine')} />
+          <BoardTab game={game} shown={shown} rolling={rolling} busy={busy} myTurn={myTurn}
+            act={act}
+            onSpace={setInfo}
+            onBuild={() => setTab('mine')}
+            onTakeover={stalled && canTakeOver(game.current) && !cur.isBot ? () => setBot(game.current, true) : undefined}
+          />
         )}
         {tab === 'mine' && <MyPropsTab game={game} me={me.id} myTurn={myTurn && !busy} act={act} onSpace={setInfo} />}
         {tab === 'market' && <MarketTab game={game} onSpace={setInfo} />}
-        {tab === 'profile' && <ProfileTab game={game} me={me.id} onExit={onExit} onNewGame={onNewGame} />}
+        {tab === 'profile' && (
+          <ProfileTab
+            game={game}
+            me={me.id}
+            onExit={onExit}
+            onNewGame={onNewGame}
+            canTakeOver={canTakeOver}
+            onSetBot={setBot}
+          />
+        )}
         <div className="toast" key={game.log.length + game.log[0]}>
           {game.log[0]}
         </div>

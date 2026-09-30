@@ -9,10 +9,13 @@ interface Props {
   me: number;
   onExit: () => void;
   onNewGame: () => void;
+  /** online host: which seats may be handed to the computer */
+  canTakeOver?: (pid: number) => boolean;
+  onSetBot?: (pid: number, isBot: boolean) => void;
 }
 
 /** Page 4: my profile, the other players, and leaving the game. */
-export function ProfileTab({ game, me, onExit, onNewGame }: Props) {
+export function ProfileTab({ game, me, onExit, onNewGame, canTakeOver, onSetBot }: Props) {
   const [confirm, setConfirm] = useState<'exit' | 'new' | null>(null);
   const p = game.players[me];
   const ranking = [...game.players].sort((a, b) => netWorth(game, b.id) - netWorth(game, a.id));
@@ -62,6 +65,11 @@ export function ProfileTab({ game, me, onExit, onNewGame }: Props) {
               {o.bankrupt ? ' · פשט רגל' : ''}
             </span>
             <span className="money">{o.bankrupt ? '—' : `ש"ח ${o.money} · שווי ${netWorth(game, o.id)}`}</span>
+            {canTakeOver?.(o.id) && (
+              <button className="btn btn-white btn-sm" onClick={() => onSetBot?.(o.id, !o.isBot)}>
+                {o.isBot ? 'החזר לשחקן' : '🤖 לבוט'}
+              </button>
+            )}
           </div>
         ))}
       </section>

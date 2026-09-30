@@ -16,10 +16,12 @@ interface Props {
   act: (a: Action) => void;
   onSpace: (id: number) => void;
   onBuild: () => void;
+  /** online host: take over a remote player who stopped responding */
+  onTakeover?: () => void;
 }
 
 /** Page 1: the board, as large as the screen allows, with a floating action button. */
-export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onBuild }: Props) {
+export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onBuild, onTakeover }: Props) {
   const me = game.players[game.current];
   const ph = game.phase;
   const ready = myTurn && !busy;
@@ -67,6 +69,11 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
                 </button>
               ) : (
                 <div className="fab fab-wait">{busy ? '...' : `${me.name} משחק`}</div>
+              )}
+              {!main && !busy && onTakeover && (
+                <button className="btn btn-black btn-sm" onClick={onTakeover}>
+                  🤖 העבר לבוט
+                </button>
               )}
               {canBuildAny && (
                 <button className="btn btn-gold btn-sm" onClick={onBuild}>
