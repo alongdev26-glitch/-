@@ -255,6 +255,13 @@ describe('public auction', () => {
     expect(s.phase).toMatchObject({ t: 'auction', active: [1, 2] });
     expect(actor(s)).toBe(1);
   });
+  it('with two players, declining leaves the property free instead of auctioning it', () => {
+    let s = setup(2);
+    s = run(s, { type: 'ROLL', dice: [2, 4] }, { type: 'DECLINE' });
+    expect(s.phase.t).toBe('end');
+    expect(s.props[6].owner).toBeNull();
+    expect(s.players[1].money).toBe(1500);
+  });
   it('goes unsold when nobody else is left to bid', () => {
     let s = setup(2);
     s.players[1].bankrupt = true;

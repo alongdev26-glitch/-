@@ -8,6 +8,7 @@ import {
   canMortgage,
   canSell,
   canSellToBank,
+  hasAuction,
   canUnmortgage,
   mortgageValue,
   ownedBy,
@@ -585,7 +586,13 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
 
     case 'DECLINE':
       if (ph.t !== 'buy') return prev;
-      startAuction(s, ph.space);
+      if (hasAuction(s)) {
+        startAuction(s, ph.space);
+      } else {
+        // with only two players left, an auction would just hand the property to the other one
+        log(s, `${p.name} ויתר על ${BOARD[ph.space].name}, והנכס נשאר פנוי`);
+        finishMove(s);
+      }
       return s;
 
     case 'BID': {

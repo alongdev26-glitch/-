@@ -4,6 +4,7 @@ import { DECKS } from '../data/cards';
 import { tokenColor } from '../data/tokens';
 import { botAction } from '../engine/bot';
 import { actor, reduce } from '../engine/reducer';
+import { hasAuction } from '../engine/rules';
 import type { Action, Announcement, GameState, Payment } from '../engine/types';
 import { MoneyFlash } from '../ui/MoneyFlash';
 import { BuyFlash } from '../ui/BuyFlash';
@@ -292,12 +293,12 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
               קנה ב-ש"ח {price}
             </button>
             <button className="btn btn-black" onClick={() => act({ type: 'DECLINE' })}>
-              למכירה פומבית
+              {hasAuction(game) ? 'למכירה פומבית' : 'לא תודה'}
             </button>
           </div>
           {me.money < price && (
             <div className="modal-note">
-              אין מספיק כסף. אפשר למשכן נכסים בעמוד "הנכסים שלי" ולחזור, או להוציא למכירה פומבית.
+              אין מספיק כסף. אפשר למשכן נכסים בעמוד "הנכסים שלי" ולחזור{hasAuction(game) ? ', או להוציא למכירה פומבית' : ', או לוותר'}.
             </div>
           )}
         </Modal>
