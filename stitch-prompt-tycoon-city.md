@@ -59,14 +59,14 @@ Reproduce this board **exactly**. Do not add, remove, reorder, translate or rena
 9. Light-blue strip "טבריה", street "רח' הבנים", "מחיר ש"ח 120"
 
 ### Top row (from the jail on the left, going right to the free parking)
-1. Pink strip "באר-שבע", street "רח' הרצל", "מחיר ש"ח 140"
+1. Pink strip "באר-שבע", street "שד' שזר", "מחיר ש"ח 140"
 2. "חברת החשמל" (electric company) with a yellow glowing light-bulb icon, "מחיר ש"ח 150"
 3. Pink strip "באר-שבע", street "רח' קק"ל", "מחיר ש"ח 140"
 4. Pink strip "באר-שבע", street "שד' רגר", "מחיר ש"ח 160"
 5. "רכבת מרכז" [verify] (railway), black steam-train icon, "מחיר ש"ח 200"
 6. Orange strip "נתניה", street "שד' בנימין", "מחיר ש"ח 180"
 7. "תיבת המזל" (community chest) with the blue chest icon
-8. Orange strip "נתניה", street "רח' סמילנסקי", "מחיר ש"ח 180"
+8. Orange strip "נתניה", street "רח' הרצל", "מחיר ש"ח 180"
 9. Orange strip "נתניה", street "כיכר העצמאות", "מחיר ש"ח 200"
 
 ### Right column (from the free parking at the top, going down to "גש לכלא")
@@ -81,7 +81,7 @@ Reproduce this board **exactly**. Do not add, remove, reorder, translate or rena
 9. Yellow strip "ירושלים", street "רח' המלך ג'ורג'", "מחיר ש"ח 280"
 
 ### Bottom row (from "גש לכלא" on the right, going left to "דרך צלחה")
-1. Green strip "חיפה", street "רח' העצמאות", "מחיר ש"ח 300"
+1. Green strip "חיפה", street "דרך העצמאות", "מחיר ש"ח 300"
 2. Green strip "חיפה", street "רח' החלוץ", "מחיר ש"ח 300"
 3. "תיבת המזל" (community chest) with the blue chest icon
 4. Green strip "חיפה", street "שד' מוריה", "מחיר ש"ח 320"

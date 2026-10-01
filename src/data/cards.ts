@@ -19,7 +19,7 @@ export interface Card {
 export const CHANCE: Card[] = [
   { text: 'התקדם ל"דרך צלחה" וקבל ש"ח 400', effect: { type: 'move', to: 0 } },
   { text: "התקדם לרח' ביאליק, רמת-גן", effect: { type: 'move', to: 24 } },
-  { text: "התקדם לרח' הרצל, באר-שבע", effect: { type: 'move', to: 11 } },
+  { text: "התקדם לשד' שזר, באר-שבע", effect: { type: 'move', to: 11 } },
   {
     text: 'התקדם לחברה הקרובה. אם היא בבעלות, שלם פי 10 מסכום הקוביות',
     effect: { type: 'nearest', kind: 'utility' },

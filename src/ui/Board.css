@@ -287,10 +287,42 @@
   justify-content: center;
 }
 .plaque-pot {
-  color: #fff4c2;
-  font-weight: 700;
-  font-size: 1.9cqw;
-  margin-top: 0.2cqw;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, -18%);
+  display: flex;
+  align-items: center;
+  gap: 1.4cqw;
+  padding: 0.7cqw 2.6cqw;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff3a8 0%, #ffd23f 45%, #e8a20c 100%);
+  border: 0.5cqw solid #fff;
+  box-shadow: 0 0 0 0.35cqw #b86e00, 0 0.8cqw 1.6cqw rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+  z-index: 1;
+}
+.plaque-pot .pot-label {
+  font-size: 2.3cqw;
+  font-weight: 800;
+  color: #7a2e00;
+}
+.plaque-pot .pot-amount {
+  font-size: 4.2cqw;
+  font-weight: 900;
+  line-height: 1;
+  color: #b30016;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0.25cqw 0 #fff6c9;
+  animation: pot-pop 0.6s ease-out;
+}
+@keyframes pot-pop {
+  0% {
+    transform: scale(1.6);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 .plaque span {
   font-weight: 900;

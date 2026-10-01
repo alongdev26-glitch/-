@@ -147,7 +147,12 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
       <div className="board-center">
         <div className="plaque" dir="rtl">
           <span>ביג דיל</span>
-          <small className="plaque-pot">קופת הלוטו: ש"ח {game.pot}</small>
+          <div className="plaque-pot">
+            <b className="pot-label">🎰 קופת הלוטו</b>
+            <b key={game.pot} className="pot-amount" dir="ltr">
+              ₪{game.pot.toLocaleString('en-US')}
+            </b>
+          </div>
           <i className="mascot">🎩</i>
         </div>
         <div className="deck deck-chest">
