@@ -54,16 +54,34 @@
   transform: translate(-50%, -50%) rotate(-90deg);
 }
 .side-top .face {
-  transform: translate(-50%, -50%) rotate(180deg);
+  /* readable, not upside down: keep the color strip toward the center by stacking bottom-up */
+  transform: translate(-50%, -50%);
+  flex-direction: column-reverse;
+}
+.side-top .strip {
+  border-bottom: none;
+  border-top: 0.5px solid var(--board-line);
+}
+.side-top .buildings {
+  top: auto;
+  bottom: 3%;
+}
+.side-top .owner-badge {
+  bottom: auto;
+  top: 3%;
+}
+.side-top .sp-price {
+  padding-bottom: 0;
+  padding-top: 5cqi;
 }
 .corner-0 .face {
   transform: translate(-50%, -50%) rotate(45deg);
 }
 .corner-10 .face {
-  transform: translate(-50%, -50%) rotate(135deg);
+  transform: translate(-50%, -50%) rotate(-45deg);
 }
 .corner-20 .face {
-  transform: translate(-50%, -50%) rotate(-135deg);
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 .corner-30 .face {
   transform: translate(-50%, -50%) rotate(-45deg);

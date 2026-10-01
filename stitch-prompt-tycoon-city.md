@@ -37,7 +37,7 @@ Design a premium mobile board-game UI in **Hebrew (RTL)**, portrait 390×844 (ph
 
 ## PART 2 — THE BOARD, EXACT 1:1 (paste second)
 
-Reproduce this board **exactly**. Do not add, remove, reorder, translate or rename any space. 40 spaces total: 4 large square corners and 9 rectangular spaces on each side. Every space's text is written in Hebrew and is **rotated to face the center of the board** (the top row reads upside-down from the bottom, the side columns read sideways), exactly like a real printed board. Property spaces have a solid color strip on the edge facing the center, with the **city name printed in white inside the strip**, the street name in the middle of the space and "מחיר ש"ח X" at the outer edge.
+Reproduce this board **exactly**. Do not add, remove, reorder, translate or rename any space. 40 spaces total: 4 large square corners and 9 rectangular spaces on each side. Every space's text is written in Hebrew. The bottom and top rows read upright (never upside down); the side columns read sideways, facing the center. Property spaces have a solid color strip on the edge facing the center, with the **city name printed in white inside the strip**, the street name in the middle of the space and "מחיר ש"ח X" at the outer edge.
 
 **Board orientation on screen:** "דרך צלחה" (START) is the **bottom-left** corner. Play moves up the left column, across the top row to the right, down the right column, then along the bottom row back to the left.
 
@@ -48,26 +48,26 @@ Reproduce this board **exactly**. Do not add, remove, reorder, translate or rena
 4. **Bottom-right: "גש לכלא"** (Go to jail). A cartoon blue policeman pointing with his finger, text "גש לכלא".
 
 ### Left column (from bottom, next to "דרך צלחה", going up to the jail)
-1. Brown strip "אילת" [verify], street "רח' התמרים" [verify], "מחיר ש"ח 60"
+1. Brown strip "אילת", street "שד' התמרים", "מחיר ש"ח 60"
 2. "תיבת המזל" (community chest) with a blue open treasure-chest icon
-3. Brown strip "אילת" [verify], street "רח' האלמוגים" [verify], "מחיר ש"ח 60"
+3. Brown strip "אילת", street "דרך הערבה", "מחיר ש"ח 60"
 4. "מס הכנסה" (income tax), "שלם ש"ח 200"
 5. "רכבת דרום" (railway), a black steam-train icon, "מחיר ש"ח 200"
-6. Light-blue strip "טבריה", street "רח' הגליל" [verify], "מחיר ש"ח 100"
+6. Light-blue strip "טבריה", street "רח' הגליל", "מחיר ש"ח 100"
 7. "הפתעה" (chance) with a large pink/magenta question mark "?"
-8. Light-blue strip "טבריה", street "רח' הירדן" [verify], "מחיר ש"ח 100"
-9. Light-blue strip "טבריה", street "רח' הכנרת" [verify], "מחיר ש"ח 120"
+8. Light-blue strip "טבריה", street "רח' הירדן", "מחיר ש"ח 100"
+9. Light-blue strip "טבריה", street "רח' הבנים", "מחיר ש"ח 120"
 
 ### Top row (from the jail on the left, going right to the free parking)
-1. Pink strip "באר-שבע", street "רח' הרצל" [verify], "מחיר ש"ח 140"
+1. Pink strip "באר-שבע", street "רח' הרצל", "מחיר ש"ח 140"
 2. "חברת החשמל" (electric company) with a yellow glowing light-bulb icon, "מחיר ש"ח 150"
-3. Pink strip "באר-שבע", street "רח' רגר" [verify], "מחיר ש"ח 140"
-4. Pink strip "באר-שבע", street "שד' רגר" [verify], "מחיר ש"ח 160"
+3. Pink strip "באר-שבע", street "רח' קק"ל", "מחיר ש"ח 140"
+4. Pink strip "באר-שבע", street "שד' רגר", "מחיר ש"ח 160"
 5. "רכבת מרכז" [verify] (railway), black steam-train icon, "מחיר ש"ח 200"
-6. Orange strip "נתניה" [verify], street "רח' ויצמן" [verify], "מחיר ש"ח 180"
+6. Orange strip "נתניה", street "שד' בנימין", "מחיר ש"ח 180"
 7. "תיבת המזל" (community chest) with the blue chest icon
-8. Orange strip "נתניה" [verify], street "רח' סמילנסקי" [verify], "מחיר ש"ח 180"
-9. Orange strip "נתניה" [verify], street "כיכר העצמאות" [verify], "מחיר ש"ח 200"
+8. Orange strip "נתניה", street "רח' סמילנסקי", "מחיר ש"ח 180"
+9. Orange strip "נתניה", street "כיכר העצמאות", "מחיר ש"ח 200"
 
 ### Right column (from the free parking at the top, going down to "גש לכלא")
 1. Red strip "רמת-גן", street "דרך אבא הלל", "מחיר ש"ח 220"
@@ -84,7 +84,7 @@ Reproduce this board **exactly**. Do not add, remove, reorder, translate or rena
 1. Green strip "חיפה", street "רח' העצמאות", "מחיר ש"ח 300"
 2. Green strip "חיפה", street "רח' החלוץ", "מחיר ש"ח 300"
 3. "תיבת המזל" (community chest) with the blue chest icon
-4. Green strip "חיפה", street "רח' מוריה", "מחיר ש"ח 320"
+4. Green strip "חיפה", street "שד' מוריה", "מחיר ש"ח 320"
 5. "רכבת צפון" (railway), black steam-train icon, "מחיר ש"ח 200"
 6. "הפתעה" (chance) with a large **red** question mark "?"
 7. Dark-blue strip "תל-אביב", street "רח' אלנבי", "מחיר ש"ח 350"
