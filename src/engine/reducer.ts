@@ -3,9 +3,11 @@ import { DECKS, type Deck } from '../data/cards';
 import { tokenColor } from '../data/tokens';
 import {
   buildingCounts,
+  bankSaleValue,
   canBuild,
   canMortgage,
   canSell,
+  canSellToBank,
   canUnmortgage,
   mortgageValue,
   ownedBy,
@@ -143,10 +145,26 @@ export function autoRaise(s: GameState, player: number, need: number) {
     const mort = ownedBy(s, player)
       .filter((id) => canMortgage(s, player, id))
       .sort((a, b) => mortgageValue(a) - mortgageValue(b))[0];
-    if (mort === undefined) return;
-    s.props[mort].mortgaged = true;
-    p.money += mortgageValue(mort);
+    if (mort !== undefined) {
+      s.props[mort].mortgaged = true;
+      p.money += mortgageValue(mort);
+      continue;
+    }
+    const sale = ownedBy(s, player)
+      .filter((id) => canSellToBank(s, player, id) && bankSaleValue(s, id) > 0)
+      .sort((a, b) => bankSaleValue(s, a) - bankSaleValue(s, b))[0];
+    if (sale === undefined) return;
+    sellToBank(s, player, sale);
   }
+}
+
+/** Return a property to the bank for half its price; it becomes free to buy again. */
+function sellToBank(s: GameState, player: number, id: number) {
+  const value = bankSaleValue(s, id);
+  s.players[player].money += value;
+  s.props[id] = { owner: null, houses: 0, mortgaged: false };
+  if (value > 0) moneyEvent(s, { kind: 'bank', from: null, to: player, amount: value, space: id });
+  log(s, `${s.players[player].name} מכר את ${BOARD[id].name} לבנק ב-${fmt(value)}`);
 }
 
 function sendToJail(s: GameState) {
@@ -613,6 +631,11 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       s.props[a.space].houses--;
       p.money += sellValue(a.space);
       log(s, `${p.name} מכר מבנה ב${BOARD[a.space].name}`);
+      return s;
+
+    case 'SELL_BANK':
+      if (!manageAllowed(s) || !canSellToBank(s, p.id, a.space)) return prev;
+      sellToBank(s, p.id, a.space);
       return s;
 
     case 'MORTGAGE':

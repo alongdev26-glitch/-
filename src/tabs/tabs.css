@@ -472,3 +472,8 @@
 .trade-summary .btn {
   margin-top: 6px;
 }
+.debt-hint {
+  flex-basis: 100%;
+  color: #555;
+  font-size: 12px;
+}

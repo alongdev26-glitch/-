@@ -1,5 +1,8 @@
+import { useEffect, useState } from 'react';
 import { BOARD, FEE_ROUNDS } from '../data/board';
 import {
+  bankSaleValue,
+  canSellToBank,
   canBuild,
   canMortgage,
   canSell,
@@ -33,6 +36,18 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
   );
   const ph = game.phase;
   const debt = ph.t === 'debt' && game.current === me ? ph.owed.reduce((a, o) => a + o.amount, 0) : 0;
+  // Selling to the bank can't be undone, so it takes a second tap to confirm.
+  const [confirmId, setConfirmId] = useState<number | null>(null);
+  useEffect(() => {
+    if (confirmId === null) return;
+    const t = setTimeout(() => setConfirmId(null), 3000);
+    return () => clearTimeout(t);
+  }, [confirmId]);
+  const sellToBank = (id: number) => {
+    if (confirmId !== id) return setConfirmId(id);
+    setConfirmId(null);
+    act({ type: 'SELL_BANK', space: id });
+  };
 
   return (
     <div className="page">
@@ -74,6 +89,11 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
           <button className="btn btn-black btn-sm" onClick={() => act({ type: 'BANKRUPT' })}>
             פשיטת רגל
           </button>
+          {player.money < debt && (
+            <small className="debt-hint">
+              אפשר למכור בתים{game.rules.mortgage ? ', למשכן' : ''} או למכור נכסים לבנק בחצי מחיר.
+            </small>
+          )}
         </div>
       )}
 
@@ -130,6 +150,14 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
                           </button>
                         </>
                       )}
+                      <button
+                        className={`btn ${confirmId === id ? 'btn-red' : 'btn-white'}`}
+                        disabled={!canSellToBank(game, me, id)}
+                        title={canSellToBank(game, me, id) ? undefined : 'קודם מכור את הבתים'}
+                        onClick={() => sellToBank(id)}
+                      >
+                        {confirmId === id ? 'בטוח? מכור' : `מכור לבנק (+${bankSaleValue(game, id)})`}
+                      </button>
                       {!game.rules.mortgage ? null : st.mortgaged ? (
                         <button className="btn btn-gold" disabled={!canUnmortgage(game, me, id)} onClick={() => act({ type: 'UNMORTGAGE', space: id })}>
                           פדה ({unmortgageCost(id)})
@@ -152,6 +180,7 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
           {game.rules.mortgage
             ? `כל ${FEE_ROUNDS} סבבים משלמים לקופת הלוטו חצי ממחיר כל נכס. נכס ממושכן לא משלם, אבל גם לא גובה שכירות.`
             : 'במשחק הזה אין משכנתא.'}
+          {' אפשר למכור נכס בלי בתים לבנק בחצי ממחירו (נכס ממושכן תמורת 0), והוא חוזר להיות פנוי.'}
           {!myTurn && ' בנייה ומכירה אפשריות רק בתור שלך.'}
         </div>
       )}

@@ -1,6 +1,8 @@
 import { BOARD, JAIL_FINE, groupMembers, isOwnable } from '../data/board';
 import { MAX_TRADE_ROUNDS, actor, rollDice } from './reducer';
 import {
+  bankSaleValue,
+  canSellToBank,
   canBuild,
   canTradeProp,
   canMortgage,
@@ -183,6 +185,10 @@ export function botAction(s: GameState, rng: () => number = Math.random): Action
         .filter((id) => canMortgage(s, me, id))
         .sort((a, b) => mortgageValue(a) - mortgageValue(b))[0];
       if (mort !== undefined) return { type: 'MORTGAGE', space: mort };
+      const sale = mine
+        .filter((id) => canSellToBank(s, me, id) && bankSaleValue(s, id) > 0)
+        .sort((a, b) => bankSaleValue(s, a) - bankSaleValue(s, b))[0];
+      if (sale !== undefined) return { type: 'SELL_BANK', space: sale };
       return { type: 'BANKRUPT' };
     }
     case 'end':

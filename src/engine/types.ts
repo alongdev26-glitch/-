@@ -140,6 +140,7 @@ export type Action =
   | { type: 'ACK_CARD' }
   | { type: 'BUILD'; space: number }
   | { type: 'SELL'; space: number }
+  | { type: 'SELL_BANK'; space: number }
   | { type: 'MORTGAGE'; space: number }
   | { type: 'UNMORTGAGE'; space: number }
   | { type: 'PAY_DEBT' }

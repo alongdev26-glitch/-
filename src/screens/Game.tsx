@@ -386,7 +386,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
             <p>
               עליך לשלם <b>ש"ח {total}</b> ויש לך <b>ש"ח {me.money}</b>.
             </p>
-            <p>אתה מחליט מה למכור או למשכן, בעמוד "הנכסים שלי". המשחק לא ימשכן כלום בשבילך.</p>
+            <p>בעמוד "הנכסים שלי" אפשר למכור בתים, למשכן, או למכור נכס לבנק בחצי ממחירו. המשחק לא ימכור ולא ימשכן כלום בשבילך.</p>
             <div className="modal-actions">
               <button className="btn btn-red" disabled={me.money < total} onClick={() => act({ type: 'PAY_DEBT' })}>
                 שלם

@@ -83,6 +83,17 @@ export function roundsToFee(s: GameState): number | null {
 }
 export const sellValue = (id: number) => BOARD[id].houseCost! / 2;
 
+/** Selling a property back to the bank pays half its price (nothing if it is mortgaged). */
+export const bankSaleValue = (s: GameState, id: number) =>
+  s.props[id].mortgaged ? 0 : Math.round(BOARD[id].price! / 2);
+
+export function canSellToBank(s: GameState, player: number, id: number): boolean {
+  const sp = BOARD[id];
+  if (!isOwnable(sp) || s.props[id].owner !== player) return false;
+  if (sp.kind === 'property') return groupMembers(sp.group!).every((g) => s.props[g].houses === 0);
+  return true;
+}
+
 export function canUnmortgage(s: GameState, player: number, id: number): boolean {
   const st = s.props[id];
   return st.owner === player && st.mortgaged && s.players[player].money >= unmortgageCost(id);
@@ -93,7 +104,8 @@ export function liquidationValue(s: GameState, player: number): number {
   return ownedBy(s, player).reduce((sum, id) => {
     const st = s.props[id];
     const houses = BOARD[id].kind === 'property' ? st.houses * sellValue(id) : 0;
-    return sum + houses + (st.mortgaged ? 0 : mortgageValue(id));
+    const asset = s.rules?.mortgage === false ? bankSaleValue(s, id) : st.mortgaged ? 0 : mortgageValue(id);
+    return sum + houses + asset;
   }, 0);
 }
 

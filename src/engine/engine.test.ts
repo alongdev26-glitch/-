@@ -459,3 +459,57 @@ describe('דרך צלחה and taxes', () => {
     expect(s.pot).toBe(200);
   });
 });
+
+describe('selling to the bank', () => {
+  it('pays half the price and frees the property, so a debt can be paid', () => {
+    let s = setup();
+    s.props[39].owner = 0; // דיזנגוף, price 400
+    s.players[0].money = 600;
+    s.phase = { t: 'debt', owed: [{ to: 1, amount: 800 }], resume: 'end' };
+    s = reduce(s, { type: 'PAY_DEBT' });
+    expect(s.phase.t).toBe('debt');
+    s = reduce(s, { type: 'SELL_BANK', space: 39 });
+    expect(s.players[0].money).toBe(800);
+    expect(s.props[39]).toEqual({ owner: null, houses: 0, mortgaged: false });
+    s = reduce(s, { type: 'PAY_DEBT' });
+    expect(s.phase.t).toBe('end');
+    expect(s.players[0].money).toBe(0);
+    expect(s.players[1].money).toBe(2300);
+  });
+
+  it('a mortgaged property goes back for nothing', () => {
+    let s = setup();
+    s.props[5].owner = 0;
+    s.props[5].mortgaged = true;
+    s = reduce(s, { type: 'SELL_BANK', space: 5 });
+    expect(s.players[0].money).toBe(1500);
+    expect(s.props[5]).toEqual({ owner: null, houses: 0, mortgaged: false });
+  });
+
+  it('needs the color group to have no houses, and only on your turn', () => {
+    let s = setup();
+    for (const id of [37, 39]) s.props[id].owner = 0;
+    s.props[39].houses = 1;
+    expect(reduce(s, { type: 'SELL_BANK', space: 37 })).toBe(s);
+    s.props[39].houses = 0;
+    s.props[1].owner = 1;
+    expect(reduce(s, { type: 'SELL_BANK', space: 1 })).toBe(s); // not player 1's turn
+  });
+
+  it('a bot in debt with mortgage off sells to the bank instead of going bankrupt', () => {
+    let s = newGame(
+      [
+        { name: 'B', token: 'cat', isBot: true },
+        { name: 'H', token: 'dog', isBot: false },
+      ],
+      () => 0.5,
+      { mortgage: false },
+    );
+    s.props[39].owner = 0;
+    s.players[0].money = 100;
+    s.phase = { t: 'debt', owed: [{ to: 1, amount: 250 }], resume: 'end' };
+    expect(botAction(s, () => 0.5)).toEqual({ type: 'SELL_BANK', space: 39 });
+    s = reduce(s, botAction(s, () => 0.5)!);
+    expect(botAction(s, () => 0.5)).toEqual({ type: 'PAY_DEBT' });
+  });
+});
