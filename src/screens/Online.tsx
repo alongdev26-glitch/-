@@ -2,20 +2,22 @@ import { useEffect, useRef, useState } from 'react';
 import { FEE_ROUNDS } from '../data/board';
 import { newGame } from '../engine/reducer';
 import type { GameState, TokenId } from '../engine/types';
-import { cleanCode, connect, newCode, roomRef, type Net, type Room, type Seat } from '../online/net';
+import { MAX_SEATS, openLink, savedHostRoom, type RoomLink } from '../online/link';
+import { cleanCode, type Room, type Seat } from '../online/net';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { TOKENS, Token } from '../ui/Token';
 import { Game } from './Game';
 import './Setup.css';
 
 const BOT_NAMES = ['הנרי', 'מרק', 'סופיה'];
-const MAX = 4;
+const MAX = MAX_SEATS;
 
 type View = 'loading' | 'unavailable' | 'profile' | 'join' | 'lobby';
 
 /** Online play: pick a name and token, then create a room code or type a friend's code. */
 export function Online({ onBack }: { onBack: () => void }) {
-  const [net, setNet] = useState<Net | null>(null);
+  const [link, setLink] = useState<RoomLink | null>(null);
+  const [resumable, setResumable] = useState<Room | null>(null);
   const [view, setView] = useState<View>('loading');
   const [name, setName] = useState('');
   const [token, setToken] = useState<TokenId>('car');
@@ -27,10 +29,11 @@ export function Online({ onBack }: { onBack: () => void }) {
 
   useEffect(() => {
     let live = true;
-    connect().then((n) => {
+    openLink().then((l) => {
       if (!live) return;
-      setNet(n);
-      setView(n ? 'profile' : 'unavailable');
+      setLink(l);
+      setView(l ? 'profile' : 'unavailable');
+      if (l?.kind === 'peer') setResumable(savedHostRoom());
     });
     return () => {
       live = false;
@@ -39,98 +42,70 @@ export function Online({ onBack }: { onBack: () => void }) {
 
   // one subscription per room code
   useEffect(() => {
-    if (!net || !code) return;
-    return roomRef(net, code).onSnapshot(
-      (snap) => {
-        if (!snap.exists) {
-          setRoom(null);
-          setError('החדר נסגר');
-          setView('profile');
-          setCode(null);
-          return;
-        }
-        setRoom(snap.data() as unknown as Room);
-      },
-      () => setError('החיבור לחדר נותק. נסה להיכנס שוב עם הקוד.'),
-    );
-  }, [net, code]);
+    if (!link || !code) return;
+    return link.subscribe(code, setRoom, (msg) => {
+      setRoom(null);
+      setError(msg);
+      setView('profile');
+      setCode(null);
+    });
+  }, [link, code]);
 
-  const me = (): Seat => ({ uid: net!.uid, name: name.trim() || 'שחקן', token });
+  const me = (): Seat => ({ uid: link!.uid, name: name.trim() || 'שחקן', token });
 
-  const create = async () => {
-    if (!net) return;
+  const run = async (f: () => Promise<void>) => {
     setBusy(true);
     setError('');
     try {
-      let c = newCode();
-      for (let i = 0; i < 5 && (await roomRef(net, c).get()).exists; i++) c = newCode();
-      const r: Room = {
-        code: c,
-        host: net.uid,
-        status: 'lobby',
-        seats: [me()],
-        bots: 0,
-        rules: { mortgage: true },
-        state: null,
-        createdAt: Date.now(),
-      };
-      await roomRef(net, c).set(r as unknown as Record<string, unknown>);
-      setCode(c);
-      setView('lobby');
-    } catch {
-      setError('לא הצלחתי ליצור חדר. בדוק שיש לך הרשאת עריכה בקישור ונסה שוב.');
+      await f();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'משהו השתבש, נסה שוב');
     } finally {
       setBusy(false);
     }
   };
 
-  const join = async () => {
-    if (!net) return;
+  const create = () =>
+    run(async () => {
+      if (!link) return;
+      const c = await link.create(me());
+      setCode(c);
+      setView('lobby');
+    });
+
+  const join = () => {
     const c = cleanCode(codeInput);
     if (c.length !== 4) return setError('הקוד הוא 4 אותיות באנגלית');
-    setBusy(true);
-    setError('');
-    try {
-      const ref = roomRef(net, c);
-      await ref.acquire({ holder: net.uid, ttlMs: 5000 });
-      const snap = await ref.get();
-      if (!snap.exists) return setError('לא מצאתי חדר עם הקוד הזה');
-      const r = snap.data() as unknown as Room;
-      const mine = r.seats.find((s) => s.uid === net.uid);
-      if (!mine) {
-        if (r.status !== 'lobby') return setError('המשחק בחדר הזה כבר התחיל');
-        if (r.seats.length + r.bots >= MAX) return setError('החדר מלא');
-        const taken = new Set(r.seats.map((s) => s.token));
-        const seat = me();
-        if (taken.has(seat.token)) seat.token = TOKENS.find((t) => !taken.has(t.id))!.id;
-        await ref.update({ seats: [...r.seats, seat] });
-      }
+    return run(async () => {
+      if (!link) return;
+      await link.join(c, me());
       setCode(c);
       setView('lobby');
-    } catch {
-      setError('לא הצלחתי להיכנס לחדר. בדוק שיש לך הרשאת עריכה בקישור.');
-    } finally {
-      setBusy(false);
-    }
+    });
   };
 
-  const leave = async () => {
-    if (net && code && room && room.status === 'lobby' && room.host !== net.uid) {
-      await roomRef(net, code)
-        .update({ seats: room.seats.filter((s) => s.uid !== net.uid) })
-        .catch(() => {});
-    }
+  const resume = () =>
+    run(async () => {
+      if (!link || !resumable || link.kind !== 'peer') return;
+      await (link as RoomLink & { resume(r: Room): Promise<void> }).resume(resumable);
+      setCode(resumable.code);
+      setView('lobby');
+    });
+
+  const leave = () => {
+    if (link && code) link.leave(code, room);
     setCode(null);
     setRoom(null);
+    setResumable(null);
     setView('profile');
   };
 
   const setRoomField = (patch: Partial<Room>) => {
-    if (net && code) roomRef(net, code).update(patch as Record<string, unknown>).catch(() => {});
+    if (link && code && room) link.patch(code, room, patch);
   };
 
   const start = () => {
-    if (!room || !net || !code) return;
+    if (!room || !link || !code) return;
     const taken = new Set(room.seats.map((s) => s.token));
     const free = TOKENS.filter((t) => !taken.has(t.id));
     const state = newGame(
@@ -145,8 +120,8 @@ export function Online({ onBack }: { onBack: () => void }) {
   };
 
   // ---------- the game itself ----------
-  if (net && code && room?.status === 'playing' && room.state && room.seats.some((s) => s.uid === net.uid)) {
-    return <OnlineGame net={net} code={code} room={room} onExit={leave} />;
+  if (link && code && room?.status === 'playing' && room.state && room.seats.some((s) => s.uid === link.uid)) {
+    return <OnlineGame link={link} code={code} room={room} onExit={leave} />;
   }
 
   const titles: Record<View, string> = {
@@ -168,7 +143,7 @@ export function Online({ onBack }: { onBack: () => void }) {
 
       {view === 'unavailable' && (
         <div className="setup-summary">
-          משחק בקוד עובד רק כשפותחים את המשחק מהקישור של Claude, מחוברים לחשבון, ועם הרשאת עריכה בקישור.
+          הדפדפן הזה לא תומך במשחק אונליין. נסה לפתוח את המשחק בכרום.
         </div>
       )}
 
@@ -191,6 +166,11 @@ export function Online({ onBack }: { onBack: () => void }) {
               </button>
             ))}
           </div>
+          {view === 'profile' && resumable && (
+            <button className="btn btn-gold" disabled={busy} onClick={resume}>
+              ↩️ חזור לחדר {resumable.code}
+            </button>
+          )}
           {view === 'profile' ? (
             <div className="choices small">
               <button className="choice" disabled={busy} onClick={create}>
@@ -225,7 +205,7 @@ export function Online({ onBack }: { onBack: () => void }) {
         </div>
       )}
 
-      {view === 'lobby' && room && net && (
+      {view === 'lobby' && room && link && (
         <div className="setup-panel">
           <div className="room-code">
             <small>קוד החדר</small>
@@ -238,14 +218,14 @@ export function Online({ onBack }: { onBack: () => void }) {
                 <Token token={s.token} size="22px" />
                 {s.name}
                 {s.uid === room.host ? ' 👑' : ''}
-                {s.uid === net.uid ? ' (אתה)' : ''}
+                {s.uid === link.uid ? ' (אתה)' : ''}
               </span>
             ))}
             {Array.from({ length: room.bots }, (_, i) => (
               <span key={`b${i}`}>🤖 {BOT_NAMES[i]}</span>
             ))}
           </div>
-          {room.host === net.uid ? (
+          {room.host === link.uid ? (
             <>
               <div className="setup-field">
                 להוסיף בוטים?
@@ -299,21 +279,22 @@ export function Online({ onBack }: { onBack: () => void }) {
   );
 }
 
-/** Runs the shared game: everyone renders the room's state; whoever is acting writes the next state. */
-function OnlineGame({ net, code, room, onExit }: { net: Net; code: string; room: Room; onExit: () => void }) {
+/** Runs the shared game: everyone renders the room's state; whoever is acting sends the next state. */
+function OnlineGame({ link, code, room, onExit }: { link: RoomLink; code: string; room: Room; onExit: () => void }) {
   const pending = useRef(false);
   const [writeError, setWriteError] = useState(false);
+  const [connected, setConnected] = useState(true);
+  useEffect(() => link.onStatus(setConnected), [link]);
   const latest = useRef(room);
   latest.current = room;
   const send = async (next: GameState) => {
     if (pending.current) return;
     pending.current = true;
     try {
-      // a full replace: update() would merge the old phase object into the new one
-      await roomRef(net, code).set({ ...latest.current, state: next } as unknown as Record<string, unknown>);
+      await link.sendState(code, latest.current, next);
       setWriteError(false);
     } catch {
-      // the shared state stays as it was; usually the viewer lacks Editor access
+      // the shared state stays as it was
       setWriteError(true);
     } finally {
       pending.current = false;
@@ -324,13 +305,20 @@ function OnlineGame({ net, code, room, onExit }: { net: Net; code: string; room:
       <Game
         key={code}
         initial={room.state!}
-        online={{ myUid: net.uid, isHost: room.host === net.uid, state: room.state!, send }}
+        online={{ myUid: link.uid, isHost: room.host === link.uid, state: room.state!, send }}
         onExit={onExit}
         onNewGame={onExit}
       />
+      {link.kind === 'peer' && (
+        <div className={`net-status${connected ? ' on' : ''}`} role="status">
+          {connected ? `🟢 מחובר · ${code}` : '🔴 מנותק, מתחבר מחדש…'}
+        </div>
+      )}
       {writeError && (
         <div className="write-error" role="alert">
-          אין לך הרשאה לשמור מהלכים. בקש מבעל המשחק להזמין אותך כעורך (Editor) בתפריט Share.
+          {link.kind === 'claude'
+            ? 'אין לך הרשאה לשמור מהלכים. בקש מבעל המשחק להזמין אותך כעורך (Editor) בתפריט Share.'
+            : 'המהלך לא נשלח – אין חיבור למארח. מתחבר מחדש…'}
         </div>
       )}
     </>
