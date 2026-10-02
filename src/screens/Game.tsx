@@ -14,6 +14,8 @@ import { MyPropsTab } from '../tabs/MyPropsTab';
 import { ProfileTab } from '../tabs/ProfileTab';
 import { TradeTab, type TradeDraft } from '../tabs/TradeTab';
 import { Modal } from '../ui/Modal';
+import { sfx } from '../ui/sound';
+import { CardReveal } from '../ui/CardReveal';
 import { PropertyCard } from '../ui/PropertyCard';
 import { Token } from '../ui/Token';
 import { Winner } from './Winner';
@@ -144,6 +146,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
     if (game.rollSeq === lastRoll.current) return;
     lastRoll.current = game.rollSeq;
     setRolling(true);
+    sfx.dice();
     window.clearTimeout(rollTimer.current);
     rollTimer.current = window.setTimeout(() => setRolling(false), 900);
   }, [game.rollSeq]);
@@ -172,6 +175,33 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
     return () => window.clearTimeout(t);
   }, [banner]);
 
+  // sounds for each money animation and big banner, from the viewer's side of the table
+  useEffect(() => {
+    if (!flash) return;
+    const p = flash.payment;
+    if (p.to === viewer) sfx.gain();
+    else if (p.from === viewer) sfx.loss();
+    else sfx.coin();
+  }, [flash?.key]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!banner) return;
+    const k = banner.a.kind;
+    if (k === 'buy' || k === 'auction') sfx.buy();
+    else if (k === 'house' || k === 'hotel') sfx.build(k === 'hotel');
+    else if (k === 'trade') sfx.trade();
+    else if (k === 'jail') sfx.jail();
+  }, [banner?.key]); // eslint-disable-line react-hooks/exhaustive-deps
+  const cardKey = game.phase.t === 'card' && !busy ? `${game.turn}-${game.phase.deck}-${game.phase.card}` : null;
+  useEffect(() => {
+    if (!cardKey) return;
+    if (cardKey.includes('-chest-')) sfx.chest();
+    else sfx.chance();
+  }, [cardKey]);
+  const over = game.phase.t === 'gameover' && !busy;
+  useEffect(() => {
+    if (over) sfx.win();
+  }, [over]);
+
   useEffect(() => {
     if (!flash) return;
     const t = window.setTimeout(() => setPayQueue((q) => q.slice(1)), 1850);
@@ -187,13 +217,14 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
     if (rolling || !moving) return;
     const t = setTimeout(
       () =>
-        setShown((sh) =>
-          sh.map((pos, i) => {
+        setShown((sh) => {
+          sfx.step();
+          return sh.map((pos, i) => {
             const target = game.players[i].pos;
             if (pos === target) return pos;
             return (target - pos + 40) % 40 <= 12 ? (pos + 1) % 40 : target;
-          }),
-        ),
+          });
+        }),
       STEP_MS,
     );
     return () => clearTimeout(t);
@@ -371,9 +402,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
       return (
         <Modal tone="blue">
           <div className="card-pop">
-            <div className="card-deck">{ph.deck === 'chance' ? '? הפתעה' : '🧰 תיבת המזל'}</div>
-            <div className="card-who">{cur.name} שלף כרטיס:</div>
-            <div className="card-text">{card.text}</div>
+            <CardReveal key={cardKey ?? ''} deck={ph.deck} who={cur.name} text={card.text} />
             {myTurn && (
               <button className="btn btn-red" onClick={() => act({ type: 'ACK_CARD' })}>
                 אישור

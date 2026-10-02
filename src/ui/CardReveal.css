@@ -1,0 +1,242 @@
+.cr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.cr-stage {
+  position: relative;
+  width: 170px;
+  height: 130px;
+  display: grid;
+  place-items: end center;
+}
+
+/* glow behind the chest / card */
+.cr-rays {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 230px;
+  height: 230px;
+  margin: -115px 0 0 -115px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(rgba(255, 214, 80, 0.55) 0 12deg, transparent 12deg 30deg);
+  mask-image: radial-gradient(circle, #000 25%, transparent 68%);
+  -webkit-mask-image: radial-gradient(circle, #000 25%, transparent 68%);
+  opacity: 0;
+  animation: cr-rays-in 0.5s ease 0.6s forwards, cr-spin 6s linear 0.6s infinite;
+}
+@keyframes cr-rays-in {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes cr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- the treasure chest ---------- */
+.chest {
+  position: relative;
+  width: 112px;
+  height: 92px;
+  animation: chest-shake 0.5s ease-in-out;
+  z-index: 1;
+}
+@keyframes chest-shake {
+  20% {
+    transform: rotate(-6deg);
+  }
+  40% {
+    transform: rotate(6deg);
+  }
+  60% {
+    transform: rotate(-4deg);
+  }
+  80% {
+    transform: rotate(3deg);
+  }
+}
+.chest-body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 58px;
+  border-radius: 6px 6px 10px 10px;
+  background: linear-gradient(180deg, #a0522d, #6b3410);
+  border: 3px solid #3f1d05;
+  box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.2);
+}
+.chest-inside {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 50px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, #fff6c9, #ffcf33 45%, #a86b00);
+  box-shadow: 0 0 22px 8px rgba(255, 210, 63, 0.9);
+  opacity: 0;
+  animation: cr-rays-in 0.3s ease 0.6s forwards;
+}
+.chest-lid {
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  bottom: 54px;
+  height: 36px;
+  border-radius: 40px 40px 4px 4px;
+  background: linear-gradient(180deg, #b5652f, #7a3d12);
+  border: 3px solid #3f1d05;
+  transform-origin: 4% 100%;
+  animation: chest-open 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) 0.5s forwards;
+  z-index: 2;
+}
+@keyframes chest-open {
+  to {
+    transform: rotate(-38deg);
+  }
+}
+.chest-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 16px;
+  margin-left: -8px;
+  background: linear-gradient(90deg, #c98a00, #ffd23f 50%, #c98a00);
+  border-left: 2px solid #7a4a00;
+  border-right: 2px solid #7a4a00;
+}
+.chest-lock {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 20px;
+  height: 22px;
+  margin-left: -10px;
+  border-radius: 4px 4px 8px 8px;
+  background: linear-gradient(180deg, #ffe680, #d99a00);
+  border: 2px solid #7a4a00;
+}
+.chest-lock::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 7px;
+  width: 4px;
+  height: 7px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: #5c3500;
+}
+.cr-paper {
+  position: absolute;
+  left: 50%;
+  bottom: 40px;
+  font-size: 40px;
+  transform: translate(-50%, 0) scale(0.3);
+  opacity: 0;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.35));
+  animation: paper-up 0.6s cubic-bezier(0.2, 1.4, 0.4, 1) 0.85s forwards;
+  z-index: 3;
+}
+@keyframes paper-up {
+  to {
+    opacity: 1;
+    transform: translate(-50%, -62px) scale(1) rotate(-8deg);
+  }
+}
+
+/* ---------- the "?" card for הפתעה ---------- */
+.cr-qcard {
+  position: relative;
+  z-index: 1;
+  width: 78px;
+  height: 108px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(160deg, #ff4fa3, #e0218a 55%, #a3115f);
+  border: 4px solid #fff;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 64px;
+  font-weight: 900;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
+  animation: q-spin 0.9s cubic-bezier(0.3, 1.3, 0.5, 1) both;
+}
+@keyframes q-spin {
+  from {
+    transform: rotateY(720deg) scale(0.2);
+    opacity: 0;
+  }
+}
+
+/* sparkles bursting out */
+.cr-sparkles {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  z-index: 4;
+}
+.cr-sparkles i {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px;
+  border-radius: 50%;
+  background: #fff3a8;
+  box-shadow: 0 0 8px 2px #ffd23f;
+  opacity: 0;
+  animation: sparkle 0.8s ease-out forwards;
+}
+@keyframes sparkle {
+  0% {
+    opacity: 1;
+    transform: rotate(var(--a)) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(-78px) scale(0.3);
+  }
+}
+
+.cr-text {
+  opacity: 0;
+  animation: cr-text-in 0.4s ease 1.05s forwards;
+}
+.cr-chance .cr-text {
+  animation-delay: 0.7s;
+}
+@keyframes cr-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cr *,
+  .cr-text {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  .chest-lid {
+    transform: rotate(-38deg);
+  }
+  .cr-paper {
+    transform: translate(-50%, -62px);
+  }
+  .cr-sparkles {
+    display: none;
+  }
+}

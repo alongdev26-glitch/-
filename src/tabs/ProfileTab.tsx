@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { netWorth, ownedBy } from '../engine/rules';
 import type { GameState } from '../engine/types';
 import { Token, TOKENS } from '../ui/Token';
+import { SoundToggle } from '../ui/SoundToggle';
 import './tabs.css';
 
 interface Props {
@@ -23,6 +24,7 @@ export function ProfileTab({ game, me, onExit, onNewGame, canTakeOver, onSetBot 
   return (
     <div className="page">
       <h2 className="page-title">פרופיל</h2>
+      <SoundToggle className="btn btn-white" label />
       <div className="profile-card">
         <Token token={p.token} color={p.color} size="44px" />
         <div>

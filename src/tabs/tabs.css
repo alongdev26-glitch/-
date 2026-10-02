@@ -525,3 +525,23 @@
   font-weight: 700;
   font-size: 13px;
 }
+.tab-board {
+  position: relative;
+}
+.board-sound {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  z-index: 6;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: rgba(17, 17, 17, 0.35);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.sound-toggle.btn {
+  align-self: flex-start;
+}

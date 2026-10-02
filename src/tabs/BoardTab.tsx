@@ -1,3 +1,4 @@
+import { SoundToggle } from '../ui/SoundToggle';
 import { BOARD, JAIL_FINE, isOwnable } from '../data/board';
 import { rollDice } from '../engine/reducer';
 import { canBuild, ownedBy } from '../engine/rules';
@@ -57,6 +58,7 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
           </div>
         ))}
       </div>
+      <SoundToggle className="board-sound" />
       {game.round === 1 && <div className="round-one">🚫 סבב ראשון: עוד אי אפשר לקנות נכסים</div>}
       <Board
         game={game}
