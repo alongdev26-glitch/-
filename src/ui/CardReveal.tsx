@@ -1,7 +1,9 @@
 import type { Deck } from '../data/cards';
 import './CardReveal.css';
 
-/** Drawing a card: a treasure chest bursts open for "תיבת המזל", a "?" card spins in for "הפתעה". */
+const CONFETTI = ['#ff4fa3', '#ffd23f', '#1fa24a', '#1e9bd7', '#f28c1e', '#7c3aed'];
+
+/** Drawing a card: a treasure chest bursts open for "תיבת המזל", a gift box pops open with a "?" card for "הפתעה". */
 export function CardReveal({ deck, who, text }: { deck: Deck; who: string; text: string }) {
   return (
     <div className={`cr cr-${deck}`}>
@@ -22,7 +24,28 @@ export function CardReveal({ deck, who, text }: { deck: Deck; who: string; text:
             <div className="cr-paper">📜</div>
           </>
         ) : (
-          <div className="cr-qcard">?</div>
+          <>
+            <div className="gift">
+              <div className="gift-lid">
+                <i className="gift-bow" />
+              </div>
+              <div className="gift-box" />
+            </div>
+            <div className="cr-qcard">?</div>
+            <div className="cr-confetti">
+              {Array.from({ length: 16 }, (_, i) => (
+                <i
+                  key={i}
+                  style={{
+                    ['--x' as string]: `${((i * 37) % 160) - 80}px`,
+                    ['--r' as string]: `${(i * 67) % 360}deg`,
+                    background: CONFETTI[i % CONFETTI.length],
+                    animationDelay: `${0.75 + (i % 4) * 0.04}s`,
+                  }}
+                />
+              ))}
+            </div>
+          </>
         )}
         <div className="cr-sparkles">
           {Array.from({ length: 12 }, (_, i) => (
