@@ -1,0 +1,27 @@
+.bld {
+  display: block;
+  flex: none;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45));
+  overflow: visible;
+}
+.bld-house {
+  aspect-ratio: 1;
+}
+.bld-hotel {
+  aspect-ratio: 40 / 24;
+}
+.bld.pop {
+  animation: bld-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  transform-origin: 50% 100%;
+}
+@keyframes bld-pop {
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

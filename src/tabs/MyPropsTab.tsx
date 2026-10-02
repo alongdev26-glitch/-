@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { House, Hotel } from '../ui/Building';
 import { BOARD, FEE_ROUNDS } from '../data/board';
 import {
   bankSaleValue,
@@ -131,8 +132,20 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
                     </small>
                   </button>
                   <div className="row-tags">
-                    {st.houses > 0 && st.houses < 5 && <span className="tag green">🏠 ×{st.houses}</span>}
-                    {st.houses === 5 && <span className="tag red">🏨 מלון</span>}
+                    {st.houses > 0 && st.houses < 5 && (
+                      <span className="tag green tag-bld">
+                        {Array.from({ length: st.houses }, (_, k) => (
+                          <House key={k} />
+                        ))}
+                        {st.houses} {st.houses === 1 ? 'בית' : 'בתים'}
+                      </span>
+                    )}
+                    {st.houses === 5 && (
+                      <span className="tag red tag-bld">
+                        <Hotel />
+                        מלון
+                      </span>
+                    )}
                     {st.mortgaged && (
                       <span className="tag red">ממושכן · בלי שכירות</span>
                     )}

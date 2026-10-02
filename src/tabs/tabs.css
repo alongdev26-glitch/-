@@ -477,3 +477,46 @@
   color: #555;
   font-size: 12px;
 }
+.tab-board.r1 {
+  --board-size: calc(min(100cqw, 100cqh - 190px) - 16px);
+}
+.round-one {
+  align-self: center;
+  margin: 2px 0 4px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: #fff4c2;
+  border: 1.5px solid #e8a20c;
+  color: #7a2e00;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.tag-bld {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.tag-bld .bld-house {
+  width: 16px;
+}
+.tag-bld .bld-house + .bld-house {
+  margin-inline-start: -4px;
+}
+.tag-bld .bld-hotel {
+  width: 28px;
+  margin-inline-end: 3px;
+}
+.tag-bld .bld-house:last-of-type {
+  margin-inline-end: 3px;
+}
+.tag.tag-bld {
+  background: #fff;
+  border: 1.5px solid currentColor;
+}
+.tag.green.tag-bld {
+  color: #15803d;
+}
+.tag.red.tag-bld {
+  color: #c00016;
+}

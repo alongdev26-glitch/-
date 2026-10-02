@@ -197,6 +197,11 @@ function land(s: GameState, mod?: RentMod) {
   if (isOwnable(sp)) {
     const st = s.props[sp.id];
     if (st.owner === null) {
+      // the first round is a free lap: nothing can be bought yet
+      if (s.round === 1) {
+        log(s, `סבב ראשון – עוד אי אפשר לקנות את ${sp.name}`);
+        return finishMove(s);
+      }
       s.phase = { t: 'buy', space: sp.id };
       return;
     }

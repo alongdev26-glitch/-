@@ -63,8 +63,11 @@
   border-top: 0.5px solid var(--board-line);
 }
 .side-top .buildings {
-  top: auto;
-  bottom: 3%;
+  top: 88%;
+}
+.face.has-bld .strip {
+  color: transparent;
+  text-shadow: none;
 }
 .side-top .owner-badge {
   bottom: auto;
@@ -131,25 +134,25 @@
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
 }
 
+/* buildings sit in the middle of the color strip, covering the city name like real game pieces */
 .buildings {
   position: absolute;
-  top: 3%;
+  top: 12%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
-  gap: 4cqi;
+  align-items: flex-end;
+  z-index: 2;
+  pointer-events: none;
 }
-.house,
-.hotel {
-  display: block;
-  width: 14cqi;
-  height: 14cqi;
-  background: #1fa24a;
-  border: 1px solid #0b5e25;
-  clip-path: polygon(50% 0, 100% 40%, 100% 100%, 0 100%, 0 40%);
+.buildings .bld-house {
+  width: 25cqi;
 }
-.hotel {
-  width: 30cqi;
-  background: #e3001b;
-  border-color: #7a000f;
+.buildings .bld-house + .bld-house {
+  margin-inline-start: -3cqi;
+}
+.buildings .bld-hotel {
+  width: 52cqi;
 }
 .space.owned {
   box-shadow: inset 0 0 0 max(2px, 4cqmin) var(--owner);

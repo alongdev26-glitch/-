@@ -6,11 +6,15 @@ import { actor, newGame, reduce } from './reducer';
 import { canBuild, feeDue, rentFor } from './rules';
 import type { Action, GameState } from './types';
 
-const setup = (n = 2) =>
-  newGame(
+/** A fresh game moved past the first round, where buying is not allowed yet. */
+const setup = (n = 2) => {
+  const s = newGame(
     Array.from({ length: n }, (_, i) => ({ name: `P${i}`, token: 'cat' as const, isBot: false })),
     () => 0.5,
   );
+  s.round = 2;
+  return s;
+};
 
 const run = (s: GameState, ...actions: Action[]) => actions.reduce(reduce, s);
 
@@ -224,14 +228,14 @@ describe('mortgage payments', () => {
 
   it('starts counting at the first purchase and charges every 7 rounds into the pot', () => {
     let s = run(setup(), { type: 'ROLL', dice: [2, 4] }, { type: 'BUY' });
-    expect(s.feeStart).toBe(1);
+    expect(s.feeStart).toBe(2);
     s.props[5].owner = 1; // railway for the other player
-    for (let r = 1; r < 7; r++) s = endRound(s);
-    expect(s.round).toBe(7);
+    for (let r = 2; r < 8; r++) s = endRound(s);
+    expect(s.round).toBe(8);
     expect(s.pot).toBe(0);
     const before = [s.players[0].money, s.players[1].money];
     s = endRound(s);
-    expect(s.round).toBe(8);
+    expect(s.round).toBe(9);
     expect(s.players[0].money).toBe(before[0] - 50); // half of 100
     expect(s.players[1].money).toBe(before[1] - 100); // half of 200
     expect(s.pot).toBe(150);
@@ -518,5 +522,20 @@ describe('selling to the bank', () => {
     expect(botAction(s, () => 0.5)).toEqual({ type: 'SELL_BANK', space: 39 });
     s = reduce(s, botAction(s, () => 0.5)!);
     expect(botAction(s, () => 0.5)).toEqual({ type: 'PAY_DEBT' });
+  });
+});
+
+describe('first round', () => {
+  it('nothing can be bought on the first lap', () => {
+    let s = setup();
+    s.round = 1;
+    s = run(s, { type: 'ROLL', dice: [2, 4] });
+    expect(s.phase.t).toBe('end');
+    expect(s.props[6].owner).toBeNull();
+  });
+  it('buying opens from the second round', () => {
+    let s = setup();
+    s = run(s, { type: 'ROLL', dice: [2, 4] });
+    expect(s.phase).toEqual({ t: 'buy', space: 6 });
   });
 });

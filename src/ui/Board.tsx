@@ -1,3 +1,4 @@
+import { House, Hotel } from './Building';
 import type { ReactNode } from 'react';
 import { BOARD, GROUP_COLORS, gridPos, sideOf, type Space } from '../data/board';
 import type { GameState } from '../engine/types';
@@ -111,14 +112,14 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
             onClick={() => onSpace(sp.id)}
             aria-label={owner ? `${sp.name}, בבעלות ${owner.name}` : sp.name}
           >
-            <div className={`face${st.mortgaged ? ' mortgaged' : ''}`} dir="rtl">
+            <div className={`face${st.mortgaged ? ' mortgaged' : ''}${st.houses > 0 ? ' has-bld' : ''}`} dir="rtl">
               {side === 'corner' ? <Corner sp={sp} /> : <SpaceFace sp={sp} />}
               {st.houses > 0 && (
                 <div className="buildings">
                   {st.houses === 5 ? (
-                    <i className="hotel" />
+                    <Hotel key="hotel" className="pop" />
                   ) : (
-                    Array.from({ length: st.houses }, (_, i) => <i key={i} className="house" />)
+                    Array.from({ length: st.houses }, (_, i) => <House key={i} className="pop" />)
                   )}
                 </div>
               )}

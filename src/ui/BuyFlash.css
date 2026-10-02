@@ -37,7 +37,16 @@
 }
 .bf-build {
   margin-inline-start: auto;
-  font-size: 40px;
+  display: flex;
+  align-items: flex-end;
+}
+.bf-build .bld-house {
+  width: 52px;
+}
+.bf-build .bld-hotel {
+  width: 84px;
+}
+.bf-build {
   animation: bf-bounce 0.6s ease 0.2s 2;
 }
 .bf-card {

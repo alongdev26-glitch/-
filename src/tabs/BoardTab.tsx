@@ -38,7 +38,7 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
   }
 
   return (
-    <div className="tab-board">
+    <div className={`tab-board${game.round === 1 ? ' r1' : ''}`}>
       <div className="players-strip">
         {game.players.map((p) => (
           <div
@@ -57,6 +57,7 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
           </div>
         ))}
       </div>
+      {game.round === 1 && <div className="round-one">🚫 סבב ראשון: עוד אי אפשר לקנות נכסים</div>}
       <Board
         game={game}
         shown={shown}

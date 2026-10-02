@@ -1,3 +1,4 @@
+import { House, Hotel } from './Building';
 import { BOARD, GROUP_COLORS } from '../data/board';
 import './PropertyCard.css';
 
@@ -36,8 +37,18 @@ export function PropertyCard({ id, ownerName }: { id: number; ownerName?: string
             <div className="deed-row" key={i}>
               <span>
                 {RENT_LABELS[i]}
-                {i > 0 && i < 5 && <i className="mini-house">{i}</i>}
-                {i === 5 && <i className="mini-hotel" />}
+                {i > 0 && i < 5 && (
+                  <span className="mini-blds">
+                    {Array.from({ length: i }, (_, k) => (
+                      <House key={k} />
+                    ))}
+                  </span>
+                )}
+                {i === 5 && (
+                  <span className="mini-blds">
+                    <Hotel />
+                  </span>
+                )}
               </span>
               <b>ש"ח {r}</b>
             </div>

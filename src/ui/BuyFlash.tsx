@@ -1,3 +1,4 @@
+import { House, Hotel } from './Building';
 import { BOARD, GROUP_COLORS } from '../data/board';
 import type { Announcement, GameState } from '../engine/types';
 import { Token } from './Token';
@@ -31,7 +32,7 @@ export function BuyFlash({ game, a }: { game: GameState; a: Announcement }) {
           <div className="bf-name">{p.name}</div>
           <div className="bf-head">{HEADLINE[a.kind]}</div>
         </div>
-        {building && <span className="bf-build">{a.kind === 'hotel' ? '🏨' : '🏠'}</span>}
+        {building && <span className="bf-build">{a.kind === 'hotel' ? <Hotel /> : <House />}</span>}
       </div>
       <div className="bf-card">
         <div className="bf-strip" style={{ background: strip }}>
