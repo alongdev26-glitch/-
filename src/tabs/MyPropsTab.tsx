@@ -27,10 +27,12 @@ interface Props {
   onSpace: (id: number) => void;
   /** open the trades tab (to sell to another player while in debt) */
   onTrade?: () => void;
+  /** a free property is waiting to be bought: go back to the buy dialog */
+  onBackToBuy?: () => void;
 }
 
 /** Page 2: my cash and everything I own, with build / mortgage controls. */
-export function MyPropsTab({ game, me, myTurn, act, onSpace, onTrade }: Props) {
+export function MyPropsTab({ game, me, myTurn, act, onSpace, onTrade, onBackToBuy }: Props) {
   const player = game.players[me];
   const sets = SETS.map((set) => ({ ...set, mine: set.ids.filter((id) => game.props[id].owner === me) })).filter(
     (s) => s.mine.length > 0,
@@ -78,6 +80,17 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace, onTrade }: Props) {
           </div>
         )}
       </div>
+
+      {onBackToBuy && ph.t === 'buy' && (
+        <div className="confirm">
+          <span>
+            {BOARD[ph.space].name} מחכה לקנייה ב-ש"ח {BOARD[ph.space].price}. יש לך ש"ח {player.money}.
+          </span>
+          <button className="btn btn-red btn-sm" onClick={onBackToBuy}>
+            חזור לקנייה
+          </button>
+        </div>
+      )}
 
       {debt > 0 && (
         <div className="confirm">

@@ -127,12 +127,19 @@
   padding: 6px 10px;
   border-radius: 10px;
   pointer-events: none;
-  animation: toast-in 0.3s ease;
+  /* shows each new log line for a few seconds, then gets out of the way */
+  animation: toast-in 0.3s ease, toast-out 0.5s ease 4s forwards;
   z-index: 6;
 }
 @keyframes toast-in {
   from {
     opacity: 0;
+  }
+}
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
   }
 }
 .waiting {

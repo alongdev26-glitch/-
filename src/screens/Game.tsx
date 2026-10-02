@@ -235,7 +235,8 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
     if (busy || (online && !online.isHost)) return;
     const a = botAction(game);
     if (!a) return;
-    const delay = game.phase.t === 'card' ? 1600 : game.phase.t === 'auction' ? 500 : 1000;
+    // a drawn card stays up long enough for its opening animation and text to be read
+    const delay = game.phase.t === 'card' ? 3000 : game.phase.t === 'auction' ? 500 : 1000;
     const t = setTimeout(() => act(a), delay);
     return () => clearTimeout(t);
   }, [game, busy, act, online]);
@@ -315,7 +316,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
         </Modal>
       );
     }
-    if (ph.t === 'buy' && myTurn) {
+    if (ph.t === 'buy' && myTurn && tab !== 'mine') {
       const price = BOARD[ph.space].price!;
       return (
         <Modal title="נכס פנוי!">
@@ -329,9 +330,15 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
             </button>
           </div>
           {me.money < price && (
-            <div className="modal-note">
-              אין מספיק כסף. אפשר למכור נכס לבנק בעמוד "הנכסים שלי" ולחזור{hasAuction(game) ? ', או להוציא למכירה פומבית' : ', או לוותר'}.
-            </div>
+            <>
+              <div className="modal-note">
+                אין מספיק כסף. אפשר למכור בתים או נכס לבנק ב"הנכסים שלי" ולחזור לקנות
+                {hasAuction(game) ? ', או להוציא למכירה פומבית' : ', או לוותר'}.
+              </div>
+              <button className="btn btn-white" onClick={() => setTab('mine')}>
+                לנכסים שלי
+              </button>
+            </>
           )}
         </Modal>
       );
@@ -475,7 +482,15 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
             onTakeover={stalled && canTakeOver(game.current) && !cur.isBot ? () => setBot(game.current, true) : undefined}
           />
         )}
-        {tab === 'mine' && <MyPropsTab game={game} me={me.id} myTurn={myTurn && !busy} act={act} onSpace={setInfo} onTrade={() => setTab('trade')} />}
+        {tab === 'mine' && <MyPropsTab
+            game={game}
+            me={me.id}
+            myTurn={myTurn && !busy}
+            act={act}
+            onSpace={setInfo}
+            onTrade={() => setTab('trade')}
+            onBackToBuy={ph.t === 'buy' && myTurn ? () => setTab('board') : undefined}
+          />}
         {tab === 'market' && <MarketTab game={game} onSpace={setInfo} />}
         {tab === 'trade' && (
           <TradeTab
