@@ -5,10 +5,8 @@ import {
   bankSaleValue,
   canSellToBank,
   canBuild,
-  canMortgage,
   canSell,
   canUnmortgage,
-  mortgageValue,
   ownsGroup,
   feeDue,
   feeFor,
@@ -92,7 +90,7 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
           </button>
           {player.money < debt && (
             <small className="debt-hint">
-              אפשר למכור בתים{game.rules.mortgage ? ', למשכן' : ''} או למכור נכסים לבנק בחצי מחיר.
+              אפשר למכור בתים או למכור נכסים לבנק בחצי מחיר.
             </small>
           )}
         </div>
@@ -171,13 +169,9 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
                       >
                         {confirmId === id ? 'בטוח? מכור' : `מכור לבנק (+${bankSaleValue(game, id)})`}
                       </button>
-                      {!game.rules.mortgage ? null : st.mortgaged ? (
+                      {st.mortgaged && (
                         <button className="btn btn-gold" disabled={!canUnmortgage(game, me, id)} onClick={() => act({ type: 'UNMORTGAGE', space: id })}>
                           פדה ({unmortgageCost(id)})
-                        </button>
-                      ) : (
-                        <button className="btn btn-black" disabled={!canMortgage(game, me, id)} onClick={() => act({ type: 'MORTGAGE', space: id })}>
-                          משכן (+{mortgageValue(id)})
                         </button>
                       )}
                     </div>
@@ -191,9 +185,9 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
       {sets.length > 0 && (
         <div className="note">
           {game.rules.mortgage
-            ? `כל ${FEE_ROUNDS} סבבים משלמים לקופת הלוטו חצי ממחיר כל נכס. נכס ממושכן לא משלם, אבל גם לא גובה שכירות.`
+            ? `כל ${FEE_ROUNDS} סבבים משלמים לקופת הלוטו חצי ממחיר כל נכס.`
             : 'במשחק הזה אין משכנתא.'}
-          {' אפשר למכור נכס בלי בתים לבנק בחצי ממחירו (נכס ממושכן תמורת 0), והוא חוזר להיות פנוי.'}
+          {' אפשר למכור נכס בלי בתים לבנק בחצי ממחירו, והוא חוזר להיות פנוי.'}
           {!myTurn && ' בנייה ומכירה אפשריות רק בתור שלך.'}
         </div>
       )}

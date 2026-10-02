@@ -5,11 +5,9 @@ import {
   canSellToBank,
   canBuild,
   canTradeProp,
-  canMortgage,
   canSell,
   canUnmortgage,
   feeDue,
-  mortgageValue,
   ownedBy,
   rentFor,
   roundsToFee,
@@ -181,10 +179,6 @@ export function botAction(s: GameState, rng: () => number = Math.random): Action
       const mine = ownedBy(s, me);
       const sell = mine.filter((id) => canSell(s, me, id)).sort((a, b) => sellValue(a) - sellValue(b))[0];
       if (sell !== undefined) return { type: 'SELL', space: sell };
-      const mort = mine
-        .filter((id) => canMortgage(s, me, id))
-        .sort((a, b) => mortgageValue(a) - mortgageValue(b))[0];
-      if (mort !== undefined) return { type: 'MORTGAGE', space: mort };
       const sale = mine
         .filter((id) => canSellToBank(s, me, id) && bankSaleValue(s, id) > 0)
         .sort((a, b) => bankSaleValue(s, a) - bankSaleValue(s, b))[0];

@@ -5,12 +5,10 @@ import {
   buildingCounts,
   bankSaleValue,
   canBuild,
-  canMortgage,
   canSell,
   canSellToBank,
   hasAuction,
   canUnmortgage,
-  mortgageValue,
   ownedBy,
   rentFor,
   sellValue,
@@ -141,14 +139,6 @@ export function autoRaise(s: GameState, player: number, need: number) {
     if (sell !== undefined) {
       s.props[sell].houses--;
       p.money += sellValue(sell);
-      continue;
-    }
-    const mort = ownedBy(s, player)
-      .filter((id) => canMortgage(s, player, id))
-      .sort((a, b) => mortgageValue(a) - mortgageValue(b))[0];
-    if (mort !== undefined) {
-      s.props[mort].mortgaged = true;
-      p.money += mortgageValue(mort);
       continue;
     }
     const sale = ownedBy(s, player)
@@ -648,13 +638,6 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
     case 'SELL_BANK':
       if (!manageAllowed(s) || !canSellToBank(s, p.id, a.space)) return prev;
       sellToBank(s, p.id, a.space);
-      return s;
-
-    case 'MORTGAGE':
-      if (!manageAllowed(s) || !canMortgage(s, p.id, a.space)) return prev;
-      s.props[a.space].mortgaged = true;
-      p.money += mortgageValue(a.space);
-      log(s, `${p.name} משכן את ${BOARD[a.space].name}`);
       return s;
 
     case 'UNMORTGAGE':

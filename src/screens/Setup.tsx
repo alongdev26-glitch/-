@@ -225,7 +225,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
               <button className={`choice${mortgage ? ' on' : ''}`} onClick={() => setMortgage(true)}>
                 <span className="choice-icon">🏦</span>
                 <b>כן</b>
-                <small>כל {FEE_ROUNDS} סבבים משלמים חצי ממחיר כל נכס. אפשר למשכן נכס ולקבל את מחירו המלא</small>
+                <small>כל {FEE_ROUNDS} סבבים משלמים חצי ממחיר כל נכס לקופת הלוטו</small>
               </button>
               <button className={`choice${!mortgage ? ' on' : ''}`} onClick={() => setMortgage(false)}>
                 <span className="choice-icon">🚫</span>

@@ -241,14 +241,14 @@ describe('mortgage payments', () => {
     expect(s.pot).toBe(150);
   });
 
-  it('voluntary mortgage pays the full price and skips the payment', () => {
+  it('an old mortgaged property skips the payment and can still be redeemed', () => {
     let s = setup();
     s.props[5].owner = 0;
-    s = run(s, { type: 'MORTGAGE', space: 5 });
-    expect(s.players[0].money).toBe(1700);
+    s.props[5].mortgaged = true;
     expect(feeDue(s, 0)).toBe(0);
     s = run(s, { type: 'UNMORTGAGE', space: 5 });
-    expect(s.players[0].money).toBe(1480);
+    expect(s.players[0].money).toBe(1280);
+    expect(s.props[5].mortgaged).toBe(false);
   });
 });
 
@@ -276,7 +276,7 @@ describe('public auction', () => {
 });
 
 describe('game options', () => {
-  it('blocks mortgages when the mortgage rule is off', () => {
+  it('selling to the bank works even when the mortgage rule is off', () => {
     let s = newGame(
       [
         { name: 'A', token: 'cat', isBot: false },
@@ -286,7 +286,7 @@ describe('game options', () => {
       { mortgage: false },
     );
     s.props[6].owner = 0;
-    expect(reduce(s, { type: 'MORTGAGE', space: 6 })).toBe(s);
+    expect(reduce(s, { type: 'SELL_BANK', space: 6 }).props[6].owner).toBeNull();
   });
 });
 

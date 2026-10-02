@@ -55,18 +55,7 @@ export function canSell(s: GameState, player: number, id: number): boolean {
   return st.houses === max;
 }
 
-export function canMortgage(s: GameState, player: number, id: number): boolean {
-  const sp = BOARD[id];
-  const st = s.props[id];
-  if (s.rules?.mortgage === false) return false;
-  if (!isOwnable(sp) || st.owner !== player || st.mortgaged) return false;
-  if (sp.kind === 'property') {
-    return groupMembers(sp.group!).every((g) => s.props[g].houses === 0);
-  }
-  return true;
-}
-
-/** Voluntary mortgage pays the property's full price. */
+/** What redeeming an old mortgaged property is based on (mortgaging itself was removed). */
 export const mortgageValue = (id: number) => BOARD[id].price!;
 export const unmortgageCost = (id: number) => Math.round(mortgageValue(id) * 1.1);
 /** The payment due every FEE_ROUNDS rounds on an owned, unmortgaged property. */
@@ -107,8 +96,7 @@ export function liquidationValue(s: GameState, player: number): number {
   return ownedBy(s, player).reduce((sum, id) => {
     const st = s.props[id];
     const houses = BOARD[id].kind === 'property' ? st.houses * sellValue(id) : 0;
-    const asset = s.rules?.mortgage === false ? bankSaleValue(s, id) : st.mortgaged ? 0 : mortgageValue(id);
-    return sum + houses + asset;
+    return sum + houses + bankSaleValue(s, id);
   }, 0);
 }
 

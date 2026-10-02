@@ -269,7 +269,7 @@ export function Online({ onBack }: { onBack: () => void }) {
                 </div>
                 <small className="hint">
                   {room.rules.mortgage
-                    ? `כל ${FEE_ROUNDS} סבבים משלמים חצי ממחיר כל נכס. אפשר למשכן נכס ולקבל את מחירו המלא.`
+                    ? `כל ${FEE_ROUNDS} סבבים משלמים חצי ממחיר כל נכס לקופת הלוטו.`
                     : 'בלי תשלומי משכנתא ובלי משכון.'}
                 </small>
               </div>
