@@ -103,29 +103,29 @@ function noise(start: number, dur: number, { vol = 0.25, freq = 2000, q = 1 } = 
 }
 
 export const sfx = {
-  /** dice rattling in a cup (three shakes), then spilling onto the table and bouncing to a stop */
+  /** a soft rattle in a cup, then the dice settle gently on the table */
   dice() {
-    const click = (t: number, vol: number, freq: number) => {
-      noise(t, 0.03, { vol, freq, q: 6 });
-      tone(300 + Math.random() * 80, t, 0.03, { type: 'triangle', vol: vol * 0.25 });
-    };
-    // cup shake: 3 bursts of quick plastic-y clicks
-    for (let burst = 0; burst < 3; burst++) {
-      const start = burst * 0.16;
-      for (let k = 0; k < 5; k++) click(start + k * 0.022 + Math.random() * 0.012, 0.32, 800 + Math.random() * 500);
+    // two soft shakes in the cup: muffled "tk-tk", not a crackle
+    for (let shake = 0; shake < 2; shake++) {
+      for (let k = 0; k < 4; k++) {
+        const t = shake * 0.2 + k * 0.035 + Math.random() * 0.01;
+        noise(t, 0.025, { vol: 0.08 + Math.random() * 0.04, freq: 600 + Math.random() * 300, q: 2 });
+        tone(420 + Math.random() * 60, t, 0.03, { type: 'sine', vol: 0.04 });
+      }
     }
-    // spill: two dice hit the table, then smaller and smaller bounces
-    const land = (t: number, vol: number) => {
-      noise(t, 0.05, { vol, freq: 650 + Math.random() * 200, q: 3 });
-      tone(180 + Math.random() * 40, t, 0.06, { type: 'triangle', vol: vol * 0.35 });
+    // the dice settle on the table: two gentle wooden "toc"s and two small bounces
+    const toc = (t: number, vol: number) => {
+      tone(220 + Math.random() * 40, t, 0.08, { type: 'sine', vol });
+      noise(t, 0.02, { vol: vol * 0.6, freq: 700, q: 1.5 });
     };
-    land(0.55, 0.65);
-    land(0.6, 0.6);
-    [0.68, 0.75, 0.8, 0.84].forEach((t, i) => land(t, 0.42 - i * 0.09));
+    toc(0.5, 0.12);
+    toc(0.56, 0.11);
+    toc(0.66, 0.06);
+    toc(0.73, 0.03);
   },
   /** a token hopping one space */
   step() {
-    tone(660, 0, 0.06, { type: 'triangle', vol: 0.12, to: 880 });
+    tone(660, 0, 0.06, { type: 'triangle', vol: 0.07, to: 880 });
   },
   /** coins in: bright rising "ding ding" */
   gain() {
