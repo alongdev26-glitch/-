@@ -166,12 +166,13 @@ function sellToBank(s: GameState, player: number, id: number) {
   log(s, `${s.players[player].name} מכר את ${BOARD[id].name} לבנק ב-${fmt(value)}`);
 }
 
-function sendToJail(s: GameState) {
+function sendToJail(s: GameState, reason: string) {
   const p = cur(s);
   p.pos = JAIL;
   p.inJail = true;
   p.jailTurns = 0;
   s.again = false;
+  announce(s, { kind: 'jail', player: p.id, space: null, price: 0, detail: reason });
   log(s, `${p.name} נשלח לכלא!`);
 }
 
@@ -228,7 +229,7 @@ function land(s: GameState, mod?: RentMod) {
       return;
     }
     case 'gotojail':
-      sendToJail(s);
+      sendToJail(s, 'נחת על "גש לכלא"');
       return finishMove(s);
     case 'parking':
       if (s.pot > 0) {
@@ -293,7 +294,7 @@ function applyCard(s: GameState, deck: Deck, cardIdx: number) {
       return charge(s, [{ to: null, amount: houses * effect.house + hotels * effect.hotel }]);
     }
     case 'gotojail':
-      sendToJail(s);
+      sendToJail(s, 'כרטיס: גש לכלא');
       return finishMove(s);
   }
 }
@@ -546,7 +547,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
         s.doubles = isDouble ? s.doubles + 1 : 0;
         if (s.doubles === 3) {
           log(s, 'שלושה דאבלים ברצף!');
-          sendToJail(s);
+          sendToJail(s, 'שלושה דאבלים ברצף');
           finishMove(s);
           return s;
         }

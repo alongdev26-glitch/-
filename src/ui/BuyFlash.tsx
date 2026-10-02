@@ -10,12 +10,14 @@ const HEADLINE: Record<Announcement['kind'], string> = {
   house: 'בנה בית!',
   hotel: 'בנה מלון!',
   trade: 'עסקה נסגרה!',
+  jail: 'לך לכלא!',
 };
 
 /** A big banner in the player's color whenever someone buys a property or builds. */
 export function BuyFlash({ game, a }: { game: GameState; a: Announcement }) {
   const p = game.players[a.player];
   if (a.kind === 'trade') return <TradeFlash game={game} a={a} />;
+  if (a.kind === 'jail') return <JailFlash game={game} a={a} />;
   const sp = BOARD[a.space!];
   const strip = sp.group ? GROUP_COLORS[sp.group] : '#333';
   const building = a.kind === 'house' || a.kind === 'hotel';
@@ -61,6 +63,36 @@ function TradeFlash({ game, a }: { game: GameState; a: Announcement }) {
       <div className="bf-card">
         <div className="bf-detail">{a.detail}</div>
       </div>
+    </div>
+  );
+}
+
+/** Police lights, the token, and jail bars slamming down over it. */
+function JailFlash({ game, a }: { game: GameState; a: Announcement }) {
+  const p = game.players[a.player];
+  return (
+    <div className="buy-flash jail-flash" role="status" aria-live="polite" style={{ ['--pc' as string]: p.color }}>
+      <div className="jf-lights" aria-hidden="true">
+        <i className="jf-red" />
+        <i className="jf-blue" />
+      </div>
+      <div className="jf-sirens" aria-hidden="true">
+        <span>🚨</span>
+        <span>🚨</span>
+      </div>
+      <div className="jf-cell">
+        <div className="jf-token">
+          <Token token={p.token} color={p.color} size="64px" />
+        </div>
+        <div className="jf-bars" aria-hidden="true">
+          {Array.from({ length: 6 }, (_, i) => (
+            <i key={i} />
+          ))}
+        </div>
+      </div>
+      <div className="jf-head">{HEADLINE.jail} ⛓️</div>
+      <div className="jf-name">{p.name}</div>
+      {a.detail && <div className="jf-why">{a.detail}</div>}
     </div>
   );
 }

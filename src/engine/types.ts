@@ -82,7 +82,7 @@ export interface TradeOffer {
 
 /** A big on-screen announcement: a purchase, an auction win, or a new house or hotel. */
 export interface Announcement {
-  kind: 'buy' | 'auction' | 'house' | 'hotel' | 'trade';
+  kind: 'buy' | 'auction' | 'house' | 'hotel' | 'trade' | 'jail';
   player: number;
   space: number | null;
   price: number;
