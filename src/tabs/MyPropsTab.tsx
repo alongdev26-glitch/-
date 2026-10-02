@@ -25,10 +25,12 @@ interface Props {
   myTurn: boolean;
   act: (a: Action) => void;
   onSpace: (id: number) => void;
+  /** open the trades tab (to sell to another player while in debt) */
+  onTrade?: () => void;
 }
 
 /** Page 2: my cash and everything I own, with build / mortgage controls. */
-export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
+export function MyPropsTab({ game, me, myTurn, act, onSpace, onTrade }: Props) {
   const player = game.players[me];
   const sets = SETS.map((set) => ({ ...set, mine: set.ids.filter((id) => game.props[id].owner === me) })).filter(
     (s) => s.mine.length > 0,
@@ -85,12 +87,17 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace }: Props) {
           <button className="btn btn-red btn-sm" disabled={player.money < debt} onClick={() => act({ type: 'PAY_DEBT' })}>
             שלם
           </button>
+          {onTrade && (
+            <button className="btn btn-gold btn-sm" onClick={onTrade}>
+              🤝 מכור לשחקן
+            </button>
+          )}
           <button className="btn btn-black btn-sm" onClick={() => act({ type: 'BANKRUPT' })}>
             פשיטת רגל
           </button>
           {player.money < debt && (
             <small className="debt-hint">
-              אפשר למכור בתים או למכור נכסים לבנק בחצי מחיר.
+              אפשר למכור בתים, למכור נכס לבנק בחצי מחיר, או למכור נכסים לשחקן אחר.
             </small>
           )}
         </div>

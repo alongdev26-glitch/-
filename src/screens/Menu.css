@@ -98,3 +98,17 @@
     opacity: 0;
   }
 }
+.menu-sound {
+  position: absolute;
+  top: 18px;
+  left: 14px;
+  z-index: 5;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: rgba(17, 17, 17, 0.3);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}

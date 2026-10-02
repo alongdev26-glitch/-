@@ -545,3 +545,9 @@
 .sound-toggle.btn {
   align-self: flex-start;
 }
+.version {
+  text-align: center;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+  padding: 8px 0 4px;
+}

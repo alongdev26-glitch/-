@@ -134,3 +134,6 @@ button {
 .color-band.bottom {
   bottom: 0;
 }
+.intro-screens {
+  display: contents;
+}

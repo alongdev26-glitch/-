@@ -426,11 +426,11 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
               <button className="btn btn-red" disabled={me.money < total} onClick={() => act({ type: 'PAY_DEBT' })}>
                 שלם
               </button>
+              <button className="btn btn-gold" onClick={() => setTab('trade')}>
+                🤝 מכור לשחקן
+              </button>
               <button className="btn btn-white" onClick={() => setTab('mine')}>
                 לנכסים שלי
-              </button>
-              <button className="btn btn-white" onClick={() => setTab('trade')}>
-                🤝 מכור לשחקן
               </button>
               <button className="btn btn-black" onClick={() => act({ type: 'BANKRUPT' })}>
                 פשיטת רגל
@@ -475,7 +475,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
             onTakeover={stalled && canTakeOver(game.current) && !cur.isBot ? () => setBot(game.current, true) : undefined}
           />
         )}
-        {tab === 'mine' && <MyPropsTab game={game} me={me.id} myTurn={myTurn && !busy} act={act} onSpace={setInfo} />}
+        {tab === 'mine' && <MyPropsTab game={game} me={me.id} myTurn={myTurn && !busy} act={act} onSpace={setInfo} onTrade={() => setTab('trade')} />}
         {tab === 'market' && <MarketTab game={game} onSpace={setInfo} />}
         {tab === 'trade' && (
           <TradeTab

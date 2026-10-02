@@ -100,6 +100,9 @@ export function ProfileTab({ game, me, onExit, onNewGame, canTakeOver, onSetBot 
           </button>
         </div>
       )}
+      <div className="version">
+        גרסה: {new Date(__BUILD__).toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' })}
+      </div>
     </div>
   );
 }

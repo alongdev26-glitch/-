@@ -1,3 +1,4 @@
+import { sfx } from '../ui/sound';
 import { useState } from 'react';
 import { FEE_ROUNDS } from '../data/board';
 import type { GameRules, PlayerSetup, TokenId } from '../engine/types';
@@ -206,7 +207,10 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
                   className={`setup-tile${t.id === humans[who].token ? ' selected' : ''}`}
                   style={{ ['--tc' as string]: t.color }}
                   disabled={taken}
-                  onClick={() => setHuman(who, { token: t.id })}
+                  onClick={() => {
+                    sfx.pop();
+                    setHuman(who, { token: t.id });
+                  }}
                 >
                   <Token token={t.id} size="clamp(22px, 7vw, 44px)" />
                   <span>{taken ? 'תפוס' : t.name}</span>

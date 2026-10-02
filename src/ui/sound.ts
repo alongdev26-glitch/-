@@ -103,11 +103,25 @@ function noise(start: number, dur: number, { vol = 0.25, freq = 2000, q = 1 } = 
 }
 
 export const sfx = {
-  /** dice rattling in the hand, then landing */
+  /** dice rattling in a cup (three shakes), then spilling onto the table and bouncing to a stop */
   dice() {
-    for (let i = 0; i < 7; i++) noise(i * 0.075 + Math.random() * 0.02, 0.05, { vol: 0.35, freq: 2600 + Math.random() * 1500, q: 3 });
-    noise(0.62, 0.08, { vol: 0.5, freq: 1400, q: 2 });
-    noise(0.72, 0.06, { vol: 0.35, freq: 1700, q: 2 });
+    const click = (t: number, vol: number, freq: number) => {
+      noise(t, 0.03, { vol, freq, q: 6 });
+      tone(300 + Math.random() * 80, t, 0.03, { type: 'triangle', vol: vol * 0.25 });
+    };
+    // cup shake: 3 bursts of quick plastic-y clicks
+    for (let burst = 0; burst < 3; burst++) {
+      const start = burst * 0.16;
+      for (let k = 0; k < 5; k++) click(start + k * 0.022 + Math.random() * 0.012, 0.32, 800 + Math.random() * 500);
+    }
+    // spill: two dice hit the table, then smaller and smaller bounces
+    const land = (t: number, vol: number) => {
+      noise(t, 0.05, { vol, freq: 650 + Math.random() * 200, q: 3 });
+      tone(180 + Math.random() * 40, t, 0.06, { type: 'triangle', vol: vol * 0.35 });
+    };
+    land(0.55, 0.65);
+    land(0.6, 0.6);
+    [0.68, 0.75, 0.8, 0.84].forEach((t, i) => land(t, 0.42 - i * 0.09));
   },
   /** a token hopping one space */
   step() {
@@ -164,6 +178,24 @@ export const sfx = {
     noise(0, 0.3, { vol: 0.2, freq: 1200, q: 0.6 });
     tone(1175, 0.3, 0.35, { type: 'triangle', vol: 0.2 });
     tone(1568, 0.42, 0.4, { type: 'triangle', vol: 0.18 });
+  },
+  /** a soft button tap */
+  tap() {
+    tone(1200, 0, 0.05, { type: 'triangle', vol: 0.1, to: 1500 });
+  },
+  /** picking a character */
+  pop() {
+    tone(500, 0, 0.12, { type: 'sine', vol: 0.22, to: 1100 });
+  },
+  /** opening screen: a short cheerful jingle */
+  intro() {
+    [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tone(f, i * 0.11, 0.22, { type: 'triangle', vol: 0.18 }));
+    tone(1319, 0.68, 0.5, { type: 'triangle', vol: 0.16 });
+  },
+  /** "יוצאים לדרך!": a rising start-of-game whoosh and chord */
+  start() {
+    tone(300, 0, 0.35, { type: 'sawtooth', vol: 0.06, to: 1200 });
+    [784, 988, 1175, 1568].forEach((f) => tone(f, 0.32, 0.6, { type: 'triangle', vol: 0.12 }));
   },
   /** victory fanfare */
   win() {

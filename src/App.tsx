@@ -1,10 +1,16 @@
-import { useState } from 'react';
+import { useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { newGame } from './engine/reducer';
 import type { GameState } from './engine/types';
 import { Game, loadGame, saveGame } from './screens/Game';
 import { Menu } from './screens/Menu';
 import { Online } from './screens/Online';
 import { Setup } from './screens/Setup';
+import { sfx } from './ui/sound';
+
+/** A click sound for every button on the opening screens (the game screen has its own sounds). */
+const tapSound = (e: ReactMouseEvent) => {
+  if ((e.target as HTMLElement).closest('button')) sfx.tap();
+};
 
 type Screen = { s: 'menu' } | { s: 'setup' } | { s: 'online' } | { s: 'game'; game: GameState; key: number };
 
@@ -14,20 +20,25 @@ export function App() {
 
   return (
     <>
-      {screen.s === 'menu' && (
-        <Menu
-          onPlay={() => setScreen({ s: 'setup' })}
-          onResume={saved ? () => setScreen({ s: 'game', game: saved, key: Date.now() }) : undefined}
-        />
-      )}
-      {screen.s === 'setup' && (
-        <Setup
-          onBack={() => setScreen({ s: 'menu' })}
-          onOnline={() => setScreen({ s: 'online' })}
-          onStart={(players, rules) => setScreen({ s: 'game', game: newGame(players, Math.random, rules), key: Date.now() })}
-        />
-      )}
-      {screen.s === 'online' && <Online onBack={() => setScreen({ s: 'setup' })} />}
+      <div className="intro-screens" onClickCapture={screen.s === 'game' ? undefined : tapSound}>
+        {screen.s === 'menu' && (
+          <Menu
+            onPlay={() => setScreen({ s: 'setup' })}
+            onResume={saved ? () => setScreen({ s: 'game', game: saved, key: Date.now() }) : undefined}
+          />
+        )}
+        {screen.s === 'setup' && (
+          <Setup
+            onBack={() => setScreen({ s: 'menu' })}
+            onOnline={() => setScreen({ s: 'online' })}
+            onStart={(players, rules) => {
+              sfx.start();
+              setScreen({ s: 'game', game: newGame(players, Math.random, rules), key: Date.now() });
+            }}
+          />
+        )}
+        {screen.s === 'online' && <Online onBack={() => setScreen({ s: 'setup' })} />}
+      </div>
       {screen.s === 'game' && (
         <Game
           key={screen.key}

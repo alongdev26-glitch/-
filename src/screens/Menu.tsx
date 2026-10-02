@@ -1,11 +1,22 @@
 import logo from '../assets/logo.webp';
+import { useRef } from 'react';
 import { RibbonBanner } from '../ui/RibbonBanner';
+import { SoundToggle } from '../ui/SoundToggle';
+import { sfx } from '../ui/sound';
 import { TOKENS, Token } from '../ui/Token';
 import './Menu.css';
 
 export function Menu({ onPlay, onResume }: { onPlay: () => void; onResume?: () => void }) {
+  // browsers only allow sound after the first touch, so the jingle plays on it
+  const played = useRef(false);
+  const jingle = () => {
+    if (played.current) return;
+    played.current = true;
+    sfx.intro();
+  };
   return (
-    <div className="menu">
+    <div className="menu" onPointerDown={jingle}>
+      <SoundToggle className="menu-sound" />
       <div className="color-band top" aria-hidden="true" />
       <div className="color-band bottom" aria-hidden="true" />
       <div className="menu-banner">
