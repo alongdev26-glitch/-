@@ -539,3 +539,78 @@ describe('first round', () => {
     expect(s.phase).toEqual({ t: 'buy', space: 6 });
   });
 });
+
+describe('blocking trade offers', () => {
+  const offer = (to: number): Action => ({
+    type: 'PROPOSE_TRADE',
+    to,
+    give: { props: [], money: 50, jailCards: 0 },
+    get: { props: [], money: 0, jailCards: 1 },
+  });
+
+  it('rejects and blocks the sender for 3 rounds', () => {
+    let s = setup(2);
+    s.players[1].jailCards = ['chance'];
+    s = run(s, offer(1));
+    expect(s.phase.t).toBe('trade');
+    s = reduce(s, { type: 'BLOCK_TRADE' });
+    expect(s.phase).toEqual({ t: 'roll' });
+    expect(s.blocks).toEqual([{ by: 1, from: 0, until: 5 }]);
+    expect(reduce(s, offer(1))).toBe(s);
+    s.round = 5;
+    expect(reduce(s, offer(1)).phase.t).toBe('trade');
+  });
+
+  it('a bot does not offer to a player who blocked it', () => {
+    let s = newGame(
+      [
+        { name: 'B', token: 'cat', isBot: true },
+        { name: 'H', token: 'dog', isBot: false },
+      ],
+      () => 0.5,
+    );
+    s.round = 2;
+    s.props[37].owner = 0;
+    s.props[39].owner = 1;
+    expect(botAction(s, () => 0.5)).toMatchObject({ type: 'PROPOSE_TRADE', to: 1 });
+    s.blocks = [{ by: 1, from: 0, until: 5 }];
+    expect(botAction(s, () => 0.5)).toMatchObject({ type: 'ROLL' });
+  });
+});
+
+describe('trading while in debt', () => {
+  it('sells a property to another player and goes back to paying the debt', () => {
+    let s = setup(2);
+    s.props[39].owner = 0;
+    s.players[0].money = 100;
+    const debt = { t: 'debt' as const, owed: [{ to: null, amount: 300 }], resume: 'end' as const };
+    s.phase = debt;
+    s = reduce(s, {
+      type: 'PROPOSE_TRADE',
+      to: 1,
+      give: { props: [39], money: 0, jailCards: 0 },
+      get: { props: [], money: 350, jailCards: 0 },
+    });
+    expect(s.phase.t).toBe('trade');
+    s = reduce(s, { type: 'ACCEPT_TRADE' });
+    expect(s.phase).toEqual(debt);
+    expect(s.props[39].owner).toBe(1);
+    s = reduce(s, { type: 'PAY_DEBT' });
+    expect(s.phase.t).toBe('end');
+    expect(s.players[0].money).toBe(150);
+  });
+
+  it('a rejected offer returns to the debt', () => {
+    let s = setup(2);
+    s.props[39].owner = 0;
+    s.phase = { t: 'debt', owed: [{ to: 1, amount: 2000 }], resume: 'roll' };
+    s = reduce(s, {
+      type: 'PROPOSE_TRADE',
+      to: 1,
+      give: { props: [39], money: 0, jailCards: 0 },
+      get: { props: [], money: 900, jailCards: 0 },
+    });
+    s = reduce(s, { type: 'REJECT_TRADE' });
+    expect(s.phase).toMatchObject({ t: 'debt', resume: 'roll' });
+  });
+});

@@ -1,3 +1,4 @@
+import logo from '../assets/logo.webp';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { TOKENS, Token } from '../ui/Token';
 import './Menu.css';
@@ -11,7 +12,7 @@ export function Menu({ onPlay, onResume }: { onPlay: () => void; onResume?: () =
         <RibbonBanner text="יוצאים לדרך!" />
       </div>
       <div className="menu-logo">
-        <span className="menu-mascot">🎩</span>
+        <img className="menu-logo-img" src={logo} alt="Big Deal" />
         <div className="menu-plaque">ביג דיל</div>
         <p>משחק המסחר בנכסים: ירושלים, תל-אביב, חיפה ועוד</p>
       </div>

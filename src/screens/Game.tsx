@@ -47,6 +47,7 @@ export function loadGame(): GameState | null {
     g.paySeq ??= 0;
     g.announce ??= null;
     g.announceSeq ??= 0;
+    g.blocks ??= [];
     for (const p of g.players) p.owes ??= [];
     return g;
   } catch {
@@ -346,6 +347,9 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
             <button className="btn btn-black" onClick={() => act({ type: 'REJECT_TRADE' })}>
               סרב
             </button>
+            <button className="btn btn-black" onClick={() => act({ type: 'BLOCK_TRADE' })}>
+              🚫 סרב וחסום
+            </button>
             {o.round < 3 && (
               <button
                 className="btn btn-white"
@@ -358,6 +362,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
               </button>
             )}
           </div>
+          <div className="modal-note">"סרב וחסום": {from.name} לא יוכל לשלוח לך הצעות ב-3 הסבבים הבאים.</div>
         </Modal>
       );
     }
@@ -378,7 +383,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
         </Modal>
       );
     }
-    if (ph.t === 'debt' && myTurn && tab !== 'mine') {
+    if (ph.t === 'debt' && myTurn && tab !== 'mine' && tab !== 'trade') {
       const total = ph.owed.reduce((a, o) => a + o.amount, 0);
       return (
         <Modal title="חוב!">
@@ -387,13 +392,16 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
             <p>
               עליך לשלם <b>ש"ח {total}</b> ויש לך <b>ש"ח {me.money}</b>.
             </p>
-            <p>בעמוד "הנכסים שלי" אפשר למכור בתים או למכור נכס לבנק בחצי ממחירו. המשחק לא ימכור כלום בשבילך.</p>
+            <p>אפשר למכור בתים או נכס לבנק בחצי ממחירו בעמוד "הנכסים שלי", או לנסות למכור נכסים לשחקן אחר בעמוד "העברות". המשחק לא ימכור כלום בשבילך.</p>
             <div className="modal-actions">
               <button className="btn btn-red" disabled={me.money < total} onClick={() => act({ type: 'PAY_DEBT' })}>
                 שלם
               </button>
               <button className="btn btn-white" onClick={() => setTab('mine')}>
                 לנכסים שלי
+              </button>
+              <button className="btn btn-white" onClick={() => setTab('trade')}>
+                🤝 מכור לשחקן
               </button>
               <button className="btn btn-black" onClick={() => act({ type: 'BANKRUPT' })}>
                 פשיטת רגל
@@ -444,7 +452,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
           <TradeTab
             game={game}
             me={me.id}
-            canPropose={myTurn && !busy && (ph.t === 'roll' || ph.t === 'end')}
+            canPropose={myTurn && !busy && (ph.t === 'roll' || ph.t === 'end' || ph.t === 'debt')}
             act={act}
             draft={tradeDraft?.counter && ph.t === 'trade' && controls(ph.awaiting) ? tradeDraft : null}
             onSent={() => {

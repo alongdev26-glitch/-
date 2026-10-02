@@ -520,3 +520,8 @@
 .tag.red.tag-bld {
   color: #c00016;
 }
+.trade-blocked {
+  color: #c00016;
+  font-weight: 700;
+  font-size: 13px;
+}

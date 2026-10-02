@@ -7,6 +7,8 @@ import {
   canBuild,
   canSell,
   canSellToBank,
+  BLOCK_ROUNDS,
+  isBlocked,
   hasAuction,
   canUnmortgage,
   ownedBy,
@@ -18,7 +20,7 @@ import {
   validSide,
   type RentMod,
 } from './rules';
-import type { Action, Announcement, GameRules, GameState, Owed, Payment, PlayerSetup, TradeOffer, TradeSide } from './types';
+import type { Action, Announcement, Phase, GameRules, GameState, Owed, Payment, PlayerSetup, TradeOffer, TradeSide } from './types';
 
 const MAX_LOG = 40;
 
@@ -71,6 +73,7 @@ export function newGame(
     announce: null,
     announceSeq: 0,
     tradesThisTurn: 0,
+    blocks: [],
     again: false,
     decks: { chance: shuffle(DECKS.chance.length, rng), chest: shuffle(DECKS.chest.length, rng) },
     log: ['המשחק התחיל! בהצלחה'],
@@ -87,6 +90,11 @@ function log(s: GameState, msg: string) {
 
 const cur = (s: GameState) => s.players[s.current];
 const alive = (s: GameState) => s.players.filter((p) => !p.bankrupt);
+
+/** The phase to return to once a trade offer is settled. */
+function resumePhase(r: 'roll' | 'end' | Phase): Phase {
+  return typeof r === 'string' ? { t: r } : r;
+}
 
 /** Called when the current move is fully resolved. */
 function finishMove(s: GameState) {
@@ -395,6 +403,7 @@ function nextTurn(s: GameState) {
   s.phase = { t: 'roll' };
   if (i <= prev) {
     s.round++;
+    if (s.blocks) s.blocks = s.blocks.filter((b) => b.until > s.round);
     if (s.rules.mortgage && s.feeStart !== null && (s.round - s.feeStart) % FEE_ROUNDS === 0) {
       log(s, `סבב ${s.round}: זמן תשלום המשכנתא!`);
       collectFees(s);
@@ -676,11 +685,11 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
     }
 
     case 'PROPOSE_TRADE': {
-      if (ph.t !== 'roll' && ph.t !== 'end') return prev;
+      if (ph.t !== 'roll' && ph.t !== 'end' && ph.t !== 'debt') return prev;
       const offer: TradeOffer = { from: p.id, to: a.to, give: a.give, get: a.get, round: 1 };
-      if (!s.players[a.to] || !tradeOk(s, offer)) return prev;
+      if (!s.players[a.to] || !tradeOk(s, offer) || isBlocked(s, p.id, a.to)) return prev;
       s.tradesThisTurn++;
-      s.phase = { t: 'trade', offer, awaiting: a.to, resume: ph.t };
+      s.phase = { t: 'trade', offer, awaiting: a.to, resume: ph.t === 'debt' ? ph : ph.t };
       log(s, `${p.name} מציע ל${s.players[a.to].name}: נותן ${describeSide(a.give)}, מבקש ${describeSide(a.get)}`);
       return s;
     }
@@ -690,7 +699,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       const o = ph.offer;
       if (!tradeOk(s, o)) {
         log(s, 'העסקה כבר לא אפשרית');
-        s.phase = { t: ph.resume };
+        s.phase = resumePhase(ph.resume);
         return s;
       }
       transfer(s, o.from, o.to, o.give);
@@ -706,14 +715,25 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
         price: o.give.money + o.get.money,
         detail: `${from.name} נותן: ${describeSide(o.give)} · ${to.name} נותן: ${describeSide(o.get)}`,
       });
-      s.phase = { t: ph.resume };
+      s.phase = resumePhase(ph.resume);
       return s;
     }
 
     case 'REJECT_TRADE': {
       if (ph.t !== 'trade') return prev;
       log(s, `${s.players[ph.awaiting].name} סירב להצעה`);
-      s.phase = { t: ph.resume };
+      s.phase = resumePhase(ph.resume);
+      return s;
+    }
+
+    case 'BLOCK_TRADE': {
+      if (ph.t !== 'trade') return prev;
+      const by = ph.awaiting;
+      const from = ph.offer.from === by ? ph.offer.to : ph.offer.from;
+      s.blocks = (s.blocks ?? []).filter((b) => !(b.by === by && b.from === from));
+      s.blocks.push({ by, from, until: s.round + BLOCK_ROUNDS });
+      log(s, `${s.players[by].name} סירב וחסם הצעות מ${s.players[from].name} ל-${BLOCK_ROUNDS} סבבים`);
+      s.phase = resumePhase(ph.resume);
       return s;
     }
 

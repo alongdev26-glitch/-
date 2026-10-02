@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BOARD, GROUP_COLORS } from '../data/board';
-import { canTradeProp, emptySide, ownedBy, sideIsEmpty } from '../engine/rules';
+import { blockRoundsLeft, canTradeProp, emptySide, ownedBy, sideIsEmpty } from '../engine/rules';
 import type { Action, GameState, TradeSide } from '../engine/types';
 import { Token } from '../ui/Token';
 import './tabs.css';
@@ -126,8 +126,10 @@ export function TradeTab({ game, me, canPropose, act, draft, onSent }: Props) {
   }, [draft]);
 
   const counter = !!draft?.counter;
-  const allowed = counter || canPropose;
+  const blockedFor = counter ? 0 : blockRoundsLeft(game, me, to);
+  const allowed = counter || (canPropose && blockedFor === 0);
   const target = game.players[to];
+  const inDebt = game.phase.t === 'debt' && game.current === me;
   const empty = sideIsEmpty(give) && sideIsEmpty(get);
 
   const pick = (id: number) => {
@@ -145,7 +147,8 @@ export function TradeTab({ game, me, canPropose, act, draft, onSent }: Props) {
   return (
     <div className="page">
       <h2 className="page-title">{counter ? 'הצעה נגדית' : 'העברות'}</h2>
-      {!allowed && <div className="note">אפשר להציע עסקה רק בתור שלך, לפני או אחרי שמטילים.</div>}
+      {!canPropose && !counter && <div className="note">אפשר להציע עסקה רק בתור שלך, לפני או אחרי שמטילים.</div>}
+      {inDebt && <div className="note">💸 אתה בחוב: אפשר להציע לשחקן אחר לקנות ממך נכסים תמורת כסף, ואז לחזור ולשלם.</div>}
 
       {!counter && (
         <div className="trade-players">
@@ -158,7 +161,9 @@ export function TradeTab({ game, me, canPropose, act, draft, onSent }: Props) {
             >
               <Token token={p.token} color={p.color} size="20px" />
               <span className="pchip-name">{p.name}</span>
-              <b className="pchip-money">ש"ח {p.money}</b>
+              <b className="pchip-money">
+                {blockRoundsLeft(game, me, p.id) > 0 ? `🚫 חסם אותך · עוד ${blockRoundsLeft(game, me, p.id)} סבבים` : `ש"ח ${p.money}`}
+              </b>
             </button>
           ))}
         </div>
@@ -185,6 +190,11 @@ export function TradeTab({ game, me, canPropose, act, draft, onSent }: Props) {
             <div>
               אתה מקבל: <b>{summary(get)}</b>
             </div>
+            {blockedFor > 0 && (
+              <div className="trade-blocked">
+                🚫 {target.name} חסם הצעות ממך. אפשר לנסות שוב בעוד {blockedFor} סבבים.
+              </div>
+            )}
             <button className="btn btn-red" disabled={!allowed || empty} onClick={send}>
               {counter ? `שלח הצעה נגדית ל${target.name}` : `שלח הצעה ל${target.name}`}
             </button>

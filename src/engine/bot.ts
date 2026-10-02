@@ -5,6 +5,7 @@ import {
   canSellToBank,
   canBuild,
   canTradeProp,
+  isBlocked,
   canSell,
   canUnmortgage,
   feeDue,
@@ -87,7 +88,7 @@ function proposeTrade(s: GameState, me: number): Action | null {
     if (missing.length !== 1) continue;
     const id = missing[0];
     const owner = s.props[id].owner;
-    if (owner === null || s.players[owner].bankrupt || !canTradeProp(s, owner, id)) continue;
+    if (owner === null || s.players[owner].bankrupt || !canTradeProp(s, owner, id) || isBlocked(s, me, owner)) continue;
     const offer = Math.round((BOARD[id].price! * 1.5) / 10) * 10;
     if (p.money - offer < keep) continue;
     return {

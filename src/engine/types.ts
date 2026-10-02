@@ -48,10 +48,20 @@ export type Phase =
     }
   | { t: 'card'; deck: Deck; card: number }
   /** resume: where play continues once the debt is paid (end of this move, or a fresh roll) */
-  | { t: 'debt'; owed: Owed[]; resume?: 'roll' | 'end' }
+  | DebtPhase
   | { t: 'end' }
-  | { t: 'trade'; offer: TradeOffer; awaiting: number; resume: 'roll' | 'end' }
+  /** resume: the phase to return to after the offer is settled (a debt resumes as it was) */
+  | { t: 'trade'; offer: TradeOffer; awaiting: number; resume: 'roll' | 'end' | DebtPhase }
   | { t: 'gameover'; winner: number };
+
+export type DebtPhase = { t: 'debt'; owed: Owed[]; resume?: 'roll' | 'end' };
+
+/** `by` refuses trade offers from `from` until round `until`. */
+export interface TradeBlock {
+  by: number;
+  from: number;
+  until: number;
+}
 
 /** One side of a trade. */
 export interface TradeSide {
@@ -122,6 +132,8 @@ export interface GameState {
   announceSeq: number;
   /** trade offers the current player has made this turn */
   tradesThisTurn: number;
+  /** players who refuse offers from someone for a few rounds */
+  blocks?: TradeBlock[];
   /** current player may roll again after finishing this move */
   again: boolean;
   decks: Record<Deck, number[]>;
@@ -150,7 +162,8 @@ export type Action =
   | { type: 'PROPOSE_TRADE'; to: number; give: TradeSide; get: TradeSide }
   | { type: 'ACCEPT_TRADE' }
   | { type: 'REJECT_TRADE' }
-  | { type: 'COUNTER_TRADE'; give: TradeSide; get: TradeSide };
+  | { type: 'COUNTER_TRADE'; give: TradeSide; get: TradeSide }
+  | { type: 'BLOCK_TRADE' };
 
 export interface PlayerSetup {
   uid?: string;

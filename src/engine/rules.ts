@@ -145,3 +145,11 @@ export function validSide(s: GameState, pid: number, side: TradeSide): boolean {
     side.props.every((id) => canTradeProp(s, pid, id))
   );
 }
+
+/** How many rounds block offers from `from` to `to`; how many rounds are left on it (0 = none). */
+export const BLOCK_ROUNDS = 3;
+export function blockRoundsLeft(s: GameState, from: number, to: number): number {
+  const b = (s.blocks ?? []).find((x) => x.by === to && x.from === from && x.until > s.round);
+  return b ? b.until - s.round : 0;
+}
+export const isBlocked = (s: GameState, from: number, to: number) => blockRoundsLeft(s, from, to) > 0;

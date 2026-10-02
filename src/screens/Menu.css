@@ -80,3 +80,21 @@
     animation: none;
   }
 }
+
+.menu-logo-img {
+  width: clamp(170px, 52vw, 340px);
+  height: auto;
+  margin-bottom: -0.6em;
+  z-index: 1;
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.35));
+  animation: logo-in 0.7s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+.menu-logo .menu-plaque {
+  font-size: clamp(32px, 9vw, 90px);
+}
+@keyframes logo-in {
+  from {
+    transform: scale(0.6) rotate(-6deg);
+    opacity: 0;
+  }
+}
