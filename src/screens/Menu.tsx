@@ -1,12 +1,14 @@
 import logo from '../assets/logo.webp';
 import { useRef } from 'react';
+import { useWallet } from '../ui/Cosmetics';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { SoundToggle } from '../ui/SoundToggle';
 import { sfx } from '../ui/sound';
 import { TOKENS, Token } from '../ui/Token';
 import './Menu.css';
 
-export function Menu({ onPlay, onResume }: { onPlay: () => void; onResume?: () => void }) {
+export function Menu({ onPlay, onResume, onShop }: { onPlay: () => void; onResume?: () => void; onShop?: () => void }) {
+  const wallet = useWallet();
   // browsers only allow sound after the first touch, so the jingle plays on it
   const played = useRef(false);
   const jingle = () => {
@@ -41,6 +43,11 @@ export function Menu({ onPlay, onResume }: { onPlay: () => void; onResume?: () =
         {onResume && (
           <button className="btn btn-white" onClick={onResume}>
             המשך משחק שמור
+          </button>
+        )}
+        {onShop && (
+          <button className="btn btn-gold" onClick={onShop}>
+            🛍️ חנות · 🪙 {wallet.coins}
           </button>
         )}
       </div>

@@ -14,6 +14,8 @@ import { MyPropsTab } from '../tabs/MyPropsTab';
 import { ProfileTab } from '../tabs/ProfileTab';
 import { TradeTab, type TradeDraft } from '../tabs/TradeTab';
 import { Modal } from '../ui/Modal';
+import { CosmeticsProvider, useWallet } from '../ui/Cosmetics';
+import { award, GAME_REWARD } from '../ui/shop';
 import { sfx } from '../ui/sound';
 import { CardReveal } from '../ui/CardReveal';
 import { PropertyCard } from '../ui/PropertyCard';
@@ -213,6 +215,22 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
   useEffect(() => {
     if (over) sfx.win();
   }, [over]);
+
+  // the shop: this device's skin on the players it controls, and its board design
+  const wallet = useWallet();
+  const cosmetics = {
+    skinFor: (pid: number) => (controls(pid) ? wallet.skin : 'skin-none'),
+    board: wallet.board,
+  };
+  // coins for finishing a game, once: more for winning
+  const gameKey = useRef(`g${Date.now()}`);
+  const [earned, setEarned] = useState(0);
+  useEffect(() => {
+    if (!over || game.phase.t !== 'gameover') return;
+    const won = controls(game.phase.winner);
+    const coins = won ? GAME_REWARD.won : GAME_REWARD.played;
+    if (award(gameKey.current, coins)) setEarned(coins);
+  }, [over]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!flash) return;
@@ -472,6 +490,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
   };
 
   return (
+    <CosmeticsProvider value={cosmetics}>
     <div className="game" dir="rtl">
       <nav className="tabbar" aria-label="עמודי המשחק">
         {TABS.map((t) => (
@@ -555,7 +574,8 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
           />
         </Modal>
       )}
-      {ph.t === 'gameover' && !busy && <Winner game={game} onNewGame={onNewGame} onMenu={onExit} />}
+      {ph.t === 'gameover' && !busy && <Winner game={game} onNewGame={onNewGame} onMenu={onExit} earned={earned} />}
     </div>
+    </CosmeticsProvider>
   );
 }

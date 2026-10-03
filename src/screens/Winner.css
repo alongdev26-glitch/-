@@ -65,3 +65,12 @@
     transform: translateY(110vh) rotate(540deg);
   }
 }
+.win-coins {
+  position: relative;
+  background: linear-gradient(180deg, #fff3a8, #ffd23f);
+  color: #6b4a00;
+  font-weight: 900;
+  border-radius: 999px;
+  padding: 6px 16px;
+  box-shadow: 0 4px 0 #b86e00;
+}

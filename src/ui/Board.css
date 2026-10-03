@@ -465,3 +465,14 @@
   filter: grayscale(1) sepia(0.35) contrast(1.15) brightness(0.95);
   opacity: 0.85;
 }
+/* the chest is drawn, not an emoji: keep its own colors */
+.sp-icon.sp-chest {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
+  opacity: 1;
+  width: 58cqi;
+  line-height: 0;
+}
+.sp-chest svg {
+  width: 100%;
+  height: auto;
+}

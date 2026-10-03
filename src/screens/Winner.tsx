@@ -5,7 +5,17 @@ import './Winner.css';
 
 const BILL_COLORS = ['#fff4a3', '#ffc1dc', '#b8f2c2', '#d9c2ff', '#bfe3ff', '#ffd9a8'];
 
-export function Winner({ game, onNewGame, onMenu }: { game: GameState; onNewGame: () => void; onMenu: () => void }) {
+export function Winner({
+  game,
+  onNewGame,
+  onMenu,
+  earned = 0,
+}: {
+  game: GameState;
+  onNewGame: () => void;
+  onMenu: () => void;
+  earned?: number;
+}) {
   if (game.phase.t !== 'gameover') return null;
   const w = game.players[game.phase.winner];
   return (
@@ -16,6 +26,7 @@ export function Winner({ game, onNewGame, onMenu }: { game: GameState; onNewGame
       </div>
       <div className="win-band">{w.name} ניצח!</div>
       <div className="win-worth">שווי סופי: ש"ח {netWorth(game, w.id)}</div>
+      {earned > 0 && <div className="win-coins">🪙 קיבלת {earned} מטבעות לחנות!</div>}
       <div className="bills">
         {Array.from({ length: 28 }, (_, i) => (
           <span

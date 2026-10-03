@@ -19,22 +19,12 @@ function Die({ value, rolling }: { value: number; rolling: boolean }) {
   );
 }
 
-export function Dice({ dice, rolling, showSum = true }: { dice: [number, number]; rolling: boolean; showSum?: boolean }) {
-  const double = dice[0] === dice[1];
+export function Dice({ dice, rolling }: { dice: [number, number]; rolling: boolean; showSum?: boolean }) {
   return (
     <div className="dice-wrap">
       <div className="dice">
         <Die value={dice[0]} rolling={rolling} />
         <Die value={dice[1]} rolling={rolling} />
-      </div>
-      {/* the total, so it's clear how far the token walks */}
-      <div className={`dice-sum${rolling || !showSum ? ' hidden' : ''}`} dir="ltr">
-        {dice[0]} + {dice[1]} = <b>{dice[0] + dice[1]}</b>
-        {double && (
-          <span className="dice-double" dir="rtl">
-            דאבל!
-          </span>
-        )}
       </div>
     </div>
   );

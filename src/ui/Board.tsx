@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { BOARD, GROUP_COLORS, gridPos, sideOf, type Space } from '../data/board';
 import type { GameState } from '../engine/types';
 import { Token } from './Token';
+import { useCosmetics } from './Cosmetics';
 import './Board.css';
 
 const ICONS: Record<NonNullable<Space['icon']>, string> = {
@@ -12,6 +13,21 @@ const ICONS: Record<NonNullable<Space['icon']>, string> = {
   ring: '💍',
   chest: '🧰',
 };
+
+/** A small wooden treasure chest with gold bands, for the "תיבת המזל" squares. */
+function ChestIcon() {
+  return (
+    <svg viewBox="0 0 32 26" aria-hidden="true">
+      <path d="M3 11 C3 4 9 2 16 2 C23 2 29 4 29 11 Z" fill="#b5652f" stroke="#3f1d05" strokeWidth="1.2" />
+      <rect x="3" y="11" width="26" height="13" rx="1.5" fill="#8b4513" stroke="#3f1d05" strokeWidth="1.2" />
+      <rect x="3" y="10" width="26" height="2.6" fill="#e0a526" stroke="#7a4a00" strokeWidth="0.6" />
+      <rect x="6.5" y="2.6" width="3" height="21.4" fill="#e0a526" stroke="#7a4a00" strokeWidth="0.6" />
+      <rect x="22.5" y="2.6" width="3" height="21.4" fill="#e0a526" stroke="#7a4a00" strokeWidth="0.6" />
+      <rect x="13.5" y="9" width="5" height="6" rx="1" fill="#ffd23f" stroke="#7a4a00" strokeWidth="0.7" />
+      <rect x="15.4" y="11.2" width="1.2" height="2.2" rx="0.5" fill="#5c3500" />
+    </svg>
+  );
+}
 
 function SpaceFace({ sp }: { sp: Space }) {
   if (sp.kind === 'property') {
@@ -38,7 +54,13 @@ function SpaceFace({ sp }: { sp: Space }) {
   return (
     <>
       <div className="sp-name">{sp.name}</div>
-      {sp.icon && <div className="sp-icon">{ICONS[sp.icon]}</div>}
+      {sp.icon === 'chest' ? (
+        <div className="sp-icon sp-chest">
+          <ChestIcon />
+        </div>
+      ) : (
+        sp.icon && <div className="sp-icon">{ICONS[sp.icon]}</div>
+      )}
       {sp.price && <div className="sp-price">מחיר ש"ח {sp.price}</div>}
       {sp.kind === 'tax' && <div className="sp-price">שלם ש"ח {sp.amount}</div>}
     </>
@@ -94,8 +116,9 @@ interface Props {
 }
 
 export function Board({ game, shown, onSpace, center, highlight }: Props) {
+  const { skinFor, board } = useCosmetics();
   return (
-    <div className="board" dir="ltr">
+    <div className={`board ${board}`} dir="ltr">
       {BOARD.map((sp) => {
         const [row, col] = gridPos(sp.id);
         const side = sideOf(sp.id);
@@ -138,7 +161,7 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
             {here.length > 0 && (
               <div className="tokens">
                 {here.map((p) => (
-                  <Token key={p.id} token={p.token} color={p.color} active={p.id === game.current} />
+                  <Token key={p.id} token={p.token} color={p.color} active={p.id === game.current} skin={skinFor(p.id)} />
                 ))}
               </div>
             )}

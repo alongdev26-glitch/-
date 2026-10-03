@@ -6,6 +6,7 @@ import type { Action, GameState, Payment } from '../engine/types';
 import { Board } from '../ui/Board';
 import { Dice } from '../ui/Dice';
 import { Token } from '../ui/Token';
+import { useCosmetics } from '../ui/Cosmetics';
 import './tabs.css';
 
 interface Props {
@@ -25,6 +26,7 @@ interface Props {
 
 /** Page 1: the board, as large as the screen allows, with a floating action button. */
 export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onBuild, onTakeover, flash }: Props) {
+  const { skinFor } = useCosmetics();
   const me = game.players[game.current];
   const ph = game.phase;
   const ready = myTurn && !busy;
@@ -49,7 +51,7 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
             }`}
             style={{ ['--pc' as string]: p.color }}
           >
-            <Token token={p.token} color={p.color} size="20px" />
+            <Token token={p.token} color={p.color} size="20px" skin={skinFor(p.id)} />
             <span className="pchip-name">
               {p.name}
               {p.inJail ? ' ⛓️' : ''}

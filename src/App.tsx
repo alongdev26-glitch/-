@@ -5,6 +5,7 @@ import { Game, loadGame, saveGame } from './screens/Game';
 import { Menu } from './screens/Menu';
 import { Online } from './screens/Online';
 import { Setup } from './screens/Setup';
+import { Shop } from './screens/Shop';
 import { sfx } from './ui/sound';
 
 /** A click sound for every button on the opening screens (the game screen has its own sounds). */
@@ -12,7 +13,7 @@ const tapSound = (e: ReactMouseEvent) => {
   if ((e.target as HTMLElement).closest('button')) sfx.tap();
 };
 
-type Screen = { s: 'menu' } | { s: 'setup' } | { s: 'online' } | { s: 'game'; game: GameState; key: number };
+type Screen = { s: 'menu' } | { s: 'setup' } | { s: 'online' } | { s: 'shop' } | { s: 'game'; game: GameState; key: number };
 
 export function App() {
   const [screen, setScreen] = useState<Screen>({ s: 'menu' });
@@ -24,6 +25,7 @@ export function App() {
         {screen.s === 'menu' && (
           <Menu
             onPlay={() => setScreen({ s: 'setup' })}
+            onShop={() => setScreen({ s: 'shop' })}
             onResume={saved ? () => setScreen({ s: 'game', game: saved, key: Date.now() }) : undefined}
           />
         )}
@@ -38,6 +40,7 @@ export function App() {
           />
         )}
         {screen.s === 'online' && <Online onBack={() => setScreen({ s: 'setup' })} />}
+        {screen.s === 'shop' && <Shop onBack={() => setScreen({ s: 'menu' })} />}
       </div>
       {screen.s === 'game' && (
         <Game
