@@ -98,7 +98,7 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
               )}
               {canBuildAny && (
                 <button className="btn btn-gold btn-sm" onClick={onBuild}>
-                  🏠 בנה בתים
+                  בנה בתים
                 </button>
               )}
               {ready && ph.t === 'roll' && me.inJail && (

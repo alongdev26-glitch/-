@@ -54,7 +54,7 @@ function TradeFlash({ game, a }: { game: GameState; a: Announcement }) {
     <div className="buy-flash" role="status" aria-live="polite" style={{ ['--pc' as string]: p.color }}>
       <div className="bf-who bf-trade">
         <Token token={p.token} color={p.color} size="40px" />
-        <span className="bf-shake">🤝</span>
+        <span className="bf-shake">⇄</span>
         <Token token={o.token} color={o.color} size="40px" />
       </div>
       <div className="bf-head" style={{ textAlign: 'center' }}>
@@ -90,7 +90,7 @@ function JailFlash({ game, a }: { game: GameState; a: Announcement }) {
           ))}
         </div>
       </div>
-      <div className="jf-head">{HEADLINE.jail} ⛓️</div>
+      <div className="jf-head">{HEADLINE.jail}</div>
       <div className="jf-name">{p.name}</div>
       {a.detail && <div className="jf-why">{a.detail}</div>}
     </div>

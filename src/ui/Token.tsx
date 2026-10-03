@@ -1,10 +1,9 @@
 import type { TokenId } from '../engine/types';
 import { TOKENS, tokenColor } from '../data/tokens';
+import { Piece } from './Pieces';
 import './Token.css';
 
 export { TOKENS, tokenColor };
-
-export const tokenEmoji = (id: TokenId) => TOKENS.find((t) => t.id === id)!.emoji;
 
 interface Props {
   token: TokenId;
@@ -13,14 +12,14 @@ interface Props {
   active?: boolean;
 }
 
-/** A colorful game piece: the token's own color inside, the player's color as the ring. */
+/** A metal game piece on a dark disc, ringed in the player's color. */
 export function Token({ token, color, size = '1em', active }: Props) {
   return (
     <span
       className={`token${active ? ' token-active' : ''}`}
-      style={{ fontSize: size, ['--ring' as string]: color ?? '#fff', ['--tint' as string]: tokenColor(token) }}
+      style={{ fontSize: size, ['--ring' as string]: color ?? tokenColor(token), ['--tint' as string]: tokenColor(token) }}
     >
-      <span className="token-glyph">{tokenEmoji(token)}</span>
+      <Piece token={token} />
     </span>
   );
 }

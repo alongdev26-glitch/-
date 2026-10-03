@@ -189,3 +189,71 @@
 .money-flash {
   animation: mf-in 0.3s cubic-bezier(0.2, 1.4, 0.4, 1), mf-out 0.35s ease 1.5s forwards;
 }
+
+/* ---------- classic look: ivory slip, muted green / burgundy, fewer and calmer bills ---------- */
+.money-flash {
+  background: var(--paper);
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px rgba(201, 162, 74, 0.3), 0 18px 44px rgba(0, 0, 0, 0.45);
+  animation: mf-in 0.35s ease, mf-out 0.35s ease 1.5s forwards;
+}
+.mf-title,
+.k-go .mf-title,
+.k-go-land .mf-title,
+.k-lotto .mf-title,
+.k-tax .mf-title {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--ink);
+  animation: none;
+}
+.mf-row {
+  border-radius: 8px;
+  border-inline-start-width: 3px;
+}
+.mf-row.loss {
+  background: #f5e6e4;
+}
+.mf-row.gain {
+  background: #e7efe6;
+}
+.mf-row.pot {
+  background: #f3ead2;
+}
+.mf-name {
+  font-weight: 500;
+  filter: none;
+}
+.mf-amount {
+  font-family: var(--serif);
+  font-weight: 700;
+  animation: mf-fade 0.4s ease 0.1s both;
+}
+.loss .mf-amount {
+  color: var(--burgundy);
+}
+.gain .mf-amount {
+  color: #2e6b43;
+}
+.pot .mf-amount {
+  color: var(--gold-dark);
+}
+.mf-bills i:nth-child(n + 4) {
+  display: none;
+}
+.mf-bills i {
+  opacity: 0.55;
+}
+@keyframes mf-in {
+  from {
+    transform: translate(-50%, -10px);
+    opacity: 0;
+  }
+}
+@keyframes mf-fade {
+  from {
+    opacity: 0;
+  }
+}

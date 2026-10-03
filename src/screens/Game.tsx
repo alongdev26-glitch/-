@@ -14,6 +14,7 @@ import { MyPropsTab } from '../tabs/MyPropsTab';
 import { ProfileTab } from '../tabs/ProfileTab';
 import { TradeTab, type TradeDraft } from '../tabs/TradeTab';
 import { Modal } from '../ui/Modal';
+import { Icon } from '../ui/Icons';
 import { sfx } from '../ui/sound';
 import { CardReveal } from '../ui/CardReveal';
 import { PropertyCard } from '../ui/PropertyCard';
@@ -460,7 +461,9 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
             onClick={() => setTab(t.id)}
             aria-current={tab === t.id ? 'page' : undefined}
           >
-            <span className="tab-icon">{t.icon}</span>
+            <span className="tab-icon">
+              <Icon name={t.id} />
+            </span>
             <span className="tab-label">{t.label}</span>
             {t.id === 'mine' && <span className="tab-sub">ש"ח {me.money}</span>}
             {t.id === 'market' && game.pot > 0 && <span className="tab-sub gold">קופה {game.pot}</span>}

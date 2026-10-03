@@ -7,11 +7,7 @@
   gap: 18px;
   padding: 70px 16px 24px;
   position: relative;
-  color: #fff;
-  background:
-    radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.18) 0 12%, transparent 13%),
-    radial-gradient(circle at 85% 70%, rgba(255, 255, 255, 0.12) 0 16%, transparent 17%),
-    linear-gradient(160deg, #0b3d91 0%, #1e73e8 55%, #5b3fd9 100%);
+  color: var(--ivory);
 }
 .setup > * {
   flex: none;
@@ -21,8 +17,11 @@
 .setup-banner {
   position: absolute;
   top: 18px;
+  left: 0;
   right: 0;
-  width: auto;
+  max-width: none;
+  display: flex;
+  justify-content: center;
 }
 .steps {
   display: flex;
@@ -30,13 +29,13 @@
   justify-content: center;
 }
 .steps i {
-  width: 34px;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.3);
+  width: 28px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(246, 241, 228, 0.2);
 }
 .steps i.done {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(201, 162, 74, 0.55);
 }
 .steps i.on {
   background: var(--gold);
@@ -57,32 +56,35 @@
   align-items: center;
   gap: 4px;
   padding: 18px 12px;
-  border-radius: 18px;
-  border: 3px solid transparent;
-  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  border: 1px solid #d8cfb8;
+  background: var(--paper);
   color: var(--ink);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
   flex: 1 1 0;
   font: inherit;
 }
 .choice b {
-  font-size: 20px;
-  font-weight: 900;
+  font-family: var(--serif);
+  font-size: 21px;
+  font-weight: 700;
 }
 .choice small {
   font-size: 13px;
-  color: #555;
+  color: var(--muted);
 }
 .choice.on {
   border-color: var(--gold);
-  box-shadow: 0 0 0 4px rgba(245, 184, 46, 0.45), 0 8px 18px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 2px var(--gold), 0 8px 18px rgba(0, 0, 0, 0.35);
 }
 .choice-icon {
-  font-size: 40px;
+  font-size: 30px;
   line-height: 1;
+  filter: grayscale(1) contrast(1.1);
+  opacity: 0.8;
 }
 .choices.small .choice-icon {
-  font-size: 28px;
+  font-size: 24px;
 }
 
 /* counts and names */
@@ -95,17 +97,21 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  font-weight: 900;
-  font-size: 16px;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--gold-light);
   text-align: center;
 }
 .setup-field input {
   font: inherit;
-  font-weight: 700;
+  font-family: var(--font);
+  font-weight: 500;
   text-align: center;
   padding: 10px;
-  border-radius: 12px;
-  border: 2px solid transparent;
+  border-radius: 10px;
+  border: 1px solid #d8cfb8;
+  background: var(--paper);
   color: var(--ink);
 }
 .setup-field input:focus {
@@ -119,18 +125,19 @@
 }
 .seg button {
   width: 56px;
-  height: 48px;
-  border-radius: 12px;
-  border: 2px solid transparent;
-  background: #fff;
-  color: var(--ink);
-  font-weight: 900;
-  font-size: 18px;
+  height: 46px;
+  border-radius: 10px;
+  border: 1px solid rgba(201, 162, 74, 0.45);
+  background: rgba(10, 42, 32, 0.6);
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 19px;
 }
 .seg button.on {
-  background: var(--red);
-  color: #fff;
-  border-color: #fff;
+  background: var(--gold);
+  color: #2e220a;
+  border-color: var(--gold-light);
 }
 .bot-names {
   display: flex;
@@ -145,10 +152,12 @@
 }
 .setup-summary {
   text-align: center;
-  font-weight: 700;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 12px;
-  padding: 8px;
+  font-weight: 400;
+  color: rgba(246, 241, 228, 0.85);
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(201, 162, 74, 0.25);
+  border-radius: 10px;
+  padding: 10px;
 }
 
 /* token pick */
@@ -167,15 +176,15 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  border: 2px solid transparent;
+  border: 1px solid rgba(201, 162, 74, 0.35);
   border-radius: 999px;
   padding: 4px 12px 4px 6px;
-  background: rgba(255, 255, 255, 0.25);
-  color: #fff;
-  font-weight: 700;
+  background: rgba(10, 42, 32, 0.6);
+  color: var(--ivory);
+  font-weight: 500;
 }
 .who button.on {
-  background: #fff;
+  background: var(--paper);
   color: var(--ink);
   border-color: var(--gold);
 }
@@ -186,24 +195,23 @@
 }
 .setup-tile {
   aspect-ratio: 1.1;
-  border: 3px solid transparent;
-  border-bottom: 6px solid var(--tc);
-  border-radius: 16px;
+  border: 1px solid #d8cfb8;
+  border-bottom: 3px solid var(--tc);
+  border-radius: 12px;
   color: var(--ink);
-  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--tc) 28%, #fff) 100%);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  background: var(--paper);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 14px;
 }
 .setup-tile.selected {
   border-color: var(--gold);
-  box-shadow: 0 0 0 4px rgba(245, 184, 46, 0.45), 0 8px 18px rgba(0, 0, 0, 0.3);
-  transform: translateY(-2px);
+  box-shadow: 0 0 0 2px var(--gold), 0 8px 18px rgba(0, 0, 0, 0.35);
 }
 .setup-tile:disabled {
   opacity: 0.35;
@@ -221,11 +229,11 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--paper);
   color: var(--ink);
   border-radius: 999px;
   padding: 3px 12px 3px 4px;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 14px;
 }
 
@@ -237,13 +245,14 @@
   margin-top: auto;
 }
 .setup .link {
-  color: #fff;
+  color: var(--gold-light);
   align-self: center;
 }
 .code-input {
+  font-family: var(--serif) !important;
   font-size: 32px !important;
   letter-spacing: 0.3em;
-  font-weight: 900 !important;
+  font-weight: 700 !important;
   text-transform: uppercase;
 }
 .room-code {
@@ -251,28 +260,31 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  background: #fff;
+  background: var(--paper);
   color: var(--ink);
-  border-radius: 18px;
+  border: 1px solid var(--gold);
+  border-radius: 12px;
   padding: 14px;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px rgba(201, 162, 74, 0.4), 0 8px 18px rgba(0, 0, 0, 0.3);
   text-align: center;
 }
 .room-code b {
-  font-size: 48px;
-  font-weight: 900;
+  font-family: var(--serif);
+  font-size: 46px;
+  font-weight: 700;
   letter-spacing: 0.25em;
-  color: var(--red);
+  color: var(--burgundy);
   line-height: 1.1;
 }
 .room-code small {
-  color: #555;
+  color: var(--muted);
   font-size: 13px;
 }
 .hint {
-  font-weight: 500;
+  font-family: var(--font);
+  font-weight: 300;
   font-size: 13px;
-  opacity: 0.9;
+  color: rgba(246, 241, 228, 0.8);
 }
 .setup-error {
   background: var(--red);
