@@ -88,7 +88,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
   };
 
   const total = humanCount + botCount;
-  const titles = ['מול מי משחקים?', 'כמה משתתפים?', 'בחר דמות', 'חוקי המשחק'];
+  const titles = ['מול מי משחקים?', 'כמה משתתפים?', 'בחר דמות!', 'חוקי המשחק'];
 
   return (
     <div className="setup">

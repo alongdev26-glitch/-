@@ -5,113 +5,358 @@
   gap: 8px;
 }
 .cr-stage {
-  width: 170px;
-  height: 116px;
-  display: grid;
-  place-items: center;
-  perspective: 700px;
-}
-.cr-card {
   position: relative;
-  width: 160px;
-  height: 104px;
-  transform-style: preserve-3d;
-  animation: cr-turn 0.9s cubic-bezier(0.4, 0, 0.2, 1) 0.25s both;
+  width: 170px;
+  height: 130px;
+  display: grid;
+  place-items: end center;
 }
-@keyframes cr-turn {
-  from {
-    transform: rotateY(180deg) translateY(6px);
+
+/* glow behind the chest / card */
+.cr-rays {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 230px;
+  height: 230px;
+  margin: -115px 0 0 -115px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(rgba(255, 214, 80, 0.55) 0 12deg, transparent 12deg 30deg);
+  mask-image: radial-gradient(circle, #000 25%, transparent 68%);
+  -webkit-mask-image: radial-gradient(circle, #000 25%, transparent 68%);
+  opacity: 0;
+  animation: cr-rays-in 0.5s ease 0.6s forwards, cr-spin 6s linear 0.6s infinite;
+}
+@keyframes cr-rays-in {
+  to {
+    opacity: 1;
   }
 }
-.cr-back,
-.cr-front {
+@keyframes cr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- the treasure chest ---------- */
+.chest {
+  position: relative;
+  width: 112px;
+  height: 92px;
+  animation: chest-shake 0.5s ease-in-out;
+  z-index: 1;
+}
+@keyframes chest-shake {
+  20% {
+    transform: rotate(-6deg);
+  }
+  40% {
+    transform: rotate(6deg);
+  }
+  60% {
+    transform: rotate(-4deg);
+  }
+  80% {
+    transform: rotate(3deg);
+  }
+}
+.chest-body {
   position: absolute;
-  inset: 0;
-  border-radius: 8px;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 58px;
+  border-radius: 6px 6px 10px 10px;
+  background: linear-gradient(180deg, #a0522d, #6b3410);
+  border: 3px solid #3f1d05;
+  box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.2);
+}
+.chest-inside {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 50px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, #fff6c9, #ffcf33 45%, #a86b00);
+  box-shadow: 0 0 22px 8px rgba(255, 210, 63, 0.9);
+  opacity: 0;
+  animation: cr-rays-in 0.3s ease 0.6s forwards;
+}
+.chest-lid {
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  bottom: 54px;
+  height: 36px;
+  border-radius: 40px 40px 4px 4px;
+  background: linear-gradient(180deg, #b5652f, #7a3d12);
+  border: 3px solid #3f1d05;
+  transform-origin: 4% 100%;
+  animation: chest-open 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) 0.5s forwards;
+  z-index: 2;
+}
+@keyframes chest-open {
+  to {
+    transform: rotate(-38deg);
+  }
+}
+.chest-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 16px;
+  margin-left: -8px;
+  background: linear-gradient(90deg, #c98a00, #ffd23f 50%, #c98a00);
+  border-left: 2px solid #7a4a00;
+  border-right: 2px solid #7a4a00;
+}
+.chest-lock {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 20px;
+  height: 22px;
+  margin-left: -10px;
+  border-radius: 4px 4px 8px 8px;
+  background: linear-gradient(180deg, #ffe680, #d99a00);
+  border: 2px solid #7a4a00;
+}
+.chest-lock::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 7px;
+  width: 4px;
+  height: 7px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: #5c3500;
+}
+.cr-paper {
+  position: absolute;
+  left: 50%;
+  bottom: 40px;
+  font-size: 40px;
+  transform: translate(-50%, 0) scale(0.3);
+  opacity: 0;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.35));
+  animation: paper-up 0.6s cubic-bezier(0.2, 1.4, 0.4, 1) 0.85s forwards;
+  z-index: 3;
+}
+@keyframes paper-up {
+  to {
+    opacity: 1;
+    transform: translate(-50%, -62px) scale(1) rotate(-8deg);
+  }
+}
+
+/* ---------- the gift box for הפתעה ---------- */
+.cr-chance .cr-stage {
+  height: 150px;
+  margin-top: 10px;
+}
+.gift {
+  position: relative;
+  width: 100px;
+  height: 84px;
+  z-index: 2;
+  animation: gift-hop 0.6s ease-in-out 2;
+  transform-origin: 50% 100%;
+}
+@keyframes gift-hop {
+  30% {
+    transform: translateY(-10px) scale(1.04, 0.96);
+  }
+  60% {
+    transform: translateY(0) scale(0.96, 1.04);
+  }
+}
+.gift-box {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 0;
+  height: 60px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, transparent 42%, #ffd23f 42% 58%, transparent 58%),
+    linear-gradient(180deg, #ff4fa3, #c2186b);
+  border: 3px solid #7a0d45;
+}
+.gift-lid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 56px;
+  height: 22px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, transparent 42%, #ffd23f 42% 58%, transparent 58%),
+    linear-gradient(180deg, #ff6bb5, #e0218a);
+  border: 3px solid #7a0d45;
+  animation: lid-pop 0.55s cubic-bezier(0.2, 0.8, 0.4, 1) 0.7s forwards;
+  z-index: 3;
+}
+@keyframes lid-pop {
+  to {
+    transform: translate(-46px, -58px) rotate(-40deg);
+    opacity: 0;
+  }
+}
+.gift-bow {
+  position: absolute;
+  left: 50%;
+  top: -16px;
+  width: 34px;
+  height: 18px;
+  margin-left: -17px;
+}
+.gift-bow::before,
+.gift-bow::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 18px;
+  height: 16px;
+  border-radius: 50% 50% 10% 50%;
+  background: #ffd23f;
+  border: 2px solid #b86e00;
+}
+.gift-bow::before {
+  left: -2px;
+  transform: rotate(-20deg);
+}
+.gift-bow::after {
+  right: -2px;
+  transform: scaleX(-1) rotate(-20deg);
+}
+.cr-chance .cr-qcard {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  width: 64px;
+  height: 88px;
+  margin-left: -32px;
+  font-size: 52px;
+  z-index: 1;
+  opacity: 0;
+  animation: q-rise 0.7s cubic-bezier(0.2, 1.5, 0.4, 1) 0.85s forwards;
+}
+@keyframes q-rise {
+  from {
+    opacity: 1;
+    transform: translateY(20px) scale(0.3) rotateY(0deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-34px) scale(1) rotateY(360deg);
+  }
+}
+.cr-qcard {
+  border-radius: 10px;
   display: grid;
   place-items: center;
-  overflow: hidden;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
+  background: linear-gradient(160deg, #ff4fa3, #e0218a 55%, #a3115f);
+  border: 4px solid #fff;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-weight: 900;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
 }
-.cr-back {
-  transform: rotateY(180deg);
-  background: repeating-linear-gradient(45deg, rgba(201, 162, 74, 0.12) 0 6px, transparent 6px 12px), #0f3d2e;
-  border: 1px solid var(--gold);
-  box-shadow: inset 0 0 0 5px #0f3d2e, inset 0 0 0 6px rgba(201, 162, 74, 0.6), 0 10px 22px rgba(0, 0, 0, 0.45);
-}
-.cr-chance .cr-back {
-  background: repeating-linear-gradient(45deg, rgba(201, 162, 74, 0.12) 0 6px, transparent 6px 12px), #5a1219;
-  box-shadow: inset 0 0 0 5px #5a1219, inset 0 0 0 6px rgba(201, 162, 74, 0.6), 0 10px 22px rgba(0, 0, 0, 0.45);
-}
-.cr-back span {
-  font-family: var(--serif);
-  font-size: 44px;
-  font-weight: 700;
-  color: var(--gold-light);
-}
-.cr-front {
-  background: var(--paper);
-  color: var(--ink);
-  border: 1px solid var(--gold);
-  box-shadow: inset 0 0 0 5px var(--paper), inset 0 0 0 6px rgba(201, 162, 74, 0.55), 0 10px 22px rgba(0, 0, 0, 0.45);
-  align-content: center;
-  gap: 2px;
-}
-.cr-front small {
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  color: var(--muted);
-}
-.cr-front b {
-  font-family: var(--serif);
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--burgundy);
-}
-.cr-chest .cr-front b {
-  color: var(--felt);
-}
-/* one soft gold glint across the face once it has turned */
-.cr-glint {
+.cr-confetti {
   position: absolute;
-  top: -20%;
-  bottom: -20%;
-  width: 40%;
-  left: -60%;
-  background: linear-gradient(100deg, transparent, rgba(230, 201, 122, 0.55), transparent);
-  transform: skewX(-15deg);
-  animation: cr-glint 0.9s ease 1.05s both;
+  left: 50%;
+  top: 55%;
+  z-index: 4;
 }
-@keyframes cr-glint {
-  to {
-    left: 130%;
+.cr-confetti i {
+  position: absolute;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  opacity: 0;
+  animation: confetti-burst 1.1s cubic-bezier(0.2, 0.7, 0.4, 1) forwards;
+}
+@keyframes confetti-burst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0);
+  }
+  60% {
+    opacity: 1;
+    transform: translate(var(--x), -90px) rotate(var(--r));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--x) * 1.2), -40px) rotate(calc(var(--r) * 2));
   }
 }
-.modal-blue .card-deck {
-  font-family: var(--serif);
-  color: var(--gold-light);
+
+/* sparkles bursting out */
+.cr-sparkles {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  z-index: 4;
 }
+.cr-sparkles i {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px;
+  border-radius: 50%;
+  background: #fff3a8;
+  box-shadow: 0 0 8px 2px #ffd23f;
+  opacity: 0;
+  animation: sparkle 0.8s ease-out forwards;
+}
+@keyframes sparkle {
+  0% {
+    opacity: 1;
+    transform: rotate(var(--a)) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(-78px) scale(0.3);
+  }
+}
+
 .cr-text {
   opacity: 0;
-  animation: cr-text-in 0.5s ease 1s forwards;
+  animation: cr-text-in 0.4s ease 1.05s forwards;
+}
+.cr-chance .cr-text {
+  animation-delay: 1.2s;
 }
 @keyframes cr-text-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
     transform: none;
   }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .cr-card,
-  .cr-glint,
+  .cr *,
   .cr-text {
     animation: none !important;
     opacity: 1 !important;
+  }
+  .chest-lid {
+    transform: rotate(-38deg);
+  }
+  .cr-paper {
+    transform: translate(-50%, -62px);
+  }
+  .cr-sparkles,
+  .cr-confetti,
+  .gift-lid {
+    display: none;
+  }
+  .cr-chance .cr-qcard {
+    transform: translateY(-34px);
   }
 }

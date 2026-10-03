@@ -149,7 +149,7 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
         <div className="plaque" dir="rtl">
           <span>ביג דיל</span>
           <div className="plaque-pot">
-            <b className="pot-label">קופת הלוטו</b>
+            <b className="pot-label">🎰 קופת הלוטו</b>
             <b key={game.pot} className="pot-amount" dir="ltr">
               ₪{game.pot.toLocaleString('en-US')}
             </b>

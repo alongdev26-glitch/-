@@ -1,6 +1,6 @@
 import './RibbonBanner.css';
 
-/** A screen title: serif lettering over a thin gold rule. */
+/** The signature red ribbon with a chevron cut. */
 export function RibbonBanner({ text, sub }: { text: string; sub?: string }) {
   return (
     <div className="ribbon">

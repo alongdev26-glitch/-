@@ -2,50 +2,37 @@
   position: fixed;
   inset: 0;
   background: var(--overlay);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
   display: grid;
   place-items: center;
   z-index: 50;
-  animation: fade 0.25s ease;
+  animation: fade 0.2s ease;
   padding: 12px;
 }
 .modal {
   position: relative;
-  background: var(--paper);
-  color: var(--ink);
-  border: 1px solid var(--gold);
+  background: #fff;
   border-radius: var(--radius);
-  box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px rgba(201, 162, 74, 0.35), 0 24px 60px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
   min-width: min(360px, 90vw);
   max-width: min(640px, 94vw);
   max-height: 92dvh;
   display: flex;
   flex-direction: column;
-  animation: rise 0.3s ease;
+  animation: pop 0.25s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
-/* card draws: deep navy with gold lettering */
 .modal-blue {
-  background: radial-gradient(ellipse at 50% 20%, #253a5e 0%, #16243d 70%);
-  color: var(--ivory);
-  border-color: var(--gold);
-  box-shadow: inset 0 0 0 4px #16243d, inset 0 0 0 5px rgba(201, 162, 74, 0.45), 0 24px 60px rgba(0, 0, 0, 0.55);
+  background: linear-gradient(160deg, #0b3d91, #1e73e8);
+  color: #fff;
+  border: 5px solid #fff;
 }
 .modal-head {
-  font-family: var(--serif);
-  color: var(--burgundy);
-  font-weight: 700;
+  background: var(--red);
+  color: #fff;
+  font-weight: 900;
   text-align: center;
-  padding: 0.7em 0.5em 0.2em;
-  font-size: clamp(18px, 2vw, 24px);
-}
-.modal-head::after {
-  content: '';
-  display: block;
-  width: 56px;
-  height: 1px;
-  margin: 8px auto 0;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  padding: 0.5em;
+  font-size: clamp(15px, 1.8vw, 22px);
+  border-radius: var(--radius) var(--radius) 0 0;
 }
 .modal-body {
   padding: clamp(10px, 2vh, 22px);
@@ -55,13 +42,13 @@
   position: absolute;
   top: -14px;
   left: -14px;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  border: 1px solid var(--gold);
-  background: #0c2a21;
-  color: var(--gold-light);
-  font-size: 16px;
+  border: 3px solid #111;
+  background: #fff;
+  font-weight: 900;
+  font-size: 18px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
   z-index: 2;
 }
@@ -70,9 +57,9 @@
     opacity: 0;
   }
 }
-@keyframes rise {
+@keyframes pop {
   from {
-    transform: translateY(10px);
+    transform: scale(0.8);
     opacity: 0;
   }
 }

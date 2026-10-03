@@ -4,22 +4,21 @@
   width: 1.6em;
   height: 1.6em;
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 30%, color-mix(in srgb, var(--tint) 55%, #3a3a3a) 0%, color-mix(in srgb, var(--tint) 35%, #0d0d0d) 100%);
-  box-shadow: 0 0 0 0.09em var(--ring), 0 0 0 0.14em rgba(230, 201, 122, 0.55), 0 0.12em 0.3em rgba(0, 0, 0, 0.5);
+  background: radial-gradient(circle at 35% 28%, #ffffff 0%, color-mix(in srgb, var(--tint) 30%, #fff) 40%, var(--tint) 100%);
+  box-shadow: 0 0 0 0.12em var(--ring), 0 0.15em 0.35em rgba(0, 0, 0, 0.45);
   flex: none;
 }
-.piece {
-  width: 1.12em;
-  height: 1.12em;
-  filter: drop-shadow(0 0.04em 0.04em rgba(0, 0, 0, 0.6));
+.token-glyph {
+  font-size: 1em;
+  line-height: 1;
+  filter: drop-shadow(0 0.05em 0.05em rgba(0, 0, 0, 0.35));
 }
 .token-active {
-  animation: lift 1.6s ease-in-out infinite;
+  animation: bob 0.9s ease-in-out infinite;
 }
-@keyframes lift {
+@keyframes bob {
   50% {
-    transform: translateY(-8%);
-    box-shadow: 0 0 0 0.09em var(--ring), 0 0 0 0.14em var(--gold-light), 0 0.3em 0.5em rgba(0, 0, 0, 0.45);
+    transform: translateY(-18%) scale(1.08);
   }
 }
 @media (prefers-reduced-motion: reduce) {

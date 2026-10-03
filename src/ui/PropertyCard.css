@@ -65,3 +65,39 @@
   font-weight: 900;
   margin-top: 4px;
 }
+
+/* ---------- classic card-stock look for the property card ---------- */
+.deed {
+  background: var(--paper);
+  border: 1px solid #b8ad92;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px rgba(201, 162, 74, 0.45), 0 10px 24px rgba(0, 0, 0, 0.3);
+  padding: 9px;
+  color: var(--ink);
+}
+.deed-head {
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 3px;
+  font-family: var(--serif);
+}
+.deed-head b {
+  font-family: var(--serif);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.deed-plain {
+  background: #efe8d6;
+}
+.deed-row {
+  font-family: var(--serif);
+  border-bottom: 1px dotted #d8cfb8;
+}
+.deed-row b {
+  font-weight: 700;
+}
+.deed-row.hl {
+  background: #efe6cc;
+}
+.deed-icon {
+  filter: grayscale(1) sepia(0.35) contrast(1.15);
+}

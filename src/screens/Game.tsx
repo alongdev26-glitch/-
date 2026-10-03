@@ -14,7 +14,6 @@ import { MyPropsTab } from '../tabs/MyPropsTab';
 import { ProfileTab } from '../tabs/ProfileTab';
 import { TradeTab, type TradeDraft } from '../tabs/TradeTab';
 import { Modal } from '../ui/Modal';
-import { Icon } from '../ui/Icons';
 import { sfx } from '../ui/sound';
 import { CardReveal } from '../ui/CardReveal';
 import { PropertyCard } from '../ui/PropertyCard';
@@ -143,9 +142,21 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
   // animate the dice on every roll, whoever rolled (rollSeq travels with the shared state)
   const lastRoll = useRef(game.rollSeq);
   const rollTimer = useRef<number | undefined>(undefined);
+  // the token walks exactly what the dice show; a jump (to jail) only comes after it lands
+  const shownRef = useRef(shown);
+  shownRef.current = shown;
+  const diceWalk = useRef<{ player: number; left: number } | null>(null);
   useEffect(() => {
     if (game.rollSeq === lastRoll.current) return;
     lastRoll.current = game.rollSeq;
+    const pid = game.current;
+    const p = game.players[pid];
+    const from = shownRef.current[pid];
+    const steps = game.dice[0] + game.dice[1];
+    // a roll that moved the token, or one that landed on "גש לכלא" (walk there, then jail)
+    const moved = !p.inJail && p.pos !== from;
+    const toGoToJail = p.inJail && (from + steps) % 40 === 30;
+    diceWalk.current = moved || toGoToJail ? { player: pid, left: steps } : null;
     setRolling(true);
     sfx.dice();
     window.clearTimeout(rollTimer.current);
@@ -216,17 +227,26 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
   // walk tokens one space at a time
   useEffect(() => {
     if (rolling || !moving) return;
+    const walk = diceWalk.current;
+    // after the dice walk ends off target (landed on "גש לכלא"), pause on that square before the jump
+    const pause = !!walk && walk.left === 0;
     const t = setTimeout(
-      () =>
-        setShown((sh) => {
-          sfx.step();
-          return sh.map((pos, i) => {
-            const target = game.players[i].pos;
-            if (pos === target) return pos;
-            return (target - pos + 40) % 40 <= 12 ? (pos + 1) % 40 : target;
-          });
-        }),
-      STEP_MS,
+      () => {
+        if (walk && walk.left === 0) diceWalk.current = null;
+        else if (walk) walk.left--;
+        const next = shown.map((pos, i) => {
+          const target = game.players[i].pos;
+          if (walk && i === walk.player && !pause) return (pos + 1) % 40;
+          if (pos === target) return pos;
+          if (walk && i === walk.player) return pos;
+          return (target - pos + 40) % 40 <= 12 ? (pos + 1) % 40 : target;
+        });
+        // the walk ended right on the real square: nothing left to show
+        if (walk && walk.left === 0 && next[walk.player] === game.players[walk.player].pos) diceWalk.current = null;
+        sfx.step();
+        setShown(next);
+      },
+      pause ? 450 : STEP_MS,
     );
     return () => clearTimeout(t);
   }, [shown, game, rolling, moving]);
@@ -461,9 +481,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
             onClick={() => setTab(t.id)}
             aria-current={tab === t.id ? 'page' : undefined}
           >
-            <span className="tab-icon">
-              <Icon name={t.id} />
-            </span>
+            <span className="tab-icon">{t.icon}</span>
             <span className="tab-label">{t.label}</span>
             {t.id === 'mine' && <span className="tab-sub">ש"ח {me.money}</span>}
             {t.id === 'market' && game.pot > 0 && <span className="tab-sub gold">קופה {game.pot}</span>}

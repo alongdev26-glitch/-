@@ -2,6 +2,7 @@
   height: 100%;
   display: flex;
   flex-direction: column-reverse;
+  background: radial-gradient(ellipse at 50% 45%, #86cf5d 0%, var(--grass) 50%, var(--park) 100%);
 }
 
 /* ---------- tab bar: bottom in portrait, right edge in landscape ---------- */
@@ -10,9 +11,9 @@
   display: flex;
   gap: 4px;
   padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(180deg, #0c2a21 0%, #071a14 100%);
-  border-top: 1px solid rgba(201, 162, 74, 0.55);
-  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(180deg, var(--red) 0%, var(--red-dark) 100%);
+  box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.3);
+  border-radius: 18px 18px 0 0;
   z-index: 5;
 }
 .turn-pill {
@@ -23,13 +24,12 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: var(--paper);
-  border: 1px solid;
+  background: #fff;
+  border: 3px solid;
   border-radius: 999px;
   padding: 3px 12px 3px 4px;
-  font-family: var(--serif);
-  font-weight: 700;
-  font-size: 14px;
+  font-weight: 900;
+  font-size: 13px;
   white-space: nowrap;
   box-shadow: var(--shadow);
   z-index: 6;
@@ -44,36 +44,30 @@
   justify-content: center;
   gap: 2px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   background: transparent;
-  color: rgba(246, 241, 228, 0.6);
-  font-weight: 400;
+  color: #ffe3e6;
+  font-weight: 700;
   font-size: 11px;
   line-height: 1.1;
   text-align: center;
   padding: 4px 2px;
 }
 .tab:focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 3px solid #fff;
 }
 .tab.on {
-  color: var(--gold-light);
-  background: rgba(201, 162, 74, 0.1);
-  box-shadow: inset 0 2px 0 var(--gold);
-  border-radius: 0 0 10px 10px;
+  background: #fff;
+  color: var(--red-dark);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
 }
 .tab-icon {
-  display: grid;
-  place-items: center;
+  font-size: 22px;
   line-height: 1;
-}
-.tab-icon .icon {
-  width: 24px;
-  height: 24px;
 }
 .tab-sub {
   font-size: 0.9em;
-  font-weight: 600;
+  font-weight: 900;
   font-variant-numeric: tabular-nums;
 }
 .tab-sub.gold {
@@ -87,7 +81,7 @@
 }
 @keyframes ping {
   50% {
-    background: rgba(201, 162, 74, 0.25);
+    background: rgba(255, 255, 255, 0.35);
   }
 }
 
@@ -126,11 +120,10 @@
   width: max-content;
   max-width: min(92%, 420px);
   text-align: center;
-  background: rgba(8, 24, 19, 0.88);
-  border: 1px solid rgba(201, 162, 74, 0.35);
-  color: var(--ivory);
+  background: rgba(17, 17, 17, 0.82);
+  color: #fff;
   font-size: clamp(11px, 1.2vw, 14px);
-  font-weight: 400;
+  font-weight: 500;
   padding: 6px 10px;
   border-radius: 10px;
   pointer-events: none;
@@ -180,16 +173,14 @@
   padding: 6px 10px;
 }
 .card-deck {
-  font-family: var(--serif);
-  font-weight: 700;
+  font-weight: 900;
   font-size: clamp(20px, 2.6vw, 32px);
 }
 .card-who {
   opacity: 0.85;
 }
 .card-text {
-  font-family: var(--serif);
-  font-weight: 500;
+  font-weight: 700;
   font-size: clamp(16px, 2vw, 24px);
   max-width: 28ch;
 }
@@ -216,9 +207,8 @@
   align-items: center;
 }
 .auction-bid b {
-  font-family: var(--serif);
   font-size: 32px;
-  color: var(--burgundy);
+  color: var(--red);
 }
 .auction-list {
   display: flex;
@@ -227,11 +217,11 @@
   justify-content: center;
 }
 .auction-list span {
-  border: 1px solid;
+  border: 2px solid;
   border-radius: 999px;
   padding: 0 8px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 700;
 }
 .auction-list .passed {
   opacity: 0.35;
@@ -310,13 +300,12 @@
   padding: 8px 12px;
 }
 .handoff b {
-  font-family: var(--serif);
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 900;
 }
 .auction-seller {
   font-size: 12px;
-  color: var(--muted);
+  color: #666;
   text-align: center;
   max-width: 220px;
 }
@@ -339,11 +328,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--paper);
-  border: 1px solid rgba(201, 162, 74, 0.5);
+  background: #fff;
   border-radius: 999px;
   padding: 6px 14px 6px 8px;
-  font-weight: 500;
+  font-weight: 700;
   box-shadow: var(--shadow);
   z-index: 40;
 }
@@ -364,14 +352,14 @@
   font-size: 15px;
 }
 .to-col.gain {
-  background: #e7efe6;
+  background: #e8f7ee;
 }
 .to-col.gain b {
-  color: #2e6b43;
+  color: #15803d;
 }
 .to-col.loss {
-  background: #f5e6e4;
+  background: #fdecee;
 }
 .to-col.loss b {
-  color: var(--burgundy);
+  color: #d90429;
 }

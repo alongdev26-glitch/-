@@ -1,36 +1,24 @@
 :root {
-  /* classic luxury: dark felt table, ivory card stock, thin gold lines */
-  --felt: #0f3d2e;
-  --felt-dark: #0a2a20;
-  --felt-light: #165140;
-  --ivory: #f6f1e4;
-  --paper: #fbf8f0;
-  --gold: #c9a24a;
-  --gold-light: #e6c97a;
-  --gold-dark: #8f6f27;
-  --burgundy: #7a1c24;
-  --burgundy-light: #9a2a33;
-  /* older names, mapped onto the new palette */
-  --red: #7a1c24;
-  --red-dark: #5a1219;
-  --red-light: #9a2a33;
-  --board: #f3eedf;
-  --board-line: #2a2620;
-  --board-border: #0a2a20;
-  --grass: #0f3d2e;
-  --park: #0a2a20;
-  --sea: #0a2a20;
-  --sand: #0a2a20;
-  --navy: #1c2b45;
-  --panel: #fbf8f0;
-  --tile: #eee8d8;
-  --ink: #1d1b16;
-  --muted: #6b6457;
-  --overlay: rgba(6, 18, 14, 0.72);
-  --radius: 12px;
-  --shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+  --red: #e3001b;
+  --red-dark: #a50014;
+  --red-light: #ff3b4e;
+  --board: #cfe3da;
+  --board-line: #1a1a1a;
+  --board-border: #1f3f8f;
+  --grass: #6dbe45;
+  --park: #3f9b3a;
+  --sea: #3ec6c9;
+  --sand: #f2dfa7;
+  --gold: #f5b82e;
+  --gold-dark: #c98a0b;
+  --navy: #1b1f3b;
+  --panel: #ffffff;
+  --tile: #efefef;
+  --ink: #111111;
+  --overlay: rgba(18, 18, 18, 0.7);
+  --radius: 18px;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
   --font: 'Rubik', 'Assistant', 'Arial Hebrew', sans-serif;
-  --serif: 'Frank Ruhl Libre', 'David Libre', 'Times New Roman', serif;
   color-scheme: light;
 }
 
@@ -49,10 +37,7 @@ body,
 body {
   font-family: var(--font);
   color: var(--ink);
-  background-color: var(--felt);
-  background-image: radial-gradient(ellipse at 50% 30%, rgba(255, 255, 255, 0.07) 0%, transparent 60%),
-    radial-gradient(ellipse at 50% 110%, rgba(0, 0, 0, 0.45) 0%, transparent 60%),
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.012) 0 2px, rgba(0, 0, 0, 0.02) 2px 4px);
+  background: radial-gradient(ellipse at 30% 20%, #8fd466 0%, var(--grass) 45%, var(--park) 100%);
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
@@ -64,45 +49,41 @@ button {
 
 /* ---------- buttons ---------- */
 .btn {
-  border: 1px solid transparent;
-  border-radius: 10px;
-  padding: 0.7em 1.5em;
-  font-weight: 600;
-  font-size: clamp(13px, 1.6vw, 19px);
-  letter-spacing: 0.01em;
+  border: none;
+  border-radius: 999px;
+  padding: 0.7em 1.6em;
+  font-weight: 900;
+  font-size: clamp(13px, 1.6vw, 20px);
+  letter-spacing: 0.02em;
   color: #fff;
   min-height: 44px;
-  transition: transform 0.08s ease, filter 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.08s ease, filter 0.15s ease;
 }
 .btn:active:not(:disabled) {
-  transform: translateY(1px);
+  transform: translateY(2px);
 }
 .btn:disabled {
-  filter: saturate(0.2);
-  opacity: 0.45;
+  filter: grayscale(1);
+  opacity: 0.5;
   cursor: default;
 }
 .btn-red {
-  background: linear-gradient(180deg, var(--burgundy-light) 0%, var(--burgundy) 100%);
-  border-color: rgba(230, 201, 122, 0.55);
-  box-shadow: 0 2px 0 #4a0f15, 0 6px 14px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(180deg, var(--red-light) 0%, var(--red) 55%, var(--red-dark) 100%);
+  box-shadow: 0 4px 0 #7a000f, 0 8px 16px rgba(163, 0, 20, 0.35);
 }
 .btn-black {
-  background: linear-gradient(180deg, #2c3a36 0%, #18211e 100%);
-  border-color: rgba(230, 201, 122, 0.25);
-  box-shadow: 0 2px 0 #0b100e, 0 6px 14px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(180deg, #333 0%, #111 100%);
+  box-shadow: 0 4px 0 #000, 0 8px 14px rgba(0, 0, 0, 0.3);
 }
 .btn-white {
-  background: var(--paper);
+  background: #fff;
   color: var(--ink);
-  border-color: #d8cfb8;
-  box-shadow: 0 2px 0 #cdbf9c, 0 6px 14px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 4px 0 #c9c9c9, 0 8px 14px rgba(0, 0, 0, 0.2);
 }
 .btn-gold {
-  background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 100%);
-  color: #2e220a;
-  border-color: var(--gold-dark);
-  box-shadow: 0 2px 0 var(--gold-dark), 0 6px 14px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(180deg, #ffd66b 0%, var(--gold) 50%, var(--gold-dark) 100%);
+  color: #4a2c00;
+  box-shadow: 0 4px 0 #8a5d00, 0 8px 14px rgba(0, 0, 0, 0.25);
 }
 .btn-sm {
   padding: 0.45em 1em;
@@ -111,34 +92,41 @@ button {
 }
 
 :root {
-  /* the 8 street colors: classic, a little deeper than toy colors */
-  --g-brown: #6e3b2a;
-  --g-lightblue: #4a8fb8;
-  --g-pink: #a8406f;
-  --g-orange: #c9772a;
-  --g-red: #a3262f;
-  --g-yellow: #c9a227;
-  --g-green: #2e7a4b;
-  --g-darkblue: #22427a;
+  --g-brown: #8b3a2b;
+  --g-lightblue: #1e9bd7;
+  --g-pink: #e0218a;
+  --g-orange: #f28c1e;
+  --g-red: #e3001b;
+  --g-yellow: #f7d117;
+  --g-green: #1fa24a;
+  --g-darkblue: #1c4fa0;
 }
 .link {
   background: none;
   border: none;
-  color: var(--gold-light);
-  font-weight: 500;
+  color: var(--red);
+  font-weight: 900;
   text-decoration: underline;
-  text-underline-offset: 3px;
   padding: 0;
 }
 
-/* a thin gold rule, used where the old color band was */
+/* the 8 color-set strips of the board, used as a band on entry screens */
 .color-band {
   position: absolute;
   left: 0;
   right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, var(--gold) 20%, var(--gold-light) 50%, var(--gold) 80%, transparent);
-  opacity: 0.8;
+  height: 10px;
+  background: linear-gradient(
+    90deg,
+    var(--g-brown) 0 12.5%,
+    var(--g-lightblue) 12.5% 25%,
+    var(--g-pink) 25% 37.5%,
+    var(--g-orange) 37.5% 50%,
+    var(--g-red) 50% 62.5%,
+    var(--g-yellow) 62.5% 75%,
+    var(--g-green) 75% 87.5%,
+    var(--g-darkblue) 87.5% 100%
+  );
 }
 .color-band.top {
   top: 0;
@@ -148,4 +136,15 @@ button {
 }
 .intro-screens {
   display: contents;
+}
+
+/* the property squares, cards and lists use a classic card-stock look */
+:root {
+  --paper: #fbf8f0;
+  --ivory: #f6f1e4;
+  --muted: #6b6457;
+  --serif: 'Frank Ruhl Libre', 'David Libre', 'Times New Roman', serif;
+  --gold-light: #e6c97a;
+  --burgundy: #7a1c24;
+  --felt: #0f3d2e;
 }
