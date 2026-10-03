@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { RibbonBanner } from '../ui/RibbonBanner';
-import { Token } from '../ui/Token';
+import { TOKENS, Token } from '../ui/Token';
+import type { TokenId } from '../engine/types';
 import { useWallet } from '../ui/Cosmetics';
 import { BOARDS, GAME_REWARD, SKINS, buy, equip, type ShopItem } from '../ui/shop';
 import { sfx } from '../ui/sound';
@@ -25,6 +26,7 @@ export function Shop({ onBack }: { onBack: () => void }) {
   const wallet = useWallet();
   const [tab, setTab] = useState<'skin' | 'board'>('skin');
   const [note, setNote] = useState('');
+  const [who, setWho] = useState<TokenId>('cat');
   const items = tab === 'skin' ? SKINS : BOARDS;
 
   const pick = (item: ShopItem) => {
@@ -68,6 +70,24 @@ export function Shop({ onBack }: { onBack: () => void }) {
         </button>
       </div>
 
+      {tab === 'skin' && (
+        <>
+          <div className="shop-who">
+            {TOKENS.map((t) => (
+              <button
+                key={t.id}
+                className={who === t.id ? 'on' : ''}
+                onClick={() => setWho(t.id)}
+                aria-label={t.name}
+              >
+                <Token token={t.id} color="#fff" size="22px" skin={wallet.skin} />
+              </button>
+            ))}
+          </div>
+          <div className="shop-how">הסקין עובד על כל דמות שתבחר במשחק</div>
+        </>
+      )}
+
       <div className="shop-grid">
         {items.map((item) => {
           const owned = wallet.owned.includes(item.id);
@@ -76,7 +96,7 @@ export function Shop({ onBack }: { onBack: () => void }) {
             <button key={item.id} className={`shop-item${on ? ' on' : ''}`} onClick={() => pick(item)}>
               <div className="shop-preview">
                 {item.kind === 'skin' ? (
-                  <Token token="cat" color="#fff" size="34px" skin={item.id} />
+                  <Token token={who} color="#fff" size="34px" skin={item.id} />
                 ) : (
                   <BoardSwatch id={item.id} />
                 )}
