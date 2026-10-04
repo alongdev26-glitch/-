@@ -19,7 +19,7 @@ export const rewardsOn = () =>
 
 export const shareLink = () => `${APP_URL}?ref=${getWallet().refCode}`;
 
-export const SHARE_TEXT = 'בוא לשחק איתי ביג דיל! 🎩🎲 משחק נכסים בעברית, בחינם:';
+export const SHARE_TEXT = 'בוא לשחק איתי ביג דיל! 🎩🎲';
 
 /** Open the phone's share sheet; fall back to WhatsApp. */
 export async function share(): Promise<'shared' | 'whatsapp' | 'cancelled'> {
