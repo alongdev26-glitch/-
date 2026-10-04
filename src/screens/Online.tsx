@@ -6,6 +6,7 @@ import { MAX_SEATS, openLink, savedHostRoom, type RoomLink } from '../online/lin
 import { cleanCode, type Room, type Seat } from '../online/net';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { TOKENS, Token } from '../ui/Token';
+import { useWallet } from '../ui/Cosmetics';
 import { Game } from './Game';
 import './Setup.css';
 
@@ -21,6 +22,7 @@ export function Online({ onBack }: { onBack: () => void }) {
   const [view, setView] = useState<View>('loading');
   const [name, setName] = useState('');
   const [token, setToken] = useState<TokenId>('car');
+  const wallet = useWallet();
   const [codeInput, setCodeInput] = useState('');
   const [code, setCode] = useState<string | null>(null);
   const [room, setRoom] = useState<Room | null>(null);
@@ -154,7 +156,7 @@ export function Online({ onBack }: { onBack: () => void }) {
             <input id="online-name" value={name} maxLength={12} placeholder="איך יקראו לך במשחק?" onChange={(e) => setName(e.target.value)} />
           </label>
           <div className="setup-grid">
-            {TOKENS.map((t) => (
+            {TOKENS.filter((t) => wallet.owned.includes(t.id)).map((t) => (
               <button
                 key={t.id}
                 className={`setup-tile${t.id === token ? ' selected' : ''}`}

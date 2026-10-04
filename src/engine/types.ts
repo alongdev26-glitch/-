@@ -1,6 +1,12 @@
 import type { Deck } from '../data/cards';
 
-export type TokenId = 'cat' | 'car' | 'dog' | 'trex' | 'hat' | 'duck';
+export type TokenId =
+  | 'cat' | 'car' | 'dog' | 'trex' | 'hat' | 'duck'
+  // characters bought in the shop
+  | 'lion' | 'tiger' | 'panda' | 'fox' | 'frog' | 'monkey' | 'unicorn' | 'dragon' | 'shark'
+  | 'octopus' | 'penguin' | 'owl' | 'turtle' | 'bunny' | 'bear' | 'koala' | 'giraffe' | 'elephant'
+  | 'zebra' | 'flamingo' | 'dolphin' | 'butterfly' | 'bee' | 'rocket' | 'heli' | 'ufo' | 'robot'
+  | 'ghost' | 'crown' | 'ball';
 
 export interface Player {
   id: number;

@@ -44,14 +44,14 @@ export interface Space {
 }
 
 export const GROUP_COLORS: Record<Group, string> = {
-  brown: '#6e3b2a',
-  lightblue: '#4a8fb8',
-  pink: '#a8406f',
-  orange: '#c9772a',
-  red: '#a3262f',
-  yellow: '#c9a227',
-  green: '#2e7a4b',
-  darkblue: '#22427a',
+  brown: '#8b3a2b',
+  lightblue: '#1e9bd7',
+  pink: '#e0218a',
+  orange: '#f28c1e',
+  red: '#e3001b',
+  yellow: '#f7d117',
+  green: '#1fa24a',
+  darkblue: '#1c4fa0',
 };
 
 const prop = (
@@ -81,7 +81,7 @@ export const BOARD: Space[] = [
   { id: 4, kind: 'tax', name: 'מס הכנסה', amount: 200 },
   rail(5, 'רכבת דרום'),
   prop(6, 'lightblue', 'טבריה', "רח' הגליל", 100, [6, 30, 90, 270, 400, 550], 50),
-  { id: 7, kind: 'chance', name: 'הפתעה', qColor: '#a8406f' },
+  { id: 7, kind: 'chance', name: 'הפתעה', qColor: '#e0218a' },
   prop(8, 'lightblue', 'טבריה', "רח' הירדן", 100, [6, 30, 90, 270, 400, 550], 50),
   prop(9, 'lightblue', 'טבריה', "רח' הבנים", 120, [8, 40, 100, 300, 450, 600], 50),
   { id: 10, kind: 'jail', name: 'בכלא' },
@@ -98,7 +98,7 @@ export const BOARD: Space[] = [
   { id: 20, kind: 'parking', name: 'חניה חופשית' },
   // Right column, top → bottom
   prop(21, 'red', 'רמת-גן', 'דרך אבא הלל', 220, [18, 90, 250, 700, 875, 1050], 150),
-  { id: 22, kind: 'chance', name: 'הפתעה', qColor: '#22427a' },
+  { id: 22, kind: 'chance', name: 'הפתעה', qColor: '#1c4fa0' },
   prop(23, 'red', 'רמת-גן', "רח' ז'בוטינסקי", 220, [18, 90, 250, 700, 875, 1050], 150),
   prop(24, 'red', 'רמת-גן', "רח' ביאליק", 240, [20, 100, 300, 750, 925, 1100], 150),
   rail(25, 'רכבת מזרח'),
@@ -113,7 +113,7 @@ export const BOARD: Space[] = [
   { id: 33, kind: 'chest', name: 'תיבת המזל', icon: 'chest' },
   prop(34, 'green', 'חיפה', "שד' מוריה", 320, [28, 150, 450, 1000, 1200, 1400], 200),
   rail(35, 'רכבת צפון'),
-  { id: 36, kind: 'chance', name: 'הפתעה', qColor: '#a3262f' },
+  { id: 36, kind: 'chance', name: 'הפתעה', qColor: '#e3001b' },
   prop(37, 'darkblue', 'תל-אביב', "רח' אלנבי", 350, [35, 175, 500, 1100, 1300, 1500], 200),
   { id: 38, kind: 'tax', name: 'מס מותרות', amount: 100, icon: 'ring' },
   prop(39, 'darkblue', 'תל-אביב', "רח' דיזנגוף", 400, [50, 200, 600, 1400, 1700, 2000], 200),

@@ -436,34 +436,37 @@
   }
 }
 
-/* ---------- property squares: deeper colors, serif lettering, printed-looking icons ---------- */
+/* ---------- property squares: strong colors, bold lettering ---------- */
 .space:hover .face {
-  background: #ece5d0;
+  background: #fff6d6;
 }
 .strip {
-  font-family: var(--serif);
-  font-weight: 700;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  font-weight: 900;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45), 0 0 2px rgba(0, 0, 0, 0.35);
+  letter-spacing: 0.01em;
+}
+.strip.g-yellow {
+  color: #3a2a00;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 .sp-name {
-  font-family: var(--serif);
-  font-weight: 700;
+  font-weight: 900;
+  font-size: 16.5cqi;
+  color: #111;
+}
+.sp-price {
+  font-weight: 800;
+  color: #222;
 }
 .space.owned .face {
-  background: color-mix(in srgb, var(--owner) 22%, var(--board));
+  background: color-mix(in srgb, var(--owner) 32%, var(--board));
 }
 .mort-tag {
   background: var(--burgundy);
-  font-weight: 500;
-}
-.corner-inner b {
-  font-family: var(--serif);
   font-weight: 700;
 }
-.sp-icon,
-.corner-icon {
-  filter: grayscale(1) sepia(0.35) contrast(1.15) brightness(0.95);
-  opacity: 0.85;
+.corner-inner b {
+  font-weight: 900;
 }
 /* the chest is drawn, not an emoji: keep its own colors */
 .sp-icon.sp-chest {

@@ -4,6 +4,8 @@ import { FEE_ROUNDS } from '../data/board';
 import type { GameRules, PlayerSetup, TokenId } from '../engine/types';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { TOKENS, Token } from '../ui/Token';
+import { useWallet } from '../ui/Cosmetics';
+import { rememberChar } from '../ui/shop';
 import './Setup.css';
 
 const BOT_NAMES = ['הנרי', 'מרק', 'סופיה'];
@@ -41,6 +43,8 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
   const [botNames, setBotNames] = useState(BOT_NAMES);
   const [who, setWho] = useState(0);
   const [mortgage, setMortgage] = useState(true);
+  const wallet = useWallet();
+  const myTokens = TOKENS.filter((t) => wallet.owned.includes(t.id));
 
   const chooseMode = (m: Mode) => {
     setMode(m);
@@ -71,6 +75,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
       token: free[i].id,
       isBot: true,
     }));
+    rememberChar(chosen[0].token);
     onStart([...chosen, ...bots], { mortgage });
   };
 
@@ -199,7 +204,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
             />
           </label>
           <div className="setup-grid">
-            {TOKENS.map((t) => {
+            {myTokens.map((t) => {
               const taken = takenByOthers(who).has(t.id);
               return (
                 <button

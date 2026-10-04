@@ -1,56 +1,89 @@
-// The shop: coins earned by playing, character skins and board designs. Kept on this device.
+// The shop: coins earned by playing, new characters, character skins and board designs.
+// Every 3 days the shop shows a fresh mix of 9 items. Kept on this device.
+import { BASE_TOKENS, TOKENS, type Rarity } from '../data/tokens';
+import type { TokenId } from '../engine/types';
+
+export type { Rarity };
 
 const KEY = 'bigdeal-wallet';
 export const START_COINS = 200;
 
 export interface ShopItem {
   id: string;
-  kind: 'skin' | 'board';
+  kind: 'char' | 'skin' | 'board';
   name: string;
   price: number;
   desc: string;
+  rarity: Rarity;
 }
 
+export const RARITY_NAME: Record<Rarity, string> = {
+  common: 'רגיל',
+  rare: 'נדיר',
+  epic: 'אפי',
+  legendary: 'אגדי',
+};
+const CHAR_PRICE: Record<Rarity, number> = { common: 120, rare: 220, epic: 350, legendary: 500 };
+
 export const SKINS: ShopItem[] = [
-  { id: 'skin-none', kind: 'skin', name: 'רגיל', price: 0, desc: 'הדמות כמו שהיא' },
-  { id: 'skin-gold', kind: 'skin', name: 'זהב', price: 150, desc: 'טבעת זהב נוצצת' },
-  { id: 'skin-neon', kind: 'skin', name: 'ניאון', price: 200, desc: 'זוהר ניאון ורוד-תכלת' },
-  { id: 'skin-fire', kind: 'skin', name: 'אש', price: 250, desc: 'להבות כתומות סביב הדמות' },
-  { id: 'skin-ice', kind: 'skin', name: 'קרח', price: 250, desc: 'קרח כחול וקריר' },
-  { id: 'skin-rainbow', kind: 'skin', name: 'קשת', price: 350, desc: 'טבעת קשת מסתובבת' },
-  { id: 'skin-galaxy', kind: 'skin', name: 'גלקסיה', price: 450, desc: 'חלל עם כוכבים' },
+  { id: 'skin-none', kind: 'skin', name: 'רגיל', price: 0, desc: 'הדמות כמו שהיא', rarity: 'common' },
+  { id: 'skin-gold', kind: 'skin', name: 'זהב', price: 150, desc: 'טבעת זהב נוצצת', rarity: 'rare' },
+  { id: 'skin-neon', kind: 'skin', name: 'ניאון', price: 200, desc: 'זוהר ורוד-תכלת', rarity: 'rare' },
+  { id: 'skin-fire', kind: 'skin', name: 'אש', price: 250, desc: 'להבות סביב הדמות', rarity: 'epic' },
+  { id: 'skin-ice', kind: 'skin', name: 'קרח', price: 250, desc: 'כחול וקריר', rarity: 'epic' },
+  { id: 'skin-rainbow', kind: 'skin', name: 'קשת', price: 350, desc: 'טבעת קשת מסתובבת', rarity: 'epic' },
+  { id: 'skin-galaxy', kind: 'skin', name: 'גלקסיה', price: 450, desc: 'חלל עם כוכבים', rarity: 'legendary' },
 ];
 
 export const BOARDS: ShopItem[] = [
-  { id: 'board-classic', kind: 'board', name: 'קלאסי', price: 0, desc: 'הלוח הרגיל' },
-  { id: 'board-ocean', kind: 'board', name: 'ים', price: 200, desc: 'כחול של חוף הים' },
-  { id: 'board-desert', kind: 'board', name: 'מדבר', price: 250, desc: 'חול חם וזהוב' },
-  { id: 'board-night', kind: 'board', name: 'לילה', price: 300, desc: 'לוח כהה עם אורות' },
-  { id: 'board-candy', kind: 'board', name: 'ממתקים', price: 300, desc: 'ורוד ומתוק' },
-  { id: 'board-luxury', kind: 'board', name: 'יוקרה', price: 500, desc: 'לבד ירוק וזהב' },
+  { id: 'board-classic', kind: 'board', name: 'קלאסי', price: 0, desc: 'הלוח הרגיל', rarity: 'common' },
+  { id: 'board-ocean', kind: 'board', name: 'ים', price: 200, desc: 'כחול של חוף הים', rarity: 'rare' },
+  { id: 'board-desert', kind: 'board', name: 'מדבר', price: 250, desc: 'חול חם וזהוב', rarity: 'rare' },
+  { id: 'board-night', kind: 'board', name: 'לילה', price: 300, desc: 'לוח כהה עם אורות', rarity: 'epic' },
+  { id: 'board-candy', kind: 'board', name: 'ממתקים', price: 300, desc: 'ורוד ומתוק', rarity: 'epic' },
+  { id: 'board-luxury', kind: 'board', name: 'יוקרה', price: 500, desc: 'לבד ירוק וזהב', rarity: 'legendary' },
 ];
+
+/** The characters you can buy (the six base ones are free). */
+export const CHARS: ShopItem[] = TOKENS.filter((t) => t.rarity).map((t) => ({
+  id: t.id,
+  kind: 'char',
+  name: t.name,
+  price: CHAR_PRICE[t.rarity!],
+  desc: 'דמות חדשה למשחק',
+  rarity: t.rarity!,
+}));
+
+export const ALL_ITEMS = [...CHARS, ...SKINS, ...BOARDS];
 
 export interface Wallet {
   coins: number;
   owned: string[];
   skin: string;
   board: string;
+  /** the character I played last, to preview skins on */
+  char: TokenId;
   /** games already paid out, so a reload never pays twice */
   paid: string[];
 }
 
 const fresh = (): Wallet => ({
   coins: START_COINS,
-  owned: ['skin-none', 'board-classic'],
+  owned: [...BASE_TOKENS.map((t) => t.id), 'skin-none', 'board-classic'],
   skin: 'skin-none',
   board: 'board-classic',
+  char: 'cat',
   paid: [],
 });
 
 export function getWallet(): Wallet {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? { ...fresh(), ...(JSON.parse(raw) as Wallet) } : fresh();
+    if (!raw) return fresh();
+    const w = { ...fresh(), ...(JSON.parse(raw) as Wallet) };
+    // wallets from before characters were sold: the base pieces are always yours
+    const base = BASE_TOKENS.map((t) => t.id).filter((id) => !w.owned.includes(id));
+    return base.length ? { ...w, owned: [...base, ...w.owned] } : w;
   } catch {
     return fresh();
   }
@@ -81,10 +114,17 @@ export function buy(item: ShopItem): boolean {
   return true;
 }
 
+/** Put on a skin or board you own. Characters are picked when setting up a game. */
 export function equip(item: ShopItem) {
   const w = getWallet();
-  if (!w.owned.includes(item.id)) return;
+  if (!w.owned.includes(item.id) || item.kind === 'char') return;
   save(item.kind === 'skin' ? { ...w, skin: item.id } : { ...w, board: item.id });
+}
+
+/** Remember the character I play with, for the skin previews. */
+export function rememberChar(char: TokenId) {
+  const w = getWallet();
+  if (w.char !== char) save({ ...w, char });
 }
 
 /** Coins for a finished game, once per game. */
@@ -97,3 +137,40 @@ export function award(gameKey: string, coins: number): boolean {
 
 /** How a finished game pays: everyone who played gets something, the winner much more. */
 export const GAME_REWARD = { played: 60, won: 200 };
+
+// ---------- the rotating shop ----------
+
+const DAY = 86_400_000;
+export const ROTATION_DAYS = 3;
+
+function mulberry32(seed: number) {
+  return () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function pick<T>(list: T[], n: number, rnd: () => number): T[] {
+  const a = [...list];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a.slice(0, n);
+}
+
+/** Today's 9 items (5 characters, 2 skins, 2 boards), the same for 3 days, and when they change. */
+export function rotation(now = Date.now()): { items: ShopItem[]; endsAt: number; period: number } {
+  const offset = new Date(now).getTimezoneOffset() * 60_000;
+  const day = Math.floor((now - offset) / DAY);
+  const period = Math.floor(day / ROTATION_DAYS);
+  const rnd = mulberry32(period * 7919 + 17);
+  const items = [
+    ...pick(CHARS, 5, rnd),
+    ...pick(SKINS.filter((s) => s.price > 0), 2, rnd),
+    ...pick(BOARDS.filter((b) => b.price > 0), 2, rnd),
+  ];
+  return { items: pick(items, items.length, rnd), endsAt: (period + 1) * ROTATION_DAYS * DAY + offset, period };
+}

@@ -33,7 +33,7 @@ function SpaceFace({ sp }: { sp: Space }) {
   if (sp.kind === 'property') {
     return (
       <>
-        <div className="strip" style={{ background: GROUP_COLORS[sp.group!] }}>
+        <div className={`strip g-${sp.group}`} style={{ background: GROUP_COLORS[sp.group!] }}>
           {sp.city}
         </div>
         <div className="sp-name">{sp.name}</div>
