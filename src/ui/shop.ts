@@ -65,7 +65,18 @@ export interface Wallet {
   char: TokenId;
   /** games already paid out, so a reload never pays twice */
   paid: string[];
+  /** this device, for the share-with-a-friend rewards */
+  deviceId: string;
+  /** my personal share code (in my link: ?ref=CODE) */
+  refCode: string;
+  /** friends' devices already paid for */
+  refPaid: string[];
+  /** the code of the friend whose link brought me here, until it's reported */
+  pendingRef?: string;
 }
+
+const randomId = (n: number, abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789') =>
+  Array.from({ length: n }, () => abc[Math.floor(Math.random() * abc.length)]).join('');
 
 const fresh = (): Wallet => ({
   coins: START_COINS,
@@ -74,16 +85,33 @@ const fresh = (): Wallet => ({
   board: 'board-classic',
   char: 'cat',
   paid: [],
+  deviceId: '',
+  refCode: '',
+  refPaid: [],
 });
+
+/** Is there anything saved on this device yet? (a brand-new player has nothing) */
+export function isNewPlayer(): boolean {
+  try {
+    return !localStorage.getItem(KEY) && !localStorage.getItem('tycoon-save');
+  } catch {
+    return false;
+  }
+}
 
 export function getWallet(): Wallet {
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return fresh();
-    const w = { ...fresh(), ...(JSON.parse(raw) as Wallet) };
+    let w = raw ? { ...fresh(), ...(JSON.parse(raw) as Wallet) } : fresh();
     // wallets from before characters were sold: the base pieces are always yours
     const base = BASE_TOKENS.map((t) => t.id).filter((id) => !w.owned.includes(id));
-    return base.length ? { ...w, owned: [...base, ...w.owned] } : w;
+    if (base.length) w = { ...w, owned: [...base, ...w.owned] };
+    // the device id and share code are made once and kept
+    if (!w.deviceId || !w.refCode) {
+      w = { ...w, deviceId: w.deviceId || randomId(16, 'abcdefghijklmnopqrstuvwxyz0123456789'), refCode: w.refCode || randomId(6) };
+      localStorage.setItem(KEY, JSON.stringify(w));
+    }
+    return w;
   } catch {
     return fresh();
   }
@@ -133,6 +161,23 @@ export function award(gameKey: string, coins: number): boolean {
   if (w.paid.includes(gameKey)) return false;
   save({ ...w, coins: w.coins + coins, paid: [...w.paid.slice(-30), gameKey] });
   return true;
+}
+
+/** Coins for each friend who joined from my link. */
+export const REFERRAL_REWARD = 150;
+
+/** Pay for friends' devices not paid yet. Returns how many new friends. */
+export function creditReferrals(deviceIds: string[]): number {
+  const w = getWallet();
+  const fresh = [...new Set(deviceIds)].filter((id) => id !== w.deviceId && !w.refPaid.includes(id));
+  if (!fresh.length) return 0;
+  save({ ...w, coins: w.coins + fresh.length * REFERRAL_REWARD, refPaid: [...w.refPaid, ...fresh] });
+  return fresh.length;
+}
+
+/** Remember (or forget, with undefined) the friend's code that brought me here. */
+export function setPendingRef(code: string | undefined) {
+  save({ ...getWallet(), pendingRef: code });
 }
 
 /** How a finished game pays: everyone who played gets something, the winner much more. */

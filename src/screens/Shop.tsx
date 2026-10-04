@@ -5,6 +5,7 @@ import { useWallet } from '../ui/Cosmetics';
 import { ALL_ITEMS, GAME_REWARD, RARITY_NAME, buy, equip, rotation, type ShopItem } from '../ui/shop';
 import type { TokenId } from '../engine/types';
 import { sfx } from '../ui/sound';
+import { ShareButton } from '../ui/ShareButton';
 import './Shop.css';
 
 /** A tiny board corner to preview a board design. */
@@ -139,6 +140,8 @@ export function Shop({ onBack }: { onBack: () => void }) {
         </div>
         {mine.length === 0 && <div className="shop-how">עוד לא קנית כלום. כל מה שתקנה יישאר כאן.</div>}
       </div>
+
+      <ShareButton />
 
       <div className="setup-nav">
         <button className="btn-back" onClick={onBack}>

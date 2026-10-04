@@ -1,5 +1,8 @@
 import logo from '../assets/logo.webp';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { collectRewards, reportPending } from '../online/referral';
+import { ShareButton } from '../ui/ShareButton';
+import { REFERRAL_REWARD } from '../ui/shop';
 import { useWallet } from '../ui/Cosmetics';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { SoundToggle } from '../ui/SoundToggle';
@@ -9,6 +12,22 @@ import './Menu.css';
 
 export function Menu({ onPlay, onResume, onShop }: { onPlay: () => void; onResume?: () => void; onShop?: () => void }) {
   const wallet = useWallet();
+  // friends who joined from my link pay out here
+  const [joined, setJoined] = useState(0);
+  useEffect(() => {
+    let live = true;
+    reportPending().finally(() =>
+      collectRewards().then((n) => {
+        if (!live || !n) return;
+        setJoined(n);
+        sfx.buy();
+        setTimeout(() => live && setJoined(0), 5000);
+      }),
+    );
+    return () => {
+      live = false;
+    };
+  }, []);
   // my characters, the one I play with first (at most 8 so the row stays tidy)
   const parade = TOKENS.filter((t) => wallet.owned.includes(t.id))
     .sort((a, b) => Number(b.id === wallet.char) - Number(a.id === wallet.char))
@@ -42,6 +61,11 @@ export function Menu({ onPlay, onResume, onShop }: { onPlay: () => void; onResum
           </span>
         </button>
       )}
+      {joined > 0 && (
+        <div className="reward-pop" onClick={() => setJoined(0)}>
+          🎉 {joined === 1 ? 'חבר הצטרף' : `${joined} חברים הצטרפו`} מהקישור שלך! +{joined * REFERRAL_REWARD} 🪙
+        </div>
+      )}
       <div className="menu-parade" aria-hidden="true">
         {parade.map((t, i) => (
           <span key={t.id} style={{ animationDelay: `${i * 0.15}s` }}>
@@ -53,6 +77,7 @@ export function Menu({ onPlay, onResume, onShop }: { onPlay: () => void; onResum
         <button className="btn btn-red menu-play" onClick={onPlay}>
           שחק עכשיו
         </button>
+        <ShareButton />
         {onResume && (
           <button className="btn btn-white" onClick={onResume}>
             המשך משחק שמור

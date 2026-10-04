@@ -1,0 +1,77 @@
+.share-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  background: linear-gradient(180deg, #34d399, #10b981 60%, #047857);
+  color: #fff;
+  font: inherit;
+  box-shadow: 0 3px 0 #065f46, 0 6px 12px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+.share-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #065f46;
+}
+.share-btn > span:last-child {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  text-align: start;
+}
+.share-btn b {
+  font-size: 16px;
+  font-weight: 900;
+}
+.share-btn small {
+  font-size: 12px;
+  font-weight: 800;
+}
+.share-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+.share-msg {
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  padding: 6px 12px;
+  max-width: 300px;
+}
+/* a friend joined: a happy banner on the menu */
+.reward-pop {
+  position: absolute;
+  top: 70px;
+  left: 50%;
+  z-index: 20;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 32px);
+  padding: 10px 18px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fff3a8, #ffd23f);
+  color: #6b3a00;
+  font-weight: 900;
+  font-size: 16px;
+  text-align: center;
+  border: 3px solid #fff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  animation: reward-in 0.5s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+@keyframes reward-in {
+  from {
+    transform: translateX(-50%) scale(0.4);
+    opacity: 0;
+  }
+}
