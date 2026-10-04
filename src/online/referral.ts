@@ -4,7 +4,7 @@
 import { creditReferrals, getWallet, isNewPlayer, setPendingRef } from '../ui/shop';
 
 /** The Firebase Realtime Database address (https://xxxx-default-rtdb.firebaseio.com). Empty = rewards off. */
-export const FIREBASE_DB = '';
+export const FIREBASE_DB = 'https://big-dil-be1cd-default-rtdb.europe-west1.firebasedatabase.app';
 /** where the requests go (tests point it elsewhere) */
 export const config = { db: FIREBASE_DB };
 
