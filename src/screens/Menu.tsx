@@ -16,16 +16,26 @@ export function Menu({ onPlay, onResume, onShop }: { onPlay: () => void; onResum
   const [joined, setJoined] = useState(0);
   useEffect(() => {
     let live = true;
-    reportPending().finally(() =>
-      collectRewards().then((n) => {
-        if (!live || !n) return;
-        setJoined(n);
-        sfx.buy();
-        setTimeout(() => live && setJoined(0), 5000);
-      }),
-    );
+    const check = () =>
+      reportPending().finally(() =>
+        collectRewards().then((n) => {
+          if (!live || !n) return;
+          setJoined(n);
+          sfx.buy();
+          setTimeout(() => live && setJoined(0), 6000);
+        }),
+      );
+    check();
+    // check again when coming back to the app (after sharing) and every little while on the menu
+    const onShow = () => document.visibilityState === 'visible' && check();
+    document.addEventListener('visibilitychange', onShow);
+    window.addEventListener('focus', onShow);
+    const timer = setInterval(check, 20_000);
     return () => {
       live = false;
+      document.removeEventListener('visibilitychange', onShow);
+      window.removeEventListener('focus', onShow);
+      clearInterval(timer);
     };
   }, []);
   // my characters, the one I play with first (at most 8 so the row stays tidy)

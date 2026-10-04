@@ -68,8 +68,7 @@ export async function reportPending(): Promise<boolean> {
       method: 'PUT',
       body: JSON.stringify({ t: Date.now() }),
     });
-    // 401/403 = already written once (the rules forbid overwriting): nothing left to do either way
-    if (r.ok || r.status === 401 || r.status === 403) {
+    if (r.ok) {
       setPendingRef(undefined);
       return true;
     }
