@@ -9,6 +9,10 @@ import './Menu.css';
 
 export function Menu({ onPlay, onResume, onShop }: { onPlay: () => void; onResume?: () => void; onShop?: () => void }) {
   const wallet = useWallet();
+  // my characters, the one I play with first (at most 8 so the row stays tidy)
+  const parade = TOKENS.filter((t) => wallet.owned.includes(t.id))
+    .sort((a, b) => Number(b.id === wallet.char) - Number(a.id === wallet.char))
+    .slice(0, 8);
   // browsers only allow sound after the first touch, so the jingle plays on it
   const played = useRef(false);
   const jingle = () => {
@@ -29,10 +33,19 @@ export function Menu({ onPlay, onResume, onShop }: { onPlay: () => void; onResum
         <div className="menu-plaque">ביג דיל</div>
         <p>משחק המסחר בנכסים: ירושלים, תל-אביב, חיפה ועוד</p>
       </div>
+      {onShop && (
+        <button className="menu-shop" onClick={onShop} aria-label="חנות">
+          <span className="menu-shop-bag">🛍️</span>
+          <span className="menu-shop-text">
+            <b>חנות</b>
+            <small>🪙 {wallet.coins}</small>
+          </span>
+        </button>
+      )}
       <div className="menu-parade" aria-hidden="true">
-        {TOKENS.map((t, i) => (
+        {parade.map((t, i) => (
           <span key={t.id} style={{ animationDelay: `${i * 0.15}s` }}>
-            <Token token={t.id} size="clamp(22px, 6vw, 40px)" />
+            <Token token={t.id} size="clamp(22px, 6vw, 40px)" skin={wallet.skin} />
           </span>
         ))}
       </div>
@@ -43,11 +56,6 @@ export function Menu({ onPlay, onResume, onShop }: { onPlay: () => void; onResum
         {onResume && (
           <button className="btn btn-white" onClick={onResume}>
             המשך משחק שמור
-          </button>
-        )}
-        {onShop && (
-          <button className="btn btn-gold" onClick={onShop}>
-            🛍️ חנות · 🪙 {wallet.coins}
           </button>
         )}
       </div>

@@ -113,6 +113,65 @@
   cursor: pointer;
 }
 
+/* the shop: a gold button in the top corner, next to the sound button */
+.menu-shop {
+  position: absolute;
+  top: 16px;
+  left: 66px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px 4px 8px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  background: linear-gradient(180deg, #fff3a8, #ffd23f 60%, #e8a20c);
+  color: #6b3a00;
+  font: inherit;
+  box-shadow: 0 3px 0 #b86e00, 0 6px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  animation: shop-wiggle 4s ease-in-out 1.5s infinite;
+}
+.menu-shop-bag {
+  font-size: 24px;
+  line-height: 1;
+}
+.menu-shop-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+  text-align: start;
+}
+.menu-shop-text b {
+  font-size: 15px;
+  font-weight: 900;
+}
+.menu-shop-text small {
+  font-size: 12px;
+  font-weight: 800;
+}
+@keyframes shop-wiggle {
+  0%,
+  88%,
+  100% {
+    transform: none;
+  }
+  91% {
+    transform: rotate(-6deg) scale(1.06);
+  }
+  94% {
+    transform: rotate(6deg) scale(1.06);
+  }
+  97% {
+    transform: rotate(-3deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu-shop {
+    animation: none;
+  }
+}
+
 /* landscape phones: size everything by the screen height */
 @media (orientation: landscape) and (max-height: 560px) {
   .menu {

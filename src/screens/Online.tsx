@@ -163,7 +163,7 @@ export function Online({ onBack }: { onBack: () => void }) {
                 style={{ ['--tc' as string]: t.color }}
                 onClick={() => setToken(t.id)}
               >
-                <Token token={t.id} size="clamp(20px, 6vw, 40px)" />
+                <Token token={t.id} size="clamp(20px, 6vw, 40px)" skin={wallet.skin} />
                 <span>{t.name}</span>
               </button>
             ))}
@@ -271,7 +271,7 @@ export function Online({ onBack }: { onBack: () => void }) {
 
       <div className="setup-nav">
         <button
-          className="link"
+          className="btn-back"
           onClick={() => (view === 'lobby' ? leave() : view === 'join' ? setView('profile') : onBack())}
         >
           {view === 'lobby' ? 'צא מהחדר' : 'חזרה'}

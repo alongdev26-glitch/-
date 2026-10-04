@@ -141,7 +141,7 @@ export function Shop({ onBack }: { onBack: () => void }) {
       </div>
 
       <div className="setup-nav">
-        <button className="link" onClick={onBack}>
+        <button className="btn-back" onClick={onBack}>
           חזרה
         </button>
       </div>

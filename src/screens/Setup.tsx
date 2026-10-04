@@ -217,7 +217,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
                     setHuman(who, { token: t.id });
                   }}
                 >
-                  <Token token={t.id} size="clamp(22px, 7vw, 44px)" />
+                  <Token token={t.id} size="clamp(22px, 7vw, 44px)" skin={wallet.skin} />
                   <span>{taken ? 'תפוס' : t.name}</span>
                 </button>
               );
@@ -269,7 +269,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
             </button>
           )
         )}
-        <button className="link" onClick={back}>
+        <button className="btn-back" onClick={back}>
           חזרה
         </button>
       </div>
