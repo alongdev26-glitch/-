@@ -3,6 +3,7 @@ import { BOARD, GROUP_COLORS } from '../data/board';
 import './PropertyCard.css';
 import { t, type Key } from '../i18n';
 import { money } from '../data/editions';
+import { RAIL_RENT } from '../engine/rules';
 
 const RENT_LABELS: Key[] = ['rentLabels0', 'rentLabels1', 'rentLabels2', 'rentLabels3', 'rentLabels4', 'rentLabels5'];
 
@@ -68,7 +69,7 @@ export function PropertyCard({ id, ownerName }: { id: number; ownerName?: string
         [1, 2, 3, 4].map((n) => (
           <div className="deed-row" key={n}>
             <span>{t('withRails', { n })}</span>
-            <b>{money(25 * 2 ** (n - 1))}</b>
+            <b>{money(RAIL_RENT * 2 ** (n - 1))}</b>
           </div>
         ))}
       {sp.kind === 'utility' && (

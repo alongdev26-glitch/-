@@ -51,7 +51,7 @@ describe('movement and buying', () => {
     expect(s.phase).toEqual({ t: 'buy', space: 6 });
     const b = reduce(s, { type: 'BUY' });
     expect(b.props[6].owner).toBe(0);
-    expect(b.players[0].money).toBe(1400);
+    expect(b.players[0].money).toBe(1410);
     expect(b.phase.t).toBe('end');
   });
 
@@ -78,21 +78,21 @@ describe('rent', () => {
   it('doubles base rent with a full set and uses house rent', () => {
     const s = setup();
     s.props[1].owner = 0;
-    expect(rentFor(s, 1, 7)).toBe(2);
+    expect(rentFor(s, 1, 7)).toBe(5);
     s.props[3].owner = 0;
-    expect(rentFor(s, 1, 7)).toBe(4);
+    expect(rentFor(s, 1, 7)).toBe(10);
     s.props[1].houses = 3;
-    expect(rentFor(s, 1, 7)).toBe(90);
+    expect(rentFor(s, 1, 7)).toBe(140);
     s.props[1].houses = 5;
-    expect(rentFor(s, 1, 7)).toBe(250);
+    expect(rentFor(s, 1, 7)).toBe(240);
   });
 
   it('railroads and utilities scale with count', () => {
     const s = setup();
     s.props[5].owner = 0;
     s.props[15].owner = 0;
-    expect(rentFor(s, 5, 7)).toBe(50);
-    expect(rentFor(s, 5, 7, 'rail2')).toBe(100);
+    expect(rentFor(s, 5, 7)).toBe(60);
+    expect(rentFor(s, 5, 7, 'rail2')).toBe(120);
     s.props[12].owner = 0;
     expect(rentFor(s, 12, 7)).toBe(28);
     s.props[28].owner = 0;
@@ -103,8 +103,8 @@ describe('rent', () => {
     let s = setup();
     s.props[6].owner = 1;
     s = run(s, { type: 'ROLL', dice: [2, 4] });
-    expect(s.players[0].money).toBe(1494);
-    expect(s.players[1].money).toBe(1506);
+    expect(s.players[0].money).toBe(1491);
+    expect(s.players[1].money).toBe(1509);
   });
 });
 
@@ -202,12 +202,12 @@ describe('bots', () => {
 describe('lotto pot', () => {
   it('collects taxes and pays out on free parking', () => {
     let s = run(setup(), { type: 'ROLL', dice: [1, 3] });
-    expect(s.players[0].money).toBe(1300);
-    expect(s.pot).toBe(200);
+    expect(s.players[0].money).toBe(1320);
+    expect(s.pot).toBe(180);
     s = run(s, { type: 'END_TURN' });
     s.players[1].pos = 15;
     s = run(s, { type: 'ROLL', dice: [2, 3] });
-    expect(s.players[1].money).toBe(1700);
+    expect(s.players[1].money).toBe(1680);
     expect(s.pot).toBe(0);
   });
   it('collects the jail fine', () => {
@@ -237,9 +237,9 @@ describe('mortgage payments', () => {
     const before = [s.players[0].money, s.players[1].money];
     s = endRound(s);
     expect(s.round).toBe(9);
-    expect(s.players[0].money).toBe(before[0] - 50); // half of 100
-    expect(s.players[1].money).toBe(before[1] - 100); // half of 200
-    expect(s.pot).toBe(150);
+    expect(s.players[0].money).toBe(before[0] - 45); // half of 90
+    expect(s.players[1].money).toBe(before[1] - 90); // half of 180
+    expect(s.pot).toBe(135);
   });
 
   it('an old mortgaged property skips the payment and can still be redeemed', () => {
@@ -248,7 +248,7 @@ describe('mortgage payments', () => {
     s.props[5].mortgaged = true;
     expect(feeDue(s, 0)).toBe(0);
     s = run(s, { type: 'UNMORTGAGE', space: 5 });
-    expect(s.players[0].money).toBe(1280);
+    expect(s.players[0].money).toBe(1302);
     expect(s.props[5].mortgaged).toBe(false);
   });
 });
@@ -309,7 +309,7 @@ describe('payment events', () => {
     s.props[6].owner = 1;
     s = run(s, { type: 'ROLL', dice: [2, 4] });
     expect(s.paySeq).toBe(1);
-    expect(s.payEvents).toEqual([{ kind: 'rent', from: 0, to: 1, amount: 6, space: 6 }]);
+    expect(s.payEvents).toEqual([{ kind: 'rent', from: 0, to: 1, amount: 9, space: 6 }]);
   });
 });
 
@@ -317,7 +317,7 @@ describe('announcements', () => {
   it('announces a purchase and a new house', () => {
     let s = run(setup(), { type: 'ROLL', dice: [2, 4] }, { type: 'BUY' });
     expect(s.announceSeq).toBe(1);
-    expect(s.announce).toEqual({ kind: 'buy', player: 0, space: 6, price: 100 });
+    expect(s.announce).toEqual({ kind: 'buy', player: 0, space: 6, price: 90 });
     s.props[8].owner = 0;
     s.props[9].owner = 0;
     s = reduce(s, { type: 'BUILD', space: 6 });
@@ -341,7 +341,7 @@ describe('no mortgaging without permission', () => {
     s.players[0].money = 100;
     s = reduce(s, { type: 'PAY_DEBT' });
     expect(s.phase.t).toBe('roll');
-    expect(s.players[0].money).toBe(50);
+    expect(s.players[0].money).toBe(55);
   });
 });
 
@@ -467,16 +467,16 @@ describe('דרך צלחה and taxes', () => {
     s = run(s, { type: 'ROLL', dice: [2, 4] });
     expect(s.players[0].pos).toBe(4);
     expect(s.payEvents.map((e) => e.kind)).toEqual(['go', 'tax']);
-    expect(s.payEvents[1]).toEqual({ kind: 'tax', from: 0, to: null, amount: 200, space: 4 });
-    expect(s.pot).toBe(200);
+    expect(s.payEvents[1]).toEqual({ kind: 'tax', from: 0, to: null, amount: 180, space: 4 });
+    expect(s.pot).toBe(180);
   });
 });
 
 describe('selling to the bank', () => {
   it('pays half the price and frees the property, so a debt can be paid', () => {
     let s = setup();
-    s.props[39].owner = 0; // דיזנגוף, price 400
-    s.players[0].money = 600;
+    s.props[39].owner = 0; // דיזנגוף, price 380
+    s.players[0].money = 610;
     s.phase = { t: 'debt', owed: [{ to: 1, amount: 800 }], resume: 'end' };
     s = reduce(s, { type: 'PAY_DEBT' });
     expect(s.phase.t).toBe('debt');

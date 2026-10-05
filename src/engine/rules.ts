@@ -1,6 +1,9 @@
 import { BOARD, FEE_ROUNDS, groupMembers, isOwnable, type Group } from '../data/board';
 import type { GameState, TradeSide } from './types';
 
+/** Rent of one station; it doubles with each more station the owner has. */
+export const RAIL_RENT = 30;
+
 export const ownsGroup = (s: GameState, player: number, g: Group) =>
   groupMembers(g).every((id) => s.props[id].owner === player);
 
@@ -26,7 +29,7 @@ export function rentFor(s: GameState, id: number, diceTotal: number, mod?: RentM
     return ownsGroup(s, st.owner, sp.group!) ? base * 2 : base;
   }
   if (sp.kind === 'railroad') {
-    const r = 25 * 2 ** (countOwned(s, st.owner, 'railroad') - 1);
+    const r = RAIL_RENT * 2 ** (countOwned(s, st.owner, 'railroad') - 1);
     return mod === 'rail2' ? r * 2 : r;
   }
   if (sp.kind === 'utility') {

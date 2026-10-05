@@ -16,57 +16,46 @@ export interface Card {
   effect: CardEffect;
 }
 
+// Our own decks. The text of each card comes from the edition in play (data/editions.ts),
+// filled in from the effect, so amounts and places always match the rules.
+const card = (effect: CardEffect): Card => ({ text: '', effect });
+
 export const CHANCE: Card[] = [
-  { text: 'התקדם ל"דרך צלחה" וקבל ש"ח 400', effect: { type: 'move', to: 0 } },
-  { text: "התקדם לרח' ביאליק, רמת-גן", effect: { type: 'move', to: 24 } },
-  { text: "התקדם לשד' שזר, באר-שבע", effect: { type: 'move', to: 11 } },
-  {
-    text: 'התקדם לחברה הקרובה. אם היא בבעלות, שלם פי 10 מסכום הקוביות',
-    effect: { type: 'nearest', kind: 'utility' },
-  },
-  {
-    text: 'התקדם לרכבת הקרובה. אם היא בבעלות, שלם כפול',
-    effect: { type: 'nearest', kind: 'railroad' },
-  },
-  {
-    text: 'התקדם לרכבת הקרובה. אם היא בבעלות, שלם כפול',
-    effect: { type: 'nearest', kind: 'railroad' },
-  },
-  { text: 'הבנק משלם לך דיבידנד של ש"ח 50', effect: { type: 'money', amount: 50 } },
-  { text: 'צא מהכלא חינם. שמור כרטיס זה', effect: { type: 'jailfree' } },
-  { text: 'חזור 3 משבצות אחורה', effect: { type: 'back', steps: 3 } },
-  { text: 'גש לכלא! אל תעבור ב"דרך צלחה"', effect: { type: 'gotojail' } },
-  {
-    text: 'תיקונים כלליים: שלם ש"ח 25 לכל בית וש"ח 100 לכל מלון',
-    effect: { type: 'repairs', house: 25, hotel: 100 },
-  },
-  { text: 'קנס מהירות: שלם ש"ח 15', effect: { type: 'money', amount: -15 } },
-  { text: 'נסע לרכבת דרום', effect: { type: 'move', to: 5 } },
-  { text: "התקדם לרח' דיזנגוף, תל-אביב", effect: { type: 'move', to: 39 } },
-  { text: 'נבחרת ליו"ר הוועד: שלם לכל שחקן ש"ח 50', effect: { type: 'payEach', amount: 50 } },
-  { text: 'הלוואת הבנייה שלך הבשילה: קבל ש"ח 150', effect: { type: 'money', amount: 150 } },
+  card({ type: 'move', to: 0 }), // taxi to the start
+  card({ type: 'move', to: 24 }), // weekend trip
+  card({ type: 'move', to: 11 }), // a concert in town
+  card({ type: 'nearest', kind: 'utility' }), // a visit to the utility office
+  card({ type: 'nearest', kind: 'railroad' }), // catch a train
+  card({ type: 'money', amount: 60 }), // a winning scratch card
+  card({ type: 'jailfree' }), // a lawyer friend
+  card({ type: 'back', steps: 2 }), // forgot your keys
+  card({ type: 'gotojail' }), // caught crossing on red
+  card({ type: 'repairs', house: 30, hotel: 110 }), // the roof leaks
+  card({ type: 'money', amount: -20 }), // a parking ticket
+  card({ type: 'move', to: 15 }), // a train trip
+  card({ type: 'move', to: 39 }), // shopping on the top street
+  card({ type: 'payEach', amount: 40 }), // you threw a party
+  card({ type: 'money', amount: 120 }), // your app went viral
+  card({ type: 'collectEach', amount: 15 }), // crowdfunding
 ];
 
 export const CHEST: Card[] = [
-  { text: 'התקדם ל"דרך צלחה" וקבל ש"ח 400', effect: { type: 'move', to: 0 } },
-  { text: 'טעות של הבנק לטובתך: קבל ש"ח 200', effect: { type: 'money', amount: 200 } },
-  { text: 'ביקור אצל רופא: שלם ש"ח 50', effect: { type: 'money', amount: -50 } },
-  { text: 'מכרת מניות: קבל ש"ח 50', effect: { type: 'money', amount: 50 } },
-  { text: 'צא מהכלא חינם. שמור כרטיס זה', effect: { type: 'jailfree' } },
-  { text: 'גש לכלא! אל תעבור ב"דרך צלחה"', effect: { type: 'gotojail' } },
-  { text: 'מענק חג: קבל ש"ח 100', effect: { type: 'money', amount: 100 } },
-  { text: 'החזר מס הכנסה: קבל ש"ח 20', effect: { type: 'money', amount: 20 } },
-  { text: 'יום הולדת שמח! קבל ש"ח 10 מכל שחקן', effect: { type: 'collectEach', amount: 10 } },
-  { text: 'פוליסת ביטוח חיים הבשילה: קבל ש"ח 100', effect: { type: 'money', amount: 100 } },
-  { text: 'אשפוז בבית חולים: שלם ש"ח 100', effect: { type: 'money', amount: -100 } },
-  { text: 'שכר לימוד: שלם ש"ח 50', effect: { type: 'money', amount: -50 } },
-  { text: 'דמי ייעוץ: קבל ש"ח 25', effect: { type: 'money', amount: 25 } },
-  {
-    text: 'תיקוני רחוב: שלם ש"ח 40 לכל בית וש"ח 115 לכל מלון',
-    effect: { type: 'repairs', house: 40, hotel: 115 },
-  },
-  { text: 'זכית במקום שני בתחרות יופי: קבל ש"ח 10', effect: { type: 'money', amount: 10 } },
-  { text: 'קיבלת ירושה: קבל ש"ח 100', effect: { type: 'money', amount: 100 } },
+  card({ type: 'move', to: 0 }), // a free bus to the start
+  card({ type: 'money', amount: 150 }), // won a cooking contest
+  card({ type: 'money', amount: -60 }), // the dentist
+  card({ type: 'money', amount: 40 }), // sold your old bike
+  card({ type: 'jailfree' }),
+  card({ type: 'gotojail' }),
+  card({ type: 'money', amount: 90 }), // a bonus at work
+  card({ type: 'money', amount: 25 }), // money in an old coat
+  card({ type: 'collectEach', amount: 20 }), // your birthday
+  card({ type: 'money', amount: 110 }), // a savings plan matures
+  card({ type: 'money', amount: -90 }), // the car needs fixing
+  card({ type: 'money', amount: -40 }), // gym membership
+  card({ type: 'money', amount: 30 }), // babysitting
+  card({ type: 'repairs', house: 35, hotel: 100 }), // home renovation
+  card({ type: 'money', amount: 15 }), // won a raffle
+  card({ type: 'money', amount: 80 }), // a gift from grandma
 ];
 
 export const DECKS: Record<Deck, Card[]> = { chance: CHANCE, chest: CHEST };

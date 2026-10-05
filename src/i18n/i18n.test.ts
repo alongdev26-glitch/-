@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { BOARD } from '../data/board';
+import { BOARD, rents } from '../data/board';
 import { CHANCE, CHEST } from '../data/cards';
 import { EDITIONS, applyEdition, money } from '../data/editions';
+import type { Lang } from './index';
 import { newGame, reduce } from '../engine/reducer';
 import { en } from './en';
 import { ar } from './ar';
@@ -54,7 +55,7 @@ describe('languages', () => {
     for (const p of s.players) p.lapped = true;
     s = reduce(s, { type: 'ROLL', dice: [2, 4] });
     s = reduce(s, { type: 'BUY' });
-    expect(s.log[0]).toBe('Ann bought Broadway for $100');
+    expect(s.log[0]).toBe('Ann bought Broadway for $90');
     expect(s.log.some((l) => HEBREW.test(l))).toBe(false);
   });
 
@@ -64,9 +65,9 @@ describe('languages', () => {
       { name: 'B', token: 'car' as const, isBot: false },
     ];
     const cases = [
-      ['fr', 'Champs-Élysées', '200 €', 'A achète Place de la Bourse pour 100 €'],
-      ['ru', 'Красная площадь', '200 ₽', 'A купил Кремлёвская ул. за 100 ₽'],
-      ['ja', '銀座', '¥200', 'Aが中洲を¥100で買った'],
+      ['fr', 'Champs-Élysées', '200 €', 'A achète Place de la Bourse pour 90 €'],
+      ['ru', 'Красная площадь', '200 ₽', 'A купил Кремлёвская ул. за 90 ₽'],
+      ['ja', '銀座', '¥200', 'Aが中洲を¥90で買った'],
     ] as const;
     for (const [lang, street, cash, line] of cases) {
       let s = newGame(players, () => 0.5, { mortgage: true }, lang);
@@ -92,5 +93,38 @@ describe('languages', () => {
     expect(s.lang).toBe('he');
     expect(BOARD[0].name).toBe('דרך צלחה');
     expect(money(50)).toBe('ש"ח 50');
+  });
+
+  it('every card in every edition is fully filled in, with the right amounts', () => {
+    for (const lang of Object.keys(EDITIONS) as Lang[]) {
+      applyEdition(lang);
+      for (const c of [...CHANCE, ...CHEST]) {
+        expect(c.text, `${lang}: ${c.text}`).not.toMatch(/\{\w+\}/);
+        const fx = c.effect;
+        if (fx.type === 'money' || fx.type === 'payEach' || fx.type === 'collectEach')
+          expect(c.text).toContain(money(Math.abs(fx.amount)));
+        if (fx.type === 'repairs') {
+          expect(c.text).toContain(money(fx.house));
+          expect(c.text).toContain(money(fx.hotel));
+        }
+        if (fx.type === 'move' && fx.to !== 0) expect(c.text).toContain(BOARD[fx.to].name);
+      }
+    }
+    applyEdition('he');
+  });
+
+  it('the board has our own prices and rents', () => {
+    expect(BOARD[39].price).toBe(380);
+    for (const sp of BOARD) if (sp.kind === 'property') expect(sp.rent).toEqual(rents(sp.price!));
+  });
+
+  it('none of the classic board-game phrases are left', () => {
+    const CLASSIC = /bank error|beauty contest|advance to go|free parking|just visiting|community chest|elected chairman/i;
+    for (const lang of Object.keys(EDITIONS) as Lang[]) {
+      applyEdition(lang);
+      for (const text of [...CHANCE.map((c) => c.text), ...CHEST.map((c) => c.text), ...EDITIONS[lang].names])
+        expect(CLASSIC.test(text), `${lang}: ${text}`).toBe(false);
+    }
+    applyEdition('he');
   });
 });

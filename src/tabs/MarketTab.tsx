@@ -4,6 +4,7 @@ import { OWNABLE_COUNT, SETS } from './groups';
 import './tabs.css';
 import { t } from '../i18n';
 import { money } from '../data/editions';
+import { RAIL_RENT } from '../engine/rules';
 
 /** Page 3: everything nobody bought yet, and the lotto pot. */
 export function MarketTab({ game, onSpace }: { game: GameState; onSpace: (id: number) => void }) {
@@ -49,7 +50,7 @@ export function MarketTab({ game, onSpace }: { game: GameState; onSpace: (id: nu
                     {sp.kind === 'property'
                       ? t('rentHotel', { base: money(sp.rent![0]), hotel: money(sp.rent![5]) })
                       : sp.kind === 'railroad'
-                        ? t('rentRails', { a: money(25), b: money(200) })
+                        ? t('rentRails', { a: money(RAIL_RENT), b: money(RAIL_RENT * 8) })
                         : t('rentUtil')}
                   </small>
                 </button>

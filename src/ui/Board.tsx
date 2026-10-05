@@ -92,7 +92,7 @@ function Corner({ sp }: { sp: Space }) {
       return (
         <div className="corner-inner">
           <b>{edition().corners.parking1}</b>
-          <span className="corner-icon">🚗</span>
+          <span className="corner-icon">🎰</span>
           <b>{edition().corners.parking2}</b>
         </div>
       );
