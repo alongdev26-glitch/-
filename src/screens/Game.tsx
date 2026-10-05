@@ -53,6 +53,7 @@ export function loadGame(): GameState | null {
     g.announceSeq ??= 0;
     g.blocks ??= [];
     for (const p of g.players) p.owes ??= [];
+    for (const p of g.players) p.lapped ??= g.round > 1;
     return g;
   } catch {
     return null;

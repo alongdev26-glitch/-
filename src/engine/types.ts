@@ -24,6 +24,8 @@ export interface Player {
   /** debts that arose outside this player's turn; settled at the start of their next turn */
   owes: Owed[];
   bankrupt: boolean;
+  /** went around the board once (passed "דרך צלחה"): only then may buy properties */
+  lapped?: boolean;
 }
 
 export interface PropState {

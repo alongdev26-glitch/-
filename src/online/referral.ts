@@ -17,7 +17,8 @@ const CODE_RE = /^[A-Z2-9]{6}$/;
 export const rewardsOn = () =>
   !!config.db && typeof location !== 'undefined' && !location.hostname.endsWith('claude.ai') && !location.hostname.endsWith('claudeusercontent.com');
 
-export const shareLink = () => `${APP_URL}?ref=${getWallet().refCode}`;
+// v= changes when the preview card changes, so WhatsApp fetches a fresh one
+export const shareLink = () => `${APP_URL}?ref=${getWallet().refCode}&v=2`;
 
 export const SHARE_TEXT = 'בוא לשחק איתי ביג דיל! 🎩🎲';
 
@@ -52,6 +53,7 @@ export function captureRef(href = location.href) {
     if (code !== w.refCode) setPendingRef(code);
   }
   url.searchParams.delete('ref');
+  url.searchParams.delete('v');
   try {
     history.replaceState(null, '', url.pathname + url.search + url.hash);
   } catch {

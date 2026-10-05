@@ -6,13 +6,14 @@ import { actor, newGame, reduce } from './reducer';
 import { canBuild, feeDue, rentFor } from './rules';
 import type { Action, GameState } from './types';
 
-/** A fresh game moved past the first round, where buying is not allowed yet. */
+/** A fresh game where everyone already went around once (before that, buying is not allowed). */
 const setup = (n = 2) => {
   const s = newGame(
     Array.from({ length: n }, (_, i) => ({ name: `P${i}`, token: 'cat' as const, isBot: false })),
     () => 0.5,
   );
   s.round = 2;
+  for (const p of s.players) p.lapped = true;
   return s;
 };
 
@@ -525,18 +526,64 @@ describe('selling to the bank', () => {
   });
 });
 
-describe('first round', () => {
-  it('nothing can be bought on the first lap', () => {
-    let s = setup();
-    s.round = 1;
+describe('first lap', () => {
+  const fresh = (n = 2) => {
+    const s = setup(n);
+    for (const p of s.players) p.lapped = false;
+    return s;
+  };
+
+  it('nothing can be bought before going around once', () => {
+    let s = fresh();
     s = run(s, { type: 'ROLL', dice: [2, 4] });
     expect(s.phase.t).toBe('end');
     expect(s.props[6].owner).toBeNull();
   });
-  it('buying opens from the second round', () => {
-    let s = setup();
+
+  it('passing "דרך צלחה" opens buying for that player only', () => {
+    let s = fresh();
+    s.players[0].pos = 37;
+    s = run(s, { type: 'ROLL', dice: [2, 4] }); // 37 → 3, past GO
+    expect(s.players[0].lapped).toBe(true);
+    expect(s.phase).toEqual({ t: 'buy', space: 3 });
+    s = run(s, { type: 'BUY' }, { type: 'END_TURN' });
+    // player 1 has not gone around yet
     s = run(s, { type: 'ROLL', dice: [2, 4] });
-    expect(s.phase).toEqual({ t: 'buy', space: 6 });
+    expect(s.players[1].lapped).toBe(false);
+    expect(s.phase.t).toBe('end');
+    expect(s.props[6].owner).toBeNull();
+  });
+
+  it('landing exactly on "דרך צלחה" counts as a lap', () => {
+    let s = fresh();
+    s.players[0].pos = 34;
+    s = run(s, { type: 'ROLL', dice: [2, 4] }); // 34 → 0
+    expect(s.players[0].pos).toBe(0);
+    expect(s.players[0].lapped).toBe(true);
+  });
+
+  it('going to jail is not a lap', () => {
+    let s = fresh();
+    s.players[0].pos = 24;
+    s = run(s, { type: 'ROLL', dice: [2, 4] }); // 24 → 30 "go to jail"
+    expect(s.players[0].pos).toBe(JAIL);
+    expect(s.players[0].lapped).toBe(false);
+  });
+
+  it('only players who went around may bid at an auction', () => {
+    let s = fresh(3);
+    s.players[0].lapped = true;
+    s.players[2].lapped = true;
+    s = run(s, { type: 'ROLL', dice: [2, 4] }, { type: 'DECLINE' });
+    expect(s.phase).toMatchObject({ t: 'auction', active: [2] });
+  });
+
+  it('with no one allowed to bid, the property just stays free', () => {
+    let s = fresh(3);
+    s.players[0].lapped = true;
+    s = run(s, { type: 'ROLL', dice: [2, 4] }, { type: 'DECLINE' });
+    expect(s.phase.t).toBe('end');
+    expect(s.props[6].owner).toBeNull();
   });
 });
 

@@ -41,7 +41,7 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
   }
 
   return (
-    <div className={`tab-board${game.round === 1 ? ' r1' : ''}`}>
+    <div className={`tab-board${!me.lapped ? ' r1' : ''}`}>
       <div className="players-strip">
         {game.players.map((p) => (
           <div
@@ -61,7 +61,9 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
         ))}
       </div>
       <SoundToggle className="board-sound" />
-      {game.round === 1 && <div className="round-one">🚫 סבב ראשון: עוד אי אפשר לקנות נכסים</div>}
+      {!me.lapped && !me.bankrupt && (
+        <div className="round-one">🚫 {me.name}: אפשר לקנות רק אחרי שעוברים ב"דרך צלחה"</div>
+      )}
       <Board
         game={game}
         shown={shown}

@@ -58,6 +58,7 @@ export function newGame(
       jailCards: [],
       owes: [],
       bankrupt: false,
+      lapped: false,
     })),
     props: BOARD.map(() => ({ owner: null, houses: 0, mortgaged: false })),
     current: 0,
@@ -182,6 +183,7 @@ function moveTo(s: GameState, target: number, passGo = true) {
     // landing exactly on "דרך צלחה" pays double
     const pay = target === 0 ? GO_SALARY * 2 : GO_SALARY;
     p.money += pay;
+    p.lapped = true;
     moneyEvent(s, { kind: target === 0 ? 'go-land' : 'go', from: null, to: p.id, amount: pay, space: 0 });
     log(s, target === 0 ? `${p.name} נחת ב"דרך צלחה" וקיבל ${fmt(pay)}!` : `${p.name} עבר ב"דרך צלחה" וקיבל ${fmt(pay)}`);
   }
@@ -196,9 +198,9 @@ function land(s: GameState, mod?: RentMod) {
   if (isOwnable(sp)) {
     const st = s.props[sp.id];
     if (st.owner === null) {
-      // the first round is a free lap: nothing can be bought yet
-      if (s.round === 1) {
-        log(s, `סבב ראשון – עוד אי אפשר לקנות את ${sp.name}`);
+      // the first lap is free: a player may buy only after passing "דרך צלחה" once
+      if (!p.lapped) {
+        log(s, `${p.name} עוד לא השלים סיבוב – אי אפשר לקנות את ${sp.name}`);
         return finishMove(s);
       }
       s.phase = { t: 'buy', space: sp.id };
@@ -432,7 +434,12 @@ function startAuction(s: GameState, space: number) {
   // the player who sent the property to auction may not bid on it
   for (let k = 1; k < n; k++) {
     const id = (s.current + k) % n;
-    if (!s.players[id].bankrupt) order.push(id);
+    // only players who already went around once may buy, at an auction too
+    if (!s.players[id].bankrupt && s.players[id].lapped) order.push(id);
+  }
+  if (!order.length) {
+    log(s, `אף אחד עוד לא יכול לקנות את ${BOARD[space].name}, והנכס נשאר פנוי`);
+    return finishMove(s);
   }
   s.phase = { t: 'auction', space, bid: 0, bidder: null, active: order, turn: 0 };
   log(s, `מכירה פומבית על ${BOARD[space].name}`);
