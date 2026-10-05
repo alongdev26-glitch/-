@@ -4,7 +4,7 @@ import { DECKS } from '../data/cards';
 import { tokenColor } from '../data/tokens';
 import { botAction } from '../engine/bot';
 import { actor, reduce } from '../engine/reducer';
-import { hasAuction } from '../engine/rules';
+import { canResign, hasAuction } from '../engine/rules';
 import type { Action, Announcement, GameState, Payment } from '../engine/types';
 import { MoneyFlash } from '../ui/MoneyFlash';
 import { BuyFlash } from '../ui/BuyFlash';
@@ -229,6 +229,10 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
   useEffect(() => {
     if (!over || game.phase.t !== 'gameover') return;
     const won = controls(game.phase.winner);
+    // giving up early is not a way to farm coins
+    const mine = game.players.filter((p) => controls(p.id));
+    const gaveUp = mine.length > 0 && mine.every((p) => p.resigned);
+    if (!won && gaveUp) return;
     const coins = won ? GAME_REWARD.won : GAME_REWARD.played;
     if (award(gameKey.current, coins)) setEarned(coins);
   }, [over]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -554,6 +558,8 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
             onNewGame={onNewGame}
             canTakeOver={canTakeOver}
             onSetBot={setBot}
+            onResign={() => act({ type: 'RESIGN', player: me.id })}
+            canResign={canResign(game, me.id)}
           />
         )}
         <div className="toast" key={game.log.length + game.log[0]}>

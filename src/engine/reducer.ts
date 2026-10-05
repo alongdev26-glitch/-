@@ -9,6 +9,7 @@ import {
   canSellToBank,
   BLOCK_ROUNDS,
   isBlocked,
+  canResign,
   hasAuction,
   canUnmortgage,
   ownedBy,
@@ -16,6 +17,7 @@ import {
   sellValue,
   unmortgageCost,
   feeDue,
+  netWorth,
   sideIsEmpty,
   validSide,
   type RentMod,
@@ -305,7 +307,7 @@ function returnJailCard(s: GameState, deck: Deck) {
   s.decks[deck].push(DECKS[deck].findIndex((c) => c.effect.type === 'jailfree'));
 }
 
-function goBankrupt(s: GameState, player: number, creditor: number | null) {
+function goBankrupt(s: GameState, player: number, creditor: number | null, toPot = true) {
   const p = s.players[player];
   p.bankrupt = true;
   log(s, `${p.name} פשט רגל!`);
@@ -320,7 +322,8 @@ function goBankrupt(s: GameState, player: number, creditor: number | null) {
     }
   }
   if (creditor !== null) s.players[creditor].money += Math.max(0, p.money);
-  else s.pot += Math.max(0, p.money);
+  else if (toPot) s.pot += Math.max(0, p.money);
+  p.owes = [];
   p.money = 0;
   for (const deck of p.jailCards) returnJailCard(s, deck);
   p.jailCards = [];
@@ -681,6 +684,25 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       const creditor = ph.owed.length === 1 && creditors.length === 1 ? creditors[0].to : null;
       goBankrupt(s, p.id, creditor);
       if (s.phase.t !== 'gameover') nextTurn(s);
+      return s;
+    }
+
+    case 'RESIGN': {
+      if (!canResign(s, a.player)) return prev;
+      const quitter = s.players[a.player];
+      log(s, `${quitter.name} הכריז על פשיטת רגל ויצא מהמשחק`);
+      goBankrupt(s, a.player, null, false);
+      quitter.resigned = true;
+      if (s.phase.t === 'gameover') return s;
+      // only the computer is left: no one to watch it play, so the richest wins now
+      const left = alive(s);
+      if (left.every((o) => o.isBot)) {
+        const best = left.reduce((b, o) => (netWorth(s, o.id) > netWorth(s, b.id) ? o : b));
+        s.phase = { t: 'gameover', winner: best.id };
+        log(s, `${best.name} ניצח במשחק!`);
+        return s;
+      }
+      if (s.current === a.player) nextTurn(s);
       return s;
     }
 

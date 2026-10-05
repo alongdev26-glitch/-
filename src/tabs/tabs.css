@@ -705,3 +705,45 @@
     bottom: 8px;
   }
 }
+
+/* "פשיטת רגל": a separate, muted button under the exit buttons */
+.resign-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.btn-resign {
+  border: 2px solid var(--burgundy, #7a1f2b);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--burgundy, #7a1f2b);
+  font: inherit;
+  font-weight: 900;
+  font-size: 16px;
+  padding: 9px 24px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.btn-resign:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.resign-wrap small {
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+.confirm-resign {
+  border: 2px solid var(--burgundy, #7a1f2b);
+}
+.resign-note {
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  font-weight: 800;
+  text-align: center;
+  border-radius: 12px;
+  padding: 8px 12px;
+}

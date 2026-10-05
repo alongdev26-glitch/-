@@ -26,6 +26,8 @@ export interface Player {
   bankrupt: boolean;
   /** went around the board once (passed "דרך צלחה"): only then may buy properties */
   lapped?: boolean;
+  /** gave up from the profile (no coins for that game) */
+  resigned?: boolean;
 }
 
 export interface PropState {
@@ -164,6 +166,8 @@ export type Action =
   | { type: 'UNMORTGAGE'; space: number }
   | { type: 'PAY_DEBT' }
   | { type: 'BANKRUPT' }
+  /** give up any time and leave the game (the profile's "פשיטת רגל") */
+  | { type: 'RESIGN'; player: number }
   | { type: 'END_TURN' }
   /** online: hand a seat to the computer (or back to its player) */
   | { type: 'SET_BOT'; player: number; isBot: boolean }

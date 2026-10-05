@@ -153,3 +153,14 @@ export function blockRoundsLeft(s: GameState, from: number, to: number): number 
   return b ? b.until - s.round : 0;
 }
 export const isBlocked = (s: GameState, from: number, to: number) => blockRoundsLeft(s, from, to) > 0;
+
+/** May this player give up now? Not while caught in someone else's auction or trade. */
+export function canResign(s: GameState, pid: number): boolean {
+  const p = s.players[pid];
+  if (!p || p.bankrupt || s.phase.t === 'gameover') return false;
+  if (s.current === pid) return true;
+  const ph = s.phase;
+  if (ph.t === 'auction') return !ph.active.includes(pid);
+  if (ph.t === 'trade') return ph.offer.from !== pid && ph.offer.to !== pid;
+  return true;
+}

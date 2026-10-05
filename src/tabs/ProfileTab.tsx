@@ -13,11 +13,14 @@ interface Props {
   /** online host: which seats may be handed to the computer */
   canTakeOver?: (pid: number) => boolean;
   onSetBot?: (pid: number, isBot: boolean) => void;
+  /** give up and leave the game ("פשיטת רגל") */
+  onResign?: () => void;
+  canResign?: boolean;
 }
 
 /** Page 4: my profile, the other players, and leaving the game. */
-export function ProfileTab({ game, me, onExit, onNewGame, canTakeOver, onSetBot }: Props) {
-  const [confirm, setConfirm] = useState<'exit' | 'new' | null>(null);
+export function ProfileTab({ game, me, onExit, onNewGame, canTakeOver, onSetBot, onResign, canResign }: Props) {
+  const [confirm, setConfirm] = useState<'exit' | 'new' | 'resign' | null>(null);
   const p = game.players[me];
   const ranking = [...game.players].sort((a, b) => netWorth(game, b.id) - netWorth(game, a.id));
 
@@ -76,29 +79,57 @@ export function ProfileTab({ game, me, onExit, onNewGame, canTakeOver, onSetBot 
         ))}
       </section>
 
+      {p.bankrupt && game.phase.t !== 'gameover' && (
+        <div className="resign-note">🏳️ יצאת מהמשחק – אתה צופה בשאר השחקנים</div>
+      )}
+
       {confirm ? (
-        <div className="confirm">
+        <div className={`confirm${confirm === 'resign' ? ' confirm-resign' : ''}`}>
           <span>
             {confirm === 'exit'
               ? 'לצאת לתפריט? המשחק נשמר ותוכל להמשיך אותו אחר כך.'
-              : 'להתחיל משחק חדש? המשחק הנוכחי יימחק.'}
+              : confirm === 'new'
+                ? 'להתחיל משחק חדש? המשחק הנוכחי יימחק.'
+                : 'לפשוט רגל ולצאת מהמשחק? כל הנכסים שלך יחזרו לבנק והמשחק ימשיך בלעדיך. אי אפשר לבטל.'}
           </span>
-          <button className="btn btn-red btn-sm" onClick={confirm === 'exit' ? onExit : onNewGame}>
-            {confirm === 'exit' ? 'כן, צא' : 'כן, משחק חדש'}
+          <button
+            className="btn btn-red btn-sm"
+            onClick={() => {
+              if (confirm === 'resign') {
+                setConfirm(null);
+                onResign?.();
+              } else (confirm === 'exit' ? onExit : onNewGame)();
+            }}
+          >
+            {confirm === 'exit' ? 'כן, צא' : confirm === 'new' ? 'כן, משחק חדש' : 'כן, פשטתי רגל'}
           </button>
           <button className="btn btn-white btn-sm" onClick={() => setConfirm(null)}>
             ביטול
           </button>
         </div>
       ) : (
-        <div className="profile-actions">
-          <button className="btn btn-black" onClick={() => setConfirm('exit')}>
-            צא מהמשחק
-          </button>
-          <button className="btn btn-white" onClick={() => setConfirm('new')}>
-            משחק חדש
-          </button>
-        </div>
+        <>
+          <div className="profile-actions">
+            <button className="btn btn-black" onClick={() => setConfirm('exit')}>
+              צא מהמשחק
+            </button>
+            <button className="btn btn-white" onClick={() => setConfirm('new')}>
+              משחק חדש
+            </button>
+          </div>
+          {onResign && !p.bankrupt && game.phase.t !== 'gameover' && (
+            <div className="resign-wrap">
+              <button className="btn-resign" disabled={!canResign} onClick={() => setConfirm('resign')}>
+                🏳️ פשיטת רגל
+              </button>
+              <small>
+                {canResign
+                  ? 'יוצאים מהמשחק והנכסים חוזרים לבנק. המשחק ממשיך בלעדיך.'
+                  : 'אפשר לפשוט רגל אחרי שהמכירה הפומבית או העסקה תיגמר'}
+              </small>
+            </div>
+          )}
+        </>
       )}
       <div className="version">
         גרסה: {new Date(__BUILD__).toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' })}

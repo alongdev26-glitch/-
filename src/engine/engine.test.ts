@@ -681,3 +681,51 @@ describe('go to jail announcement', () => {
     expect(s.announce).toMatchObject({ kind: 'jail', detail: 'שלושה דאבלים ברצף' });
   });
 });
+
+describe('resigning (פשיטת רגל from the profile)', () => {
+  it('on my turn: I am out, my properties are free, my cash is gone, the turn passes', () => {
+    const s0 = setup(3);
+    s0.props[1].owner = 0;
+    s0.props[3] = { owner: 0, houses: 2, mortgaged: false };
+    const pot = s0.pot;
+    const s = reduce(s0, { type: 'RESIGN', player: 0 });
+    expect(s.players[0].bankrupt).toBe(true);
+    expect(s.players[0].money).toBe(0);
+    expect(s.props[1].owner).toBeNull();
+    expect(s.props[3]).toEqual({ owner: null, houses: 0, mortgaged: false });
+    expect(s.pot).toBe(pot);
+    expect(s.current).toBe(1);
+    expect(s.phase).toEqual({ t: 'roll' });
+  });
+
+  it("on someone else's turn: their turn goes on", () => {
+    let s = setup(3);
+    s = run(s, { type: 'ROLL', dice: [2, 4] });
+    expect(s.phase).toEqual({ t: 'buy', space: 6 });
+    s = reduce(s, { type: 'RESIGN', player: 2 });
+    expect(s.players[2].bankrupt).toBe(true);
+    expect(s.current).toBe(0);
+    expect(s.phase).toEqual({ t: 'buy', space: 6 });
+  });
+
+  it('with two players, the other one wins', () => {
+    const s = reduce(setup(2), { type: 'RESIGN', player: 1 });
+    expect(s.phase).toEqual({ t: 'gameover', winner: 0 });
+  });
+
+  it('when only bots are left, the richest bot wins', () => {
+    const s0 = setup(3);
+    s0.players[1].isBot = true;
+    s0.players[2].isBot = true;
+    s0.players[2].money = 3000;
+    const s = reduce(s0, { type: 'RESIGN', player: 0 });
+    expect(s.phase).toEqual({ t: 'gameover', winner: 2 });
+  });
+
+  it("is refused while I'm bidding in another player's auction", () => {
+    let s = setup(3);
+    s = run(s, { type: 'ROLL', dice: [2, 4] }, { type: 'DECLINE' });
+    expect(s.phase.t).toBe('auction');
+    expect(reduce(s, { type: 'RESIGN', player: 1 })).toBe(s);
+  });
+});
