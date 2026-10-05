@@ -4,6 +4,8 @@ import { blockRoundsLeft, canTradeProp, emptySide, ownedBy, sideIsEmpty } from '
 import type { Action, GameState, TradeSide } from '../engine/types';
 import { Token } from '../ui/Token';
 import './tabs.css';
+import { t } from '../i18n';
+import { money } from '../data/editions';
 
 /** A counter-offer being written: who it goes to and the starting terms. */
 export interface TradeDraft {
@@ -35,7 +37,7 @@ function Stepper({ value, max, onChange }: { value: number; max: number; onChang
       </button>
       <input
         inputMode="numeric"
-        aria-label="סכום"
+        aria-label={t('amount')}
         value={value}
         onChange={(e) => set(Number(e.target.value.replace(/\D/g, '')) || 0)}
       />
@@ -66,7 +68,7 @@ function SidePicker({
     onChange({ ...side, props: side.props.includes(id) ? side.props.filter((x) => x !== id) : [...side.props, id] });
   return (
     <div className="trade-side">
-      {props.length === 0 && <div className="trade-empty">אין נכסים</div>}
+      {props.length === 0 && <div className="trade-empty">{t('noProps')}</div>}
       {props.map((id) => {
         const sp = BOARD[id];
         const ok = canTradeProp(game, owner, id);
@@ -76,21 +78,21 @@ function SidePicker({
             <i style={{ background: sp.group ? GROUP_COLORS[sp.group] : '#555' }} />
             <span className="tp-name">
               {sp.name}
-              {game.props[id].mortgaged && <em> · ממושכן</em>}
-              {!ok && <em> · יש בתים בסדרה</em>}
+              {game.props[id].mortgaged && <em>{t('mortgagedTag')}</em>}
+              {!ok && <em>{t('housesInSet')}</em>}
             </span>
-            <span className="tp-price">ש"ח {sp.price}</span>
+            <span className="tp-price">{money(sp.price!)}</span>
             <span className="tp-check">{on ? '✓' : ''}</span>
           </button>
         );
       })}
       <div className="trade-money">
-        <span>כסף (יש ש"ח {p.money})</span>
+        <span>{t('moneyHave', { money: money(p.money) })}</span>
         <Stepper value={side.money} max={p.money} onChange={(money) => onChange({ ...side, money })} />
       </div>
       {p.jailCards.length > 0 && (
         <div className="trade-money">
-          <span>כרטיסי יציאה מהכלא (יש {p.jailCards.length})</span>
+          <span>{t('jailCardsHave', { n: p.jailCards.length })}</span>
           <div className="seg">
             {Array.from({ length: p.jailCards.length + 1 }, (_, n) => (
               <button key={n} className={n === side.jailCards ? 'on' : ''} onClick={() => onChange({ ...side, jailCards: n })}>
@@ -104,11 +106,11 @@ function SidePicker({
   );
 }
 
-const summary = (t: TradeSide) => {
-  const parts = t.props.map((id) => BOARD[id].name);
-  if (t.money > 0) parts.push(`ש"ח ${t.money}`);
-  if (t.jailCards > 0) parts.push(`${t.jailCards} כרטיס יציאה`);
-  return parts.length ? parts.join(', ') : 'כלום';
+const summary = (side: TradeSide) => {
+  const parts = side.props.map((id) => BOARD[id].name);
+  if (side.money > 0) parts.push(money(side.money));
+  if (side.jailCards > 0) parts.push(t('jailCardShort', { n: side.jailCards }));
+  return parts.length ? parts.join(', ') : t('nothing');
 };
 
 /** Page 5: offer a deal to another player. */
@@ -146,9 +148,9 @@ export function TradeTab({ game, me, canPropose, act, draft, onSent }: Props) {
 
   return (
     <div className="page">
-      <h2 className="page-title">{counter ? 'הצעה נגדית' : 'העברות'}</h2>
-      {!canPropose && !counter && <div className="note">אפשר להציע עסקה רק בתור שלך, לפני או אחרי שמטילים.</div>}
-      {inDebt && <div className="note">💸 אתה בחוב: אפשר להציע לשחקן אחר לקנות ממך נכסים תמורת כסף, ואז לחזור ולשלם.</div>}
+      <h2 className="page-title">{counter ? t('counterOffer') : t('tabTrade')}</h2>
+      {!canPropose && !counter && <div className="note">{t('tradeOnlyTurn')}</div>}
+      {inDebt && <div className="note">{t('tradeInDebt')}</div>}
 
       {!counter && (
         <div className="trade-players">
@@ -162,7 +164,7 @@ export function TradeTab({ game, me, canPropose, act, draft, onSent }: Props) {
               <Token token={p.token} color={p.color} size="20px" />
               <span className="pchip-name">{p.name}</span>
               <b className="pchip-money">
-                {blockRoundsLeft(game, me, p.id) > 0 ? `🚫 חסם אותך · עוד ${blockRoundsLeft(game, me, p.id)} סבבים` : `ש"ח ${p.money}`}
+                {blockRoundsLeft(game, me, p.id) > 0 ? t('blockedYou', { n: blockRoundsLeft(game, me, p.id) }) : money(p.money)}
               </b>
             </button>
           ))}
@@ -173,30 +175,30 @@ export function TradeTab({ game, me, canPropose, act, draft, onSent }: Props) {
         <>
           <section className="group">
             <div className="group-head" style={{ background: game.players[me].color }}>
-              <span>אני נותן</span>
+              <span>{t('iGive')}</span>
             </div>
             <SidePicker game={game} owner={me} side={give} onChange={setGive} />
           </section>
           <section className="group">
             <div className="group-head" style={{ background: target.color }}>
-              <span>אני מבקש מ{target.name}</span>
+              <span>{t('iAskFrom', { name: target.name })}</span>
             </div>
             <SidePicker game={game} owner={to} side={get} onChange={setGet} />
           </section>
           <div className="trade-summary">
             <div>
-              אתה נותן: <b>{summary(give)}</b>
+              {t('youGiveX')} <b>{summary(give)}</b>
             </div>
             <div>
-              אתה מקבל: <b>{summary(get)}</b>
+              {t('youGetX')} <b>{summary(get)}</b>
             </div>
             {blockedFor > 0 && (
               <div className="trade-blocked">
-                🚫 {target.name} חסם הצעות ממך. אפשר לנסות שוב בעוד {blockedFor} סבבים.
+                {t('blockedTry', { name: target.name, n: blockedFor })}
               </div>
             )}
             <button className="btn btn-red" disabled={!allowed || empty} onClick={send}>
-              {counter ? `שלח הצעה נגדית ל${target.name}` : `שלח הצעה ל${target.name}`}
+              {counter ? t('sendCounter', { name: target.name }) : t('sendOffer', { name: target.name })}
             </button>
           </div>
         </>

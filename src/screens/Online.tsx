@@ -9,8 +9,11 @@ import { TOKENS, Token } from '../ui/Token';
 import { useWallet } from '../ui/Cosmetics';
 import { Game } from './Game';
 import './Setup.css';
+import { getLang, t } from '../i18n';
+import { EDITIONS } from '../data/editions';
+import { tokenName } from '../data/tokens';
+import { getName } from '../ui/profile';
 
-const BOT_NAMES = ['הנרי', 'מרק', 'סופיה'];
 const MAX = MAX_SEATS;
 
 type View = 'loading' | 'unavailable' | 'profile' | 'join' | 'lobby';
@@ -20,7 +23,7 @@ export function Online({ onBack }: { onBack: () => void }) {
   const [link, setLink] = useState<RoomLink | null>(null);
   const [resumable, setResumable] = useState<Room | null>(null);
   const [view, setView] = useState<View>('loading');
-  const [name, setName] = useState('');
+  const [name, setName] = useState(getName);
   const [token, setToken] = useState<TokenId>('car');
   const wallet = useWallet();
   const [codeInput, setCodeInput] = useState('');
@@ -53,7 +56,7 @@ export function Online({ onBack }: { onBack: () => void }) {
     });
   }, [link, code]);
 
-  const me = (): Seat => ({ uid: link!.uid, name: name.trim() || 'שחקן', token });
+  const me = (): Seat => ({ uid: link!.uid, name: name.trim() || getName() || t('player'), token });
 
   const run = async (f: () => Promise<void>) => {
     setBusy(true);
@@ -61,7 +64,7 @@ export function Online({ onBack }: { onBack: () => void }) {
     try {
       await f();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'משהו השתבש, נסה שוב');
+      setError(e instanceof Error ? e.message : t('somethingWrong'));
     } finally {
       setBusy(false);
     }
@@ -77,7 +80,7 @@ export function Online({ onBack }: { onBack: () => void }) {
 
   const join = () => {
     const c = cleanCode(codeInput);
-    if (c.length !== 4) return setError('הקוד הוא 4 אותיות באנגלית');
+    if (c.length !== 4) return setError(t('codeIs4'));
     return run(async () => {
       if (!link) return;
       await link.join(c, me());
@@ -109,14 +112,16 @@ export function Online({ onBack }: { onBack: () => void }) {
   const start = () => {
     if (!room || !link || !code) return;
     const taken = new Set(room.seats.map((s) => s.token));
-    const free = TOKENS.filter((t) => !taken.has(t.id));
+    const free = TOKENS.filter((tk) => !taken.has(tk.id));
     const state = newGame(
       [
         ...room.seats.map((s) => ({ uid: s.uid, name: s.name, token: s.token, isBot: false })),
-        ...Array.from({ length: room.bots }, (_, i) => ({ name: BOT_NAMES[i], token: free[i].id, isBot: true })),
+        ...Array.from({ length: room.bots }, (_, i) => ({ name: EDITIONS[getLang()].bots[i], token: free[i].id, isBot: true })),
       ],
       Math.random,
       room.rules,
+      // everyone plays the host's edition
+      getLang(),
     );
     setRoomField({ status: 'playing', state });
   };
@@ -127,11 +132,11 @@ export function Online({ onBack }: { onBack: () => void }) {
   }
 
   const titles: Record<View, string> = {
-    loading: 'מתחבר...',
-    unavailable: 'משחק בקוד',
-    profile: 'משחק בקוד',
-    join: 'רשום קוד',
-    lobby: 'לובי',
+    loading: t('connecting'),
+    unavailable: t('codeGame'),
+    profile: t('codeGame'),
+    join: t('enterCode'),
+    lobby: t('lobby'),
   };
 
   return (
@@ -141,54 +146,54 @@ export function Online({ onBack }: { onBack: () => void }) {
         <RibbonBanner text={titles[view]} />
       </div>
 
-      {view === 'loading' && <div className="setup-summary">מתחבר לשרת המשחק...</div>}
+      {view === 'loading' && <div className="setup-summary">{t('connectingServer')}</div>}
 
       {view === 'unavailable' && (
         <div className="setup-summary">
-          הדפדפן הזה לא תומך במשחק אונליין. נסה לפתוח את המשחק בכרום.
+          {t('noOnline')}
         </div>
       )}
 
       {(view === 'profile' || view === 'join') && (
         <div className="setup-pick">
           <label className="setup-field">
-            השם שלך
-            <input id="online-name" value={name} maxLength={12} placeholder="איך יקראו לך במשחק?" onChange={(e) => setName(e.target.value)} />
+            {t('yourName')}
+            <input id="online-name" value={name} maxLength={12} placeholder={t('namePh')} onChange={(e) => setName(e.target.value)} />
           </label>
           <div className="setup-grid">
-            {TOKENS.filter((t) => wallet.owned.includes(t.id)).map((t) => (
+            {TOKENS.filter((tk) => wallet.owned.includes(tk.id)).map((tk) => (
               <button
-                key={t.id}
-                className={`setup-tile${t.id === token ? ' selected' : ''}`}
-                style={{ ['--tc' as string]: t.color }}
-                onClick={() => setToken(t.id)}
+                key={tk.id}
+                className={`setup-tile${tk.id === token ? ' selected' : ''}`}
+                style={{ ['--tc' as string]: tk.color }}
+                onClick={() => setToken(tk.id)}
               >
-                <Token token={t.id} size="clamp(20px, 6vw, 40px)" skin={wallet.skin} />
-                <span>{t.name}</span>
+                <Token token={tk.id} size="clamp(20px, 6vw, 40px)" skin={wallet.skin} />
+                <span>{tokenName(tk.id)}</span>
               </button>
             ))}
           </div>
           {view === 'profile' && resumable && (
             <button className="btn btn-gold" disabled={busy} onClick={resume}>
-              ↩️ חזור לחדר {resumable.code}
+              {t('backToRoom', { code: resumable.code })}
             </button>
           )}
           {view === 'profile' ? (
             <div className="choices small">
               <button className="choice" disabled={busy} onClick={create}>
                 <span className="choice-icon">✨</span>
-                <b>צור קוד</b>
-                <small>פותח חדר חדש ומקבל קוד לחברים</small>
+                <b>{t('createCode')}</b>
+                <small>{t('createCodeNote')}</small>
               </button>
               <button className="choice" disabled={busy} onClick={() => setView('join')}>
                 <span className="choice-icon">🔑</span>
-                <b>רשום קוד</b>
-                <small>נכנס לחדר של חבר</small>
+                <b>{t('enterCode')}</b>
+                <small>{t('enterCodeNote')}</small>
               </button>
             </div>
           ) : (
             <div className="setup-field">
-              הקוד שקיבלת מחבר
+              {t('codeFromFriend')}
               <input
                 id="join-code"
                 className="code-input"
@@ -200,7 +205,7 @@ export function Online({ onBack }: { onBack: () => void }) {
                 onChange={(e) => setCodeInput(cleanCode(e.target.value))}
               />
               <button className="btn btn-red" disabled={busy || codeInput.length !== 4} onClick={join}>
-                כנס לחדר
+                {t('joinRoom')}
               </button>
             </div>
           )}
@@ -210,9 +215,9 @@ export function Online({ onBack }: { onBack: () => void }) {
       {view === 'lobby' && room && link && (
         <div className="setup-panel">
           <div className="room-code">
-            <small>קוד החדר</small>
+            <small>{t('roomCode')}</small>
             <b dir="ltr">{room.code}</b>
-            <small>שלח את הקוד לחברים. הם בוחרים "רשום קוד" ומקלידים אותו.</small>
+            <small>{t('sendCode')}</small>
           </div>
           <div className="lineup lobby-list">
             {room.seats.map((s) => (
@@ -220,17 +225,17 @@ export function Online({ onBack }: { onBack: () => void }) {
                 <Token token={s.token} size="22px" />
                 {s.name}
                 {s.uid === room.host ? ' 👑' : ''}
-                {s.uid === link.uid ? ' (אתה)' : ''}
+                {s.uid === link.uid ? t('youMark') : ''}
               </span>
             ))}
             {Array.from({ length: room.bots }, (_, i) => (
-              <span key={`b${i}`}>🤖 {BOT_NAMES[i]}</span>
+              <span key={`b${i}`}>🤖 {EDITIONS[getLang()].bots[i]}</span>
             ))}
           </div>
           {room.host === link.uid ? (
             <>
               <div className="setup-field">
-                להוסיף בוטים?
+                {t('addBotsQ')}
                 <div className="seg">
                   {Array.from({ length: MAX - room.seats.length + 1 }, (_, i) => i).map((n) => (
                     <button key={n} className={n === room.bots ? 'on' : ''} onClick={() => setRoomField({ bots: n })}>
@@ -240,28 +245,28 @@ export function Online({ onBack }: { onBack: () => void }) {
                 </div>
               </div>
               <div className="setup-field">
-                לשחק עם משכנתא?
+                {t('mortgageQ')}
                 <div className="seg">
                   <button className={room.rules.mortgage ? 'on' : ''} onClick={() => setRoomField({ rules: { mortgage: true } })}>
-                    כן
+                    {t('yes')}
                   </button>
                   <button className={!room.rules.mortgage ? 'on' : ''} onClick={() => setRoomField({ rules: { mortgage: false } })}>
-                    לא
+                    {t('no')}
                   </button>
                 </div>
                 <small className="hint">
                   {room.rules.mortgage
-                    ? `כל ${FEE_ROUNDS} סבבים משלמים חצי ממחיר כל נכס לקופת הלוטו.`
-                    : 'בלי תשלומי משכנתא ובלי משכון.'}
+                    ? t('mortgageYes', { n: FEE_ROUNDS })
+                    : t('mortgageOff')}
                 </small>
               </div>
               <button className="btn btn-red" disabled={room.seats.length + room.bots < 2} onClick={start}>
-                התחל משחק ({room.seats.length + room.bots} שחקנים)
+                {t('startGameN', { n: room.seats.length + room.bots })}
               </button>
             </>
           ) : (
             <div className="setup-summary">
-              ממתינים ש-{room.seats.find((s) => s.uid === room.host)?.name ?? 'המארח'} יתחיל את המשחק...
+              {t('waitingHost', { name: room.seats.find((s) => s.uid === room.host)?.name ?? t('host') })}
             </div>
           )}
         </div>
@@ -274,7 +279,7 @@ export function Online({ onBack }: { onBack: () => void }) {
           className="btn-back"
           onClick={() => (view === 'lobby' ? leave() : view === 'join' ? setView('profile') : onBack())}
         >
-          {view === 'lobby' ? 'צא מהחדר' : 'חזרה'}
+          {view === 'lobby' ? t('leaveRoom') : t('back')}
         </button>
       </div>
     </div>
@@ -313,14 +318,14 @@ function OnlineGame({ link, code, room, onExit }: { link: RoomLink; code: string
       />
       {link.kind === 'peer' && (
         <div className={`net-status${connected ? ' on' : ''}`} role="status">
-          {connected ? `🟢 מחובר · ${code}` : '🔴 מנותק, מתחבר מחדש…'}
+          {connected ? t('connected', { code }) : t('disconnected')}
         </div>
       )}
       {writeError && (
         <div className="write-error" role="alert">
           {link.kind === 'claude'
-            ? 'אין לך הרשאה לשמור מהלכים. בקש מבעל המשחק להזמין אותך כעורך (Editor) בתפריט Share.'
-            : 'המהלך לא נשלח – אין חיבור למארח. מתחבר מחדש…'}
+            ? t('noPermission')
+            : t('moveNotSent')}
         </div>
       )}
     </>

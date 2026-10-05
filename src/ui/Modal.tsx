@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import './Modal.css';
+import { t } from '../i18n';
 
 interface Props {
   title?: string;
@@ -14,7 +15,7 @@ export function Modal({ title, onClose, children, tone = 'white' }: Props) {
       <div className={`modal modal-${tone}`} onClick={(e) => e.stopPropagation()}>
         {title && <div className="modal-head">{title}</div>}
         {onClose && (
-          <button className="modal-x" onClick={onClose} aria-label="סגור">
+          <button className="modal-x" onClick={onClose} aria-label={t('close')}>
             ✕
           </button>
         )}

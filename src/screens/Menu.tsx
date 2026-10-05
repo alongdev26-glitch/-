@@ -9,8 +9,20 @@ import { SoundToggle } from '../ui/SoundToggle';
 import { sfx } from '../ui/sound';
 import { TOKENS, Token } from '../ui/Token';
 import './Menu.css';
+import { getLang, t } from '../i18n';
+import { EDITIONS } from '../data/editions';
 
-export function Menu({ onPlay, onResume, onShop }: { onPlay: () => void; onResume?: () => void; onShop?: () => void }) {
+export function Menu({
+  onPlay,
+  onResume,
+  onShop,
+  onSettings,
+}: {
+  onPlay: () => void;
+  onResume?: () => void;
+  onShop?: () => void;
+  onSettings?: () => void;
+}) {
   const wallet = useWallet();
   // friends who joined from my link pay out here
   const [joined, setJoined] = useState(0);
@@ -52,28 +64,33 @@ export function Menu({ onPlay, onResume, onShop }: { onPlay: () => void; onResum
   return (
     <div className="menu" onPointerDown={jingle}>
       <SoundToggle className="menu-sound" />
+      {onSettings && (
+        <button className="menu-gear" onClick={onSettings} aria-label={t('settings')}>
+          ⚙️
+        </button>
+      )}
       <div className="color-band top" aria-hidden="true" />
       <div className="color-band bottom" aria-hidden="true" />
       <div className="menu-banner">
-        <RibbonBanner text="יוצאים לדרך!" />
+        <RibbonBanner text={t('letsGo')} />
       </div>
       <div className="menu-logo">
         <img className="menu-logo-img" src={logo} alt="Big Deal" />
-        <div className="menu-plaque">ביג דיל</div>
-        <p>משחק המסחר בנכסים: ירושלים, תל-אביב, חיפה ועוד</p>
+        <div className="menu-plaque">{t('appName')}</div>
+        <p>{EDITIONS[getLang()].tagline}</p>
       </div>
       {onShop && (
-        <button className="menu-shop" onClick={onShop} aria-label="חנות">
+        <button className="menu-shop" onClick={onShop} aria-label={t('shop')}>
           <span className="menu-shop-bag">🛍️</span>
           <span className="menu-shop-text">
-            <b>חנות</b>
+            <b>{t('shop')}</b>
             <small>🪙 {wallet.coins}</small>
           </span>
         </button>
       )}
       {joined > 0 && (
         <div className="reward-pop" onClick={() => setJoined(0)}>
-          🎉 {joined === 1 ? 'חבר הצטרף' : `${joined} חברים הצטרפו`} מהקישור שלך! +{joined * REFERRAL_REWARD} 🪙
+          {t('friendJoined', { n: joined, coins: joined * REFERRAL_REWARD })}
         </div>
       )}
       <div className="menu-parade" aria-hidden="true">
@@ -85,12 +102,12 @@ export function Menu({ onPlay, onResume, onShop }: { onPlay: () => void; onResum
       </div>
       <div className="menu-actions">
         <button className="btn btn-red menu-play" onClick={onPlay}>
-          שחק עכשיו
+          {t('playNow')}
         </button>
         <ShareButton />
         {onResume && (
           <button className="btn btn-white" onClick={onResume}>
-            המשך משחק שמור
+            {t('resumeGame')}
           </button>
         )}
       </div>

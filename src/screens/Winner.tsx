@@ -2,6 +2,8 @@ import type { GameState } from '../engine/types';
 import { netWorth } from '../engine/rules';
 import { Token } from '../ui/Token';
 import './Winner.css';
+import { t } from '../i18n';
+import { edition, money } from '../data/editions';
 
 const BILL_COLORS = ['#fff4a3', '#ffc1dc', '#b8f2c2', '#d9c2ff', '#bfe3ff', '#ffd9a8'];
 
@@ -24,9 +26,9 @@ export function Winner({
       <div className="podium">
         <Token token={w.token} color={w.color} size="clamp(40px, 7vw, 90px)" />
       </div>
-      <div className="win-band">{w.name} ניצח!</div>
-      <div className="win-worth">שווי סופי: ש"ח {netWorth(game, w.id)}</div>
-      {earned > 0 && <div className="win-coins">🪙 קיבלת {earned} מטבעות לחנות!</div>}
+      <div className="win-band">{t('winnerIs', { name: w.name })}</div>
+      <div className="win-worth">{t('finalWorth', { worth: money(netWorth(game, w.id)) })}</div>
+      {earned > 0 && <div className="win-coins">{t('gotCoins', { n: earned })}</div>}
       <div className="bills">
         {Array.from({ length: 28 }, (_, i) => (
           <span
@@ -38,16 +40,16 @@ export function Winner({
               animationDuration: `${2.6 + (i % 5) * 0.4}s`,
             }}
           >
-            ש"ח
+            {edition().symbol}
           </span>
         ))}
       </div>
       <div className="modal-actions">
         <button className="btn btn-red" onClick={onNewGame}>
-          משחק חדש
+          {t('newGame')}
         </button>
         <button className="btn btn-white" onClick={onMenu}>
-          לתפריט
+          {t('toMenu')}
         </button>
       </div>
     </div>

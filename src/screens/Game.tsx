@@ -22,6 +22,8 @@ import { PropertyCard } from '../ui/PropertyCard';
 import { Token } from '../ui/Token';
 import { Winner } from './Winner';
 import './Game.css';
+import { dir, t, type Key } from '../i18n';
+import { applyEdition, money } from '../data/editions';
 
 /** Time per board space while a token walks: slow enough to follow on a phone. */
 const STEP_MS = 340;
@@ -62,12 +64,12 @@ export function loadGame(): GameState | null {
 
 type Tab = 'board' | 'mine' | 'market' | 'trade' | 'profile';
 
-const TABS: { id: Tab; icon: string; label: string }[] = [
-  { id: 'board', icon: '🎲', label: 'לוח' },
-  { id: 'mine', icon: '💼', label: 'הנכסים שלי' },
-  { id: 'market', icon: '🏷️', label: 'נכסים פנויים' },
-  { id: 'trade', icon: '🤝', label: 'העברות' },
-  { id: 'profile', icon: '👤', label: 'פרופיל' },
+const TABS: { id: Tab; icon: string; label: Key }[] = [
+  { id: 'board', icon: '🎲', label: 'tabBoard' },
+  { id: 'mine', icon: '💼', label: 'tabMine' },
+  { id: 'market', icon: '🏷️', label: 'tabMarket' },
+  { id: 'trade', icon: '🤝', label: 'tabTrade' },
+  { id: 'profile', icon: '👤', label: 'tabProfile' },
 ];
 
 /** An online game: the shared state comes from the room, and moves are sent back to it. */
@@ -88,6 +90,8 @@ interface Props {
 export function Game({ initial, online, onExit, onNewGame }: Props) {
   const [localGame, dispatch] = useReducer(reduce, initial);
   const game = online ? online.state : localGame;
+  // the board's streets, cards and money follow this game's edition
+  applyEdition(game.lang ?? 'he');
   const gameRef = useRef(game);
   gameRef.current = game;
   const onlineRef = useRef(online);
@@ -293,14 +297,14 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
     const step = (n: number) => ph.bid + n;
     const humanBids = controls(acting) && !busy;
     return (
-      <Modal title={`מכירה פומבית: ${BOARD[ph.space].name}`}>
+      <Modal title={t('auctionTitle', { space: BOARD[ph.space].name })}>
         <div className="auction">
           <PropertyCard id={ph.space} />
           <div className="auction-side">
             <div className="auction-bid">
-              <small>הצעה נוכחית</small>
-              <b>ש"ח {ph.bid}</b>
-              <span>{bidder ? bidder.name : 'אין הצעות'}</span>
+              <small>{t('currentBid')}</small>
+              <b>{money(ph.bid)}</b>
+              <span>{bidder ? bidder.name : t('noBids')}</span>
             </div>
             <div className="auction-list">
               {game.players
@@ -311,10 +315,10 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
                   </span>
                 ))}
             </div>
-            <div className="auction-seller">{cur.name} הוציא את הנכס למכירה ולא יכול להציע עליו</div>
+            <div className="auction-seller">{t('auctionSeller', { name: cur.name })}</div>
             {humanBids ? (
               <div className="auction-btns">
-                <div className="auction-turn">התור של {actingPlayer.name} להציע</div>
+                <div className="auction-turn">{t('auctionTurn', { name: actingPlayer.name })}</div>
                 {[5, 10, 25, 50, 100, 150, 200].map((n) => (
                   <button
                     key={n}
@@ -326,15 +330,15 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
                   </button>
                 ))}
                 <button className="btn btn-black btn-sm" onClick={() => act({ type: 'PASS' })}>
-                  פרוש
+                  {t('pass')}
                 </button>
               </div>
             ) : (
               <div className="waiting">
-                {actingPlayer.name} {actingPlayer.isBot ? 'חושב...' : 'מחליט...'}
+                {t(actingPlayer.isBot ? 'thinking' : 'deciding', { name: actingPlayer.name })}
                 {stalled && canTakeOver(acting) && !actingPlayer.isBot && (
                   <button className="btn btn-black btn-sm takeover" onClick={() => setBot(acting, true)}>
-                    🤖 העבר לבוט
+                    {t('toBot')}
                   </button>
                 )}
               </div>
@@ -349,12 +353,12 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
     if (busy) return null;
     if (handoff) {
       return (
-        <Modal title="העבירו את הטלפון">
+        <Modal title={t('passPhone')}>
           <div className="handoff">
             <Token token={actingPlayer.token} color={actingPlayer.color} size="56px" />
-            <b>{ph.t === 'trade' ? `הצעת עסקה ל${actingPlayer.name}` : `התור של ${actingPlayer.name}`}</b>
+            <b>{ph.t === 'trade' ? t('tradeOfferFor', { name: actingPlayer.name }) : t('turnOf', { name: actingPlayer.name })}</b>
             <button className="btn btn-red" onClick={() => setViewer(acting)}>
-              אני {actingPlayer.name}, בוא נשחק
+              {t('itsMe', { name: actingPlayer.name })}
             </button>
           </div>
         </Modal>
@@ -363,24 +367,23 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
     if (ph.t === 'buy' && myTurn && tab !== 'mine') {
       const price = BOARD[ph.space].price!;
       return (
-        <Modal title="נכס פנוי!">
+        <Modal title={t('freeProperty')}>
           <PropertyCard id={ph.space} />
           <div className="modal-actions">
             <button className="btn btn-red" disabled={me.money < price} onClick={() => act({ type: 'BUY' })}>
-              קנה ב-ש"ח {price}
+              {t('buyFor', { price: money(price) })}
             </button>
             <button className="btn btn-black" onClick={() => act({ type: 'DECLINE' })}>
-              {hasAuction(game) ? 'למכירה פומבית' : 'לא תודה'}
+              {hasAuction(game) ? t('toAuction') : t('noThanks')}
             </button>
           </div>
           {me.money < price && (
             <>
               <div className="modal-note">
-                אין מספיק כסף. אפשר למכור בתים או נכס לבנק ב"הנכסים שלי" ולחזור לקנות
-                {hasAuction(game) ? ', או להוציא למכירה פומבית' : ', או לוותר'}.
+                {t('noMoneyBuy', { auction: hasAuction(game) ? 1 : 0 })}
               </div>
               <button className="btn btn-white" onClick={() => setTab('mine')}>
-                לנכסים שלי
+                {t('toMyProps')}
               </button>
             </>
           )}
@@ -391,32 +394,32 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
     if (ph.t === 'trade') {
       const o = ph.offer;
       const from = game.players[o.from];
-      const list = (t: typeof o.give) => {
-        const parts = t.props.map((id) => BOARD[id].name);
-        if (t.money > 0) parts.push(`ש"ח ${t.money}`);
-        if (t.jailCards > 0) parts.push(`${t.jailCards} כרטיס יציאה מהכלא`);
-        return parts.length ? parts : ['כלום'];
+      const list = (side: typeof o.give) => {
+        const parts = side.props.map((id) => BOARD[id].name);
+        if (side.money > 0) parts.push(money(side.money));
+        if (side.jailCards > 0) parts.push(t('jailCardsN', { n: side.jailCards }));
+        return parts.length ? parts : [t('nothing')];
       };
       if (!controls(ph.awaiting)) {
         return (
           <div className="trade-wait" role="status">
             <Token token={actingPlayer.token} color={actingPlayer.color} size="20px" />
-            {actingPlayer.name} חושב על ההצעה...
+            {t('thinksOffer', { name: actingPlayer.name })}
           </div>
         );
       }
       if (tab === 'trade' && tradeDraft?.counter) return null;
       return (
-        <Modal title={o.round > 1 ? `הצעה נגדית מ${from.name}` : `הצעת עסקה מ${from.name}`}>
+        <Modal title={t(o.round > 1 ? 'counterFrom' : 'offerFrom', { name: from.name })}>
           <div className="trade-offer">
             <div className="to-col gain">
-              <b>אתה מקבל</b>
+              <b>{t('youGet')}</b>
               {list(o.give).map((x) => (
                 <span key={x}>{x}</span>
               ))}
             </div>
             <div className="to-col loss">
-              <b>אתה נותן</b>
+              <b>{t('youGive')}</b>
               {list(o.get).map((x) => (
                 <span key={x}>{x}</span>
               ))}
@@ -424,13 +427,13 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
           </div>
           <div className="modal-actions">
             <button className="btn btn-red" onClick={() => act({ type: 'ACCEPT_TRADE' })}>
-              אשר
+              {t('accept')}
             </button>
             <button className="btn btn-black" onClick={() => act({ type: 'REJECT_TRADE' })}>
-              סרב
+              {t('refuse')}
             </button>
             <button className="btn btn-black" onClick={() => act({ type: 'BLOCK_TRADE' })}>
-              🚫 סרב וחסום
+              {t('refuseBlock')}
             </button>
             {o.round < 3 && (
               <button
@@ -440,11 +443,11 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
                   setTab('trade');
                 }}
               >
-                הצעה נגדית
+                {t('counterOffer')}
               </button>
             )}
           </div>
-          <div className="modal-note">"סרב וחסום": {from.name} לא יוכל לשלוח לך הצעות ב-3 הסבבים הבאים.</div>
+          <div className="modal-note">{t('blockNote', { name: from.name })}</div>
         </Modal>
       );
     }
@@ -456,7 +459,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
             <CardReveal key={cardKey ?? ''} deck={ph.deck} who={cur.name} text={card.text} />
             {myTurn && (
               <button className="btn btn-red" onClick={() => act({ type: 'ACK_CARD' })}>
-                אישור
+                {t('ok')}
               </button>
             )}
           </div>
@@ -466,25 +469,25 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
     if (ph.t === 'debt' && myTurn && tab !== 'mine' && tab !== 'trade') {
       const total = ph.owed.reduce((a, o) => a + o.amount, 0);
       return (
-        <Modal title="חוב!">
+        <Modal title={t('debtTitle')}>
           <div className="debt">
-            {ph.resume === 'roll' && <p>נשאר לך חוב מהסבב הקודם. צריך לסגור אותו לפני שמטילים.</p>}
+            {ph.resume === 'roll' && <p>{t('debtOld')}</p>}
             <p>
-              עליך לשלם <b>ש"ח {total}</b> ויש לך <b>ש"ח {me.money}</b>.
+              {t('debtYouOwe', { total: money(total), money: money(me.money) })}
             </p>
-            <p>אפשר למכור בתים או נכס לבנק בחצי ממחירו בעמוד "הנכסים שלי", או לנסות למכור נכסים לשחקן אחר בעמוד "העברות". המשחק לא ימכור כלום בשבילך.</p>
+            <p>{t('debtHelp')}</p>
             <div className="modal-actions">
               <button className="btn btn-red" disabled={me.money < total} onClick={() => act({ type: 'PAY_DEBT' })}>
-                שלם
+                {t('pay')}
               </button>
               <button className="btn btn-gold" onClick={() => setTab('trade')}>
-                🤝 מכור לשחקן
+                {t('sellToPlayer')}
               </button>
               <button className="btn btn-white" onClick={() => setTab('mine')}>
-                לנכסים שלי
+                {t('toMyProps')}
               </button>
               <button className="btn btn-black" onClick={() => act({ type: 'BANKRUPT' })}>
-                פשיטת רגל
+                {t('bankrupt')}
               </button>
             </div>
           </div>
@@ -496,27 +499,27 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
 
   return (
     <CosmeticsProvider value={cosmetics}>
-    <div className="game" dir="rtl">
-      <nav className="tabbar" aria-label="עמודי המשחק">
-        {TABS.map((t) => (
+    <div className="game" dir={dir()}>
+      <nav className="tabbar" aria-label={t('gameTabs')}>
+        {TABS.map((tb) => (
           <button
-            key={t.id}
-            className={`tab${tab === t.id ? ' on' : ''}${t.id === 'board' && needsBoard && tab !== 'board' ? ' ping' : ''}`}
-            onClick={() => setTab(t.id)}
-            aria-current={tab === t.id ? 'page' : undefined}
+            key={tb.id}
+            className={`tab${tab === tb.id ? ' on' : ''}${tb.id === 'board' && needsBoard && tab !== 'board' ? ' ping' : ''}`}
+            onClick={() => setTab(tb.id)}
+            aria-current={tab === tb.id ? 'page' : undefined}
           >
-            <span className="tab-icon">{t.icon}</span>
-            <span className="tab-label">{t.label}</span>
-            {t.id === 'mine' && <span className="tab-sub">ש"ח {me.money}</span>}
-            {t.id === 'market' && game.pot > 0 && <span className="tab-sub gold">קופה {game.pot}</span>}
+            <span className="tab-icon">{tb.icon}</span>
+            <span className="tab-label">{t(tb.label)}</span>
+            {tb.id === 'mine' && <span className="tab-sub">{money(me.money)}</span>}
+            {tb.id === 'market' && game.pot > 0 && <span className="tab-sub gold">{t('potShort', { n: game.pot })}</span>}
           </button>
         ))}
       </nav>
 
       <main className="tab-page">
-          <div className="turn-pill" style={{ borderColor: cur.color }} title={`התור של ${cur.name}`}>
+          <div className="turn-pill" style={{ borderColor: cur.color }} title={t('turnOf', { name: cur.name })}>
             <Token token={cur.token} color={cur.color} size="18px" />
-            <span>{cur.id === me.id ? (humans.length > 1 ? `התור שלך, ${me.name}` : 'התור שלך') : cur.name}</span>
+            <span>{cur.id === me.id ? (humans.length > 1 ? t('yourTurnName', { name: me.name }) : t('yourTurn')) : cur.name}</span>
           </div>
         {tab === 'board' && (
           <BoardTab game={game} shown={shown} rolling={rolling} busy={busy} myTurn={myTurn}

@@ -1,4 +1,5 @@
 import { BOARD, GROUP_COLORS, isOwnable, type Group } from '../data/board';
+import { edition } from '../data/editions';
 
 export interface SetInfo {
   key: string;
@@ -13,17 +14,29 @@ const GROUP_ORDER: Group[] = ['brown', 'lightblue', 'pink', 'orange', 'red', 'ye
 export const SETS: SetInfo[] = [
   ...GROUP_ORDER.map((g) => {
     const ids = BOARD.filter((s) => s.group === g).map((s) => s.id);
-    return { key: g, title: BOARD[ids[0]].city!, color: GROUP_COLORS[g], ids };
+    return {
+      key: g,
+      // the city of the edition in play
+      get title() {
+        return BOARD[ids[0]].city!;
+      },
+      color: GROUP_COLORS[g],
+      ids,
+    };
   }),
   {
     key: 'railroad',
-    title: 'רכבות',
+    get title() {
+      return edition().railsTitle;
+    },
     color: '#333',
     ids: BOARD.filter((s) => s.kind === 'railroad').map((s) => s.id),
   },
   {
     key: 'utility',
-    title: 'חברות',
+    get title() {
+      return edition().utilitiesTitle;
+    },
     color: '#6b737c',
     ids: BOARD.filter((s) => s.kind === 'utility').map((s) => s.id),
   },

@@ -2,6 +2,7 @@
 // player opens it, their phone writes referrals/CODE/<their device> to a small
 // Firebase Realtime Database, and the sharer's phone collects 150 coins for each.
 import { creditReferrals, getWallet, isNewPlayer, setPendingRef } from '../ui/shop';
+import { t } from '../i18n';
 
 /** The Firebase Realtime Database address (https://xxxx-default-rtdb.firebaseio.com). Empty = rewards off. */
 export const FIREBASE_DB = 'https://big-dil-be1cd-default-rtdb.europe-west1.firebasedatabase.app';
@@ -20,20 +21,19 @@ export const rewardsOn = () =>
 // v= changes when the preview card changes, so WhatsApp fetches a fresh one
 export const shareLink = () => `${APP_URL}?ref=${getWallet().refCode}&v=2`;
 
-export const SHARE_TEXT = 'בוא לשחק איתי ביג דיל! 🎩🎲';
 
 /** Open the phone's share sheet; fall back to WhatsApp. */
 export async function share(): Promise<'shared' | 'whatsapp' | 'cancelled'> {
   const url = shareLink();
   try {
     if (navigator.share) {
-      await navigator.share({ title: 'ביג דיל', text: SHARE_TEXT, url });
+      await navigator.share({ title: t('appName'), text: t('shareText'), url });
       return 'shared';
     }
   } catch {
     return 'cancelled';
   }
-  window.open(`https://wa.me/?text=${encodeURIComponent(`${SHARE_TEXT} ${url}`)}`, '_blank');
+  window.open(`https://wa.me/?text=${encodeURIComponent(`${t('shareText')} ${url}`)}`, '_blank');
   return 'whatsapp';
 }
 

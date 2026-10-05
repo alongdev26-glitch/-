@@ -3,6 +3,7 @@ import { rewardsOn, share } from '../online/referral';
 import { REFERRAL_REWARD } from './shop';
 import { sfx } from './sound';
 import './ShareButton.css';
+import { t } from '../i18n';
 
 /** "Share with a friend": opens the phone's share sheet with my personal link. */
 export function ShareButton({ className = '' }: { className?: string }) {
@@ -12,15 +13,15 @@ export function ShareButton({ className = '' }: { className?: string }) {
     sfx.pop();
     const r = await share();
     if (r !== 'cancelled')
-      setMsg(paid ? `כשחבר חדש יפתח את הקישור שלך תקבל ${REFERRAL_REWARD} מטבעות!` : 'תודה ששיתפת!');
+      setMsg(paid ? t('shareWillGet', { n: REFERRAL_REWARD }) : t('shareThanks'));
   };
   return (
     <div className={`share-wrap ${className}`}>
       <button className="share-btn" onClick={go}>
         <span className="share-icon">📣</span>
         <span>
-          <b>שתף לחבר</b>
-          {paid && <small>וקבל 🪙{REFERRAL_REWARD}</small>}
+          <b>{t('shareFriend')}</b>
+          {paid && <small>{t('shareGet', { n: REFERRAL_REWARD })}</small>}
         </span>
       </button>
       {msg && <div className="share-msg">{msg}</div>}

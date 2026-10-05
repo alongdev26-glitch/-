@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { netWorth, ownedBy } from '../engine/rules';
 import type { GameState } from '../engine/types';
-import { Token, TOKENS } from '../ui/Token';
+import { Token } from '../ui/Token';
+import { tokenName } from '../data/tokens';
 import { SoundToggle } from '../ui/SoundToggle';
 import './tabs.css';
+import { locale, t } from '../i18n';
+import { money } from '../data/editions';
 
 interface Props {
   game: GameState;
@@ -26,30 +29,30 @@ export function ProfileTab({ game, me, onExit, onNewGame, canTakeOver, onSetBot,
 
   return (
     <div className="page">
-      <h2 className="page-title">פרופיל</h2>
+      <h2 className="page-title">{t('tabProfile')}</h2>
       <SoundToggle className="btn btn-white" label />
       <div className="profile-card">
         <Token token={p.token} color={p.color} size="44px" />
         <div>
           <h3>{p.name}</h3>
-          <div>הכלי שלך: {TOKENS.find((t) => t.id === p.token)!.name}</div>
-          {p.inJail && <div>⛓️ אתה בכלא</div>}
+          <div>{t('yourToken', { name: tokenName(p.token) })}</div>
+          {p.inJail && <div>{t('inJail')}</div>}
         </div>
         <div className="profile-stats">
           <div className="stat">
-            <small>מזומן</small>
-            <b>ש"ח {p.money}</b>
+            <small>{t('cash')}</small>
+            <b>{money(p.money)}</b>
           </div>
           <div className="stat">
-            <small>שווי כולל</small>
-            <b>ש"ח {netWorth(game, me)}</b>
+            <small>{t('netWorth')}</small>
+            <b>{money(netWorth(game, me))}</b>
           </div>
           <div className="stat">
-            <small>נכסים</small>
+            <small>{t('properties')}</small>
             <b>{ownedBy(game, me).length}</b>
           </div>
           <div className="stat">
-            <small>תור מספר</small>
+            <small>{t('turnNo')}</small>
             <b>{game.turn}</b>
           </div>
         </div>
@@ -57,7 +60,7 @@ export function ProfileTab({ game, me, onExit, onNewGame, canTakeOver, onSetBot,
 
       <section className="group">
         <div className="group-head" style={{ background: 'var(--navy)' }}>
-          <span>דירוג השחקנים (לפי שווי)</span>
+          <span>{t('ranking')}</span>
         </div>
         {ranking.map((o, i) => (
           <div className={`player-row${o.bankrupt ? ' out' : ''}`} key={o.id}>
@@ -65,14 +68,14 @@ export function ProfileTab({ game, me, onExit, onNewGame, canTakeOver, onSetBot,
             <Token token={o.token} color={o.color} size="22px" />
             <span>
               {o.name}
-              {o.isBot ? ' 🤖' : o.id === me ? ' (אתה)' : ''}
+              {o.isBot ? ' 🤖' : o.id === me ? t('youMark') : ''}
               {o.inJail ? ' ⛓️' : ''}
-              {o.bankrupt ? ' · פשט רגל' : ''}
+              {o.bankrupt ? ` · ${t('wentBankrupt')}` : ''}
             </span>
-            <span className="money">{o.bankrupt ? '—' : `ש"ח ${o.money} · שווי ${netWorth(game, o.id)}`}</span>
+            <span className="money">{o.bankrupt ? '—' : t('moneyWorth', { money: money(o.money), worth: netWorth(game, o.id) })}</span>
             {canTakeOver?.(o.id) && (
               <button className="btn btn-white btn-sm" onClick={() => onSetBot?.(o.id, !o.isBot)}>
-                {o.isBot ? 'החזר לשחקן' : '🤖 לבוט'}
+                {o.isBot ? t('backToHuman') : t('toBotShort')}
               </button>
             )}
           </div>
@@ -80,17 +83,17 @@ export function ProfileTab({ game, me, onExit, onNewGame, canTakeOver, onSetBot,
       </section>
 
       {p.bankrupt && game.phase.t !== 'gameover' && (
-        <div className="resign-note">🏳️ יצאת מהמשחק – אתה צופה בשאר השחקנים</div>
+        <div className="resign-note">{t('youAreOut')}</div>
       )}
 
       {confirm ? (
         <div className={`confirm${confirm === 'resign' ? ' confirm-resign' : ''}`}>
           <span>
             {confirm === 'exit'
-              ? 'לצאת לתפריט? המשחק נשמר ותוכל להמשיך אותו אחר כך.'
+              ? t('confirmExit')
               : confirm === 'new'
-                ? 'להתחיל משחק חדש? המשחק הנוכחי יימחק.'
-                : 'לפשוט רגל ולצאת מהמשחק? כל הנכסים שלך יחזרו לבנק והמשחק ימשיך בלעדיך. אי אפשר לבטל.'}
+                ? t('confirmNew')
+                : t('confirmResign')}
           </span>
           <button
             className="btn btn-red btn-sm"
@@ -101,38 +104,38 @@ export function ProfileTab({ game, me, onExit, onNewGame, canTakeOver, onSetBot,
               } else (confirm === 'exit' ? onExit : onNewGame)();
             }}
           >
-            {confirm === 'exit' ? 'כן, צא' : confirm === 'new' ? 'כן, משחק חדש' : 'כן, פשטתי רגל'}
+            {confirm === 'exit' ? t('yesExit') : confirm === 'new' ? t('yesNew') : t('yesResign')}
           </button>
           <button className="btn btn-white btn-sm" onClick={() => setConfirm(null)}>
-            ביטול
+            {t('cancel')}
           </button>
         </div>
       ) : (
         <>
           <div className="profile-actions">
             <button className="btn btn-black" onClick={() => setConfirm('exit')}>
-              צא מהמשחק
+              {t('exitGame')}
             </button>
             <button className="btn btn-white" onClick={() => setConfirm('new')}>
-              משחק חדש
+              {t('newGame')}
             </button>
           </div>
           {onResign && !p.bankrupt && game.phase.t !== 'gameover' && (
             <div className="resign-wrap">
               <button className="btn-resign" disabled={!canResign} onClick={() => setConfirm('resign')}>
-                🏳️ פשיטת רגל
+                {t('resignBtn')}
               </button>
               <small>
                 {canResign
-                  ? 'יוצאים מהמשחק והנכסים חוזרים לבנק. המשחק ממשיך בלעדיך.'
-                  : 'אפשר לפשוט רגל אחרי שהמכירה הפומבית או העסקה תיגמר'}
+                  ? t('resignNote')
+                  : t('resignLater')}
               </small>
             </div>
           )}
         </>
       )}
       <div className="version">
-        גרסה: {new Date(__BUILD__).toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' })}
+        {t('version')}: {new Date(__BUILD__).toLocaleString(locale(), { dateStyle: 'short', timeStyle: 'short' })}
       </div>
     </div>
   );

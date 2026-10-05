@@ -2,6 +2,7 @@ import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
 import type { GameState } from '../engine/types';
 import { HOST_KEY, freshRoom, seatIn, type RoomLink } from './link';
 import { newCode, type Room, type Seat } from './net';
+import { t } from '../i18n';
 
 /**
  * Direct phone-to-phone rooms (WebRTC through PeerJS). The player who creates the code is the
@@ -91,7 +92,7 @@ function openPeer(id?: string): Promise<Peer> {
   });
 }
 
-const NO_NET = 'החיבור נכשל – נסו שוב או עברו לוויי-פיי';
+const NO_NET = () => t('netFail');
 
 export function peerLink(): RoomLink & { resume(room: Room): Promise<void> } {
   const uid = myUid();
@@ -156,20 +157,20 @@ export function peerLink(): RoomLink & { resume(room: Room): Promise<void> } {
   // ---------- guest ----------
   const connectToHost = (code: string, seat: Seat): Promise<void> =>
     new Promise((resolve, reject) => {
-      if (!peer) return reject(new Error(NO_NET));
+      if (!peer) return reject(new Error(NO_NET()));
       const c = peer.connect(PREFIX + code, { reliable: true });
       let settled = false;
-      const t = window.setTimeout(() => {
+      const timer = window.setTimeout(() => {
         if (settled) return;
         settled = true;
         c.close();
-        reject(new Error(NO_NET));
+        reject(new Error(NO_NET()));
       }, CONNECT_MS);
       const onPeerError = (e: Error & { type?: string }) => {
         if (settled || e.type !== 'peer-unavailable') return;
         settled = true;
-        window.clearTimeout(t);
-        reject(new Error('לא מצאתי חדר עם הקוד הזה'));
+        window.clearTimeout(timer);
+        reject(new Error(t('roomNotFound')));
       };
       peer.on('error', onPeerError);
       c.on('open', () => c.send({ t: 'join', seat } satisfies Msg));
@@ -178,7 +179,7 @@ export function peerLink(): RoomLink & { resume(room: Room): Promise<void> } {
         if (m.t === 'room') {
           if (!settled) {
             settled = true;
-            window.clearTimeout(t);
+            window.clearTimeout(timer);
             peer?.off('error', onPeerError);
             toHost = c;
             lostAt = 0;
@@ -188,7 +189,7 @@ export function peerLink(): RoomLink & { resume(room: Room): Promise<void> } {
           emit(m.room);
         } else if (m.t === 'error' && !settled) {
           settled = true;
-          window.clearTimeout(t);
+          window.clearTimeout(timer);
           c.close();
           reject(new Error(m.msg));
         }
@@ -203,7 +204,7 @@ export function peerLink(): RoomLink & { resume(room: Room): Promise<void> } {
     setOnline(false);
     if (!lostAt) lostAt = Date.now();
     window.clearTimeout(retryTimer);
-    if (Date.now() - lostAt > GIVE_UP_MS) return closed('המארח יצא מהמשחק');
+    if (Date.now() - lostAt > GIVE_UP_MS) return closed(t('hostLeft'));
     retryTimer = window.setTimeout(async () => {
       if (!joinedCode || !joinedSeat) return;
       try {
@@ -241,13 +242,13 @@ export function peerLink(): RoomLink & { resume(room: Room): Promise<void> } {
           peer = await openPeer(PREFIX + code);
         } catch (e) {
           if ((e as { type?: string }).type === 'unavailable-id') continue;
-          throw new Error(NO_NET);
+          throw new Error(NO_NET());
         }
         listenAsHost(peer);
         hostUpdate(freshRoom(code, seat));
         return code;
       }
-      throw new Error(NO_NET);
+      throw new Error(NO_NET());
     },
     async resume(saved) {
       shutdown();
@@ -259,18 +260,18 @@ export function peerLink(): RoomLink & { resume(room: Room): Promise<void> } {
           hostUpdate(saved);
           return;
         } catch (e) {
-          if ((e as { type?: string }).type !== 'unavailable-id') throw new Error(NO_NET);
+          if ((e as { type?: string }).type !== 'unavailable-id') throw new Error(NO_NET());
           await new Promise((r) => window.setTimeout(r, 2500));
         }
       }
-      throw new Error('הקוד עדיין תפוס. נסה שוב בעוד דקה.');
+      throw new Error(t('codeBusy'));
     },
     async join(code, seat) {
       shutdown();
       try {
         peer = await openPeer();
       } catch {
-        throw new Error(NO_NET);
+        throw new Error(NO_NET());
       }
       joinedCode = code;
       joinedSeat = seat;
@@ -295,7 +296,7 @@ export function peerLink(): RoomLink & { resume(room: Room): Promise<void> } {
     },
     async sendState(_code, current, state) {
       if (isHost) return hostUpdate({ ...(room ?? current), state });
-      if (!toHost?.open) throw new Error(NO_NET);
+      if (!toHost?.open) throw new Error(NO_NET());
       toHost.send({ t: 'state', uid, state } satisfies Msg);
     },
     leave(_code, current) {

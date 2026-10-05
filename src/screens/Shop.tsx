@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { Token } from '../ui/Token';
 import { useWallet } from '../ui/Cosmetics';
-import { ALL_ITEMS, GAME_REWARD, RARITY_NAME, buy, equip, rotation, type ShopItem } from '../ui/shop';
+import { ALL_ITEMS, GAME_REWARD, buy, equip, itemName, rarityName, rotation, type ShopItem } from '../ui/shop';
 import type { TokenId } from '../engine/types';
 import { sfx } from '../ui/sound';
 import { ShareButton } from '../ui/ShareButton';
 import './Shop.css';
+import { t, type Key } from '../i18n';
 
 /** A tiny board corner to preview a board design. */
 function BoardSwatch({ id }: { id: string }) {
@@ -22,7 +23,7 @@ function BoardSwatch({ id }: { id: string }) {
   );
 }
 
-const KIND_NAME = { char: 'דמות', skin: 'סקין', board: 'לוח' };
+const KIND_NAME: Record<ShopItem['kind'], Key> = { char: 'kindChar', skin: 'kindSkin', board: 'kindBoard' };
 
 function Preview({ item, char, size }: { item: ShopItem; char: TokenId; size: string }) {
   if (item.kind === 'char') return <Token token={item.id as TokenId} color="#fff" size={size} />;
@@ -33,11 +34,7 @@ function Preview({ item, char, size }: { item: ShopItem; char: TokenId; size: st
 /** "2 ימים ו-7 שעות" until the shop changes. */
 function timeLeft(ms: number) {
   const h = Math.max(0, Math.floor(ms / 3_600_000));
-  const d = Math.floor(h / 24);
-  const hh = h % 24;
-  if (d === 0) return hh === 0 ? 'פחות משעה' : hh === 1 ? 'שעה' : `${hh} שעות`;
-  const days = d === 1 ? 'יום' : d === 2 ? 'יומיים' : `${d} ימים`;
-  return hh === 0 ? days : `${days} ו-${hh === 1 ? 'שעה' : `${hh} שעות`}`;
+  return t('timeLeft', { d: Math.floor(h / 24), h: h % 24 });
 }
 
 /** The shop: 9 items that change every 3 days, bought with the coins you earn by playing. */
@@ -57,22 +54,22 @@ export function Shop({ onBack }: { onBack: () => void }) {
   const pick = (item: ShopItem) => {
     if (wallet.owned.includes(item.id)) {
       if (item.kind === 'char') {
-        setNote(`${item.name} שלך! בחר אותו כשמתחילים משחק.`);
+        setNote(t('charOwned', { name: itemName(item) }));
         return;
       }
       equip(item);
       sfx.pop();
-      setNote(`${item.name} נבחר!`);
+      setNote(t('itemPicked', { name: itemName(item) }));
       return;
     }
     if (buy(item)) {
       equip(item);
       sfx.buy();
       setNote(
-        item.kind === 'char' ? `קנית את ${item.name}! תוכל לבחור אותו כשמתחילים משחק.` : `קנית את ${item.name}!`,
+        t(item.kind === 'char' ? 'boughtChar' : 'boughtItem', { name: itemName(item) }),
       );
     } else {
-      setNote(`חסרים לך ${item.price - wallet.coins} מטבעות. שחק עוד משחק כדי להרוויח!`);
+      setNote(t('missingCoins', { n: item.price - wallet.coins }));
     }
   };
 
@@ -84,18 +81,18 @@ export function Shop({ onBack }: { onBack: () => void }) {
     <div className="shop">
       <div className="color-band top" aria-hidden="true" />
       <div className="setup-banner">
-        <RibbonBanner text="חנות" />
+        <RibbonBanner text={t('shop')} />
       </div>
 
       <div className="shop-coins">
         <span>🪙</span>
         <b>{wallet.coins}</b>
-        <small>מטבעות</small>
+        <small>{t('coins')}</small>
       </div>
       <div className="shop-how">
-        על כל משחק שמסיימים מקבלים {GAME_REWARD.played} מטבעות, ועל ניצחון {GAME_REWARD.won}!
+        {t('howToEarn', { played: GAME_REWARD.played, won: GAME_REWARD.won })}
       </div>
-      <div className="shop-timer">⏳ החנות מתחלפת בעוד {timeLeft(endsAt - now)}</div>
+      <div className="shop-timer">{t('shopChanges', { time: timeLeft(endsAt - now) })}</div>
 
       <div className="shop-grid">
         {items.map((item) => {
@@ -107,14 +104,14 @@ export function Shop({ onBack }: { onBack: () => void }) {
               className={`shop-item r-${item.rarity}${on ? ' on' : ''}`}
               onClick={() => pick(item)}
             >
-              <span className="shop-kind">{KIND_NAME[item.kind]}</span>
+              <span className="shop-kind">{t(KIND_NAME[item.kind])}</span>
               <div className="shop-preview">
                 <Preview item={item} char={wallet.char} size="34px" />
               </div>
-              <b>{item.name}</b>
-              <small className="shop-rarity">{RARITY_NAME[item.rarity]}</small>
+              <b>{itemName(item)}</b>
+              <small className="shop-rarity">{rarityName(item.rarity)}</small>
               <span className={`shop-price${owned ? ' owned' : ''}`}>
-                {on ? '✓ בשימוש' : owned ? (item.kind === 'char' ? '✓ שלך' : 'בחר') : `🪙 ${item.price}`}
+                {on ? t('inUse') : owned ? (item.kind === 'char' ? t('yours') : t('pick')) : `🪙 ${item.price}`}
               </span>
             </button>
           );
@@ -124,28 +121,28 @@ export function Shop({ onBack }: { onBack: () => void }) {
       {note && <div className="setup-summary">{note}</div>}
 
       <div className="shop-mine">
-        <h3>האוסף שלי</h3>
+        <h3>{t('myCollection')}</h3>
         <div className="shop-mine-row">
           {[...basics, ...mine].map((item) => (
             <button
               key={item.id}
               className={`mine-item r-${item.rarity}${isOn(item) ? ' on' : ''}`}
               onClick={() => pick(item)}
-              title={item.name}
+              title={itemName(item)}
             >
               <Preview item={item} char={wallet.char} size="22px" />
-              <small>{item.name}</small>
+              <small>{itemName(item)}</small>
             </button>
           ))}
         </div>
-        {mine.length === 0 && <div className="shop-how">עוד לא קנית כלום. כל מה שתקנה יישאר כאן.</div>}
+        {mine.length === 0 && <div className="shop-how">{t('nothingBought')}</div>}
       </div>
 
       <ShareButton />
 
       <div className="setup-nav">
         <button className="btn-back" onClick={onBack}>
-          חזרה
+          {t('back')}
         </button>
       </div>
     </div>

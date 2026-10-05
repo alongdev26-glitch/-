@@ -1,4 +1,5 @@
 import type { TokenId } from '../engine/types';
+import { t, type Key } from '../i18n';
 
 /**
  * The game pieces. Each has its own color, and a player takes the color of
@@ -50,3 +51,6 @@ export const TOKENS: { id: TokenId; emoji: string; name: string; color: string; 
 export const BASE_TOKENS = TOKENS.slice(0, 6);
 
 export const tokenColor = (id: TokenId) => TOKENS.find((t) => t.id === id)!.color;
+
+/** A piece's name in the UI language. */
+export const tokenName = (id: TokenId) => t(`tok.${id}` as Key);

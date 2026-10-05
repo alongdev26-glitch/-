@@ -2,6 +2,8 @@ import { BOARD } from '../data/board';
 import type { GameState } from '../engine/types';
 import { OWNABLE_COUNT, SETS } from './groups';
 import './tabs.css';
+import { t } from '../i18n';
+import { money } from '../data/editions';
 
 /** Page 3: everything nobody bought yet, and the lotto pot. */
 export function MarketTab({ game, onSpace }: { game: GameState; onSpace: (id: number) => void }) {
@@ -13,28 +15,28 @@ export function MarketTab({ game, onSpace }: { game: GameState; onSpace: (id: nu
   return (
     <div className="page">
       <div className="page-head">
-        <h2 className="page-title">נכסים פנויים</h2>
+        <h2 className="page-title">{t('tabMarket')}</h2>
         <div className="stat gold">
-          <small>💰 קופת הלוטו</small>
-          <b>ש"ח {game.pot}</b>
+          <small>{t('potIcon')}</small>
+          <b>{money(game.pot)}</b>
         </div>
         <div className="stat">
-          <small>עוד לא נקנו</small>
+          <small>{t('notBoughtYet')}</small>
           <b>
             {freeCount} / {OWNABLE_COUNT}
           </b>
         </div>
       </div>
-      <div className="note">מסים, קנסות וכרטיסי תשלום נכנסים לקופה. מי שנוחת על "חניה חופשית" לוקח את כולה.</div>
+      <div className="note">{t('potNote', { parking: BOARD[20].name })}</div>
 
-      {sets.length === 0 && <div className="empty">כל הנכסים כבר נקנו.</div>}
+      {sets.length === 0 && <div className="empty">{t('allBought')}</div>}
 
       {sets.map((set) => (
         <section className="group" key={set.key}>
           <div className="group-head" style={{ background: set.color }}>
             <span>{set.title}</span>
             <span>
-              {set.free.length} פנויים מתוך {set.ids.length}
+              {t('freeOf', { free: set.free.length, total: set.ids.length })}
             </span>
           </div>
           {set.free.map((id) => {
@@ -45,14 +47,14 @@ export function MarketTab({ game, onSpace }: { game: GameState; onSpace: (id: nu
                   <b>{sp.name}</b>
                   <small>
                     {sp.kind === 'property'
-                      ? `שכירות ש"ח ${sp.rent![0]} · עם מלון ש"ח ${sp.rent![5]}`
+                      ? t('rentHotel', { base: money(sp.rent![0]), hotel: money(sp.rent![5]) })
                       : sp.kind === 'railroad'
-                        ? 'שכירות ש"ח 25 עד 200'
-                        : 'פי 4 או פי 10 מהקוביות'}
+                        ? t('rentRails', { a: money(25), b: money(200) })
+                        : t('rentUtil')}
                   </small>
                 </button>
                 <div className="row-tags">
-                  <span className="tag">מחיר ש"ח {sp.price}</span>
+                  <span className="tag">{t('priceOf', { price: money(sp.price!) })}</span>
                 </div>
               </div>
             );

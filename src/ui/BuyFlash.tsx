@@ -3,14 +3,16 @@ import { BOARD, GROUP_COLORS } from '../data/board';
 import type { Announcement, GameState } from '../engine/types';
 import { Token } from './Token';
 import './BuyFlash.css';
+import { t, type Key } from '../i18n';
+import { money } from '../data/editions';
 
-const HEADLINE: Record<Announcement['kind'], string> = {
-  buy: 'קנה נכס!',
-  auction: 'זכה במכירה הפומבית!',
-  house: 'בנה בית!',
-  hotel: 'בנה מלון!',
-  trade: 'עסקה נסגרה!',
-  jail: 'לך לכלא!',
+const HEADLINE: Record<Announcement['kind'], Key> = {
+  buy: 'flashBuy',
+  auction: 'flashAuction',
+  house: 'flashHouse',
+  hotel: 'flashHotel',
+  trade: 'flashTrade',
+  jail: 'flashJail',
 };
 
 /** A big banner in the player's color whenever someone buys a property or builds. */
@@ -32,7 +34,7 @@ export function BuyFlash({ game, a }: { game: GameState; a: Announcement }) {
         <Token token={p.token} color={p.color} size="40px" />
         <div>
           <div className="bf-name">{p.name}</div>
-          <div className="bf-head">{HEADLINE[a.kind]}</div>
+          <div className="bf-head">{t(HEADLINE[a.kind])}</div>
         </div>
         {building && <span className="bf-build">{a.kind === 'hotel' ? <Hotel /> : <House />}</span>}
       </div>
@@ -41,7 +43,7 @@ export function BuyFlash({ game, a }: { game: GameState; a: Announcement }) {
           {sp.city ?? ''}
         </div>
         <div className="bf-prop">{sp.name}</div>
-        <div className="bf-price">ש"ח {a.price}</div>
+        <div className="bf-price">{money(a.price)}</div>
       </div>
     </div>
   );
@@ -58,7 +60,7 @@ function TradeFlash({ game, a }: { game: GameState; a: Announcement }) {
         <Token token={o.token} color={o.color} size="40px" />
       </div>
       <div className="bf-head" style={{ textAlign: 'center' }}>
-        {HEADLINE.trade}
+        {t(HEADLINE.trade)}
       </div>
       <div className="bf-card">
         <div className="bf-detail">{a.detail}</div>
@@ -90,7 +92,7 @@ function JailFlash({ game, a }: { game: GameState; a: Announcement }) {
           ))}
         </div>
       </div>
-      <div className="jf-head">{HEADLINE.jail} ⛓️</div>
+      <div className="jf-head">{t(HEADLINE.jail)} ⛓️</div>
       <div className="jf-name">{p.name}</div>
       {a.detail && <div className="jf-why">{a.detail}</div>}
     </div>

@@ -5,6 +5,8 @@ import type { GameState } from '../engine/types';
 import { Token } from './Token';
 import { useCosmetics } from './Cosmetics';
 import './Board.css';
+import { dir, t } from '../i18n';
+import { edition, editionLang, money } from '../data/editions';
 
 const ICONS: Record<NonNullable<Space['icon']>, string> = {
   train: '🚂',
@@ -37,7 +39,7 @@ function SpaceFace({ sp }: { sp: Space }) {
           {sp.city}
         </div>
         <div className="sp-name">{sp.name}</div>
-        <div className="sp-price">מחיר ש"ח {sp.price}</div>
+        <div className="sp-price">{money(sp.price!)}</div>
       </>
     );
   }
@@ -61,8 +63,8 @@ function SpaceFace({ sp }: { sp: Space }) {
       ) : (
         sp.icon && <div className="sp-icon">{ICONS[sp.icon]}</div>
       )}
-      {sp.price && <div className="sp-price">מחיר ש"ח {sp.price}</div>}
-      {sp.kind === 'tax' && <div className="sp-price">שלם ש"ח {sp.amount}</div>}
+      {sp.price && <div className="sp-price">{money(sp.price)}</div>}
+      {sp.kind === 'tax' && <div className="sp-price">{money(sp.amount!)}</div>}
     </>
   );
 }
@@ -72,8 +74,8 @@ function Corner({ sp }: { sp: Space }) {
     case 'go':
       return (
         <div className="corner-inner go">
-          <small>כל העובר מקבל ש"ח 200</small>
-          <b>דרך צלחה</b>
+          <small>{edition().corners.goNote}</small>
+          <b>{edition().corners.go}</b>
           <span className="go-arrow" />
         </div>
       );
@@ -81,25 +83,25 @@ function Corner({ sp }: { sp: Space }) {
       return (
         <div className="corner-inner">
           <div className="jail-cell">
-            <b>בכלא</b>
+            <b>{edition().corners.jail}</b>
           </div>
-          <b>רק מבקר</b>
+          <b>{edition().corners.visiting}</b>
         </div>
       );
     case 'parking':
       return (
         <div className="corner-inner">
-          <b>חניה</b>
+          <b>{edition().corners.parking1}</b>
           <span className="corner-icon">🚗</span>
-          <b>חופשית</b>
+          <b>{edition().corners.parking2}</b>
         </div>
       );
     default:
       return (
         <div className="corner-inner">
-          <b>גש</b>
+          <b>{edition().corners.toJail1}</b>
           <span className="corner-icon">👮</span>
-          <b>לכלא</b>
+          <b>{edition().corners.toJail2}</b>
         </div>
       );
   }
@@ -117,6 +119,9 @@ interface Props {
 
 export function Board({ game, shown, onSpace, center, highlight }: Props) {
   const { skinFor, board } = useCosmetics();
+  // the squares speak the game's edition, whatever the menus' language
+  const edLang = editionLang();
+  const edDir = dir(edLang);
   return (
     <div className={`board ${board}`} dir="ltr">
       {BOARD.map((sp) => {
@@ -133,9 +138,9 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
             }`}
             style={{ gridRow: row, gridColumn: col, ...(owner ? { ['--owner' as string]: owner.color } : {}) }}
             onClick={() => onSpace(sp.id)}
-            aria-label={owner ? `${sp.name}, בבעלות ${owner.name}` : sp.name}
+            aria-label={owner ? `${sp.name}, ${t('ownedBy', { name: owner.name })}` : sp.name}
           >
-            <div className={`face${st.mortgaged ? ' mortgaged' : ''}${st.houses > 0 ? ' has-bld' : ''}`} dir="rtl">
+            <div className={`face${st.mortgaged ? ' mortgaged' : ''}${st.houses > 0 ? ' has-bld' : ''}`} dir={edDir}>
               {side === 'corner' ? <Corner sp={sp} /> : <SpaceFace sp={sp} />}
               {st.houses > 0 && (
                 <div className="buildings">
@@ -147,11 +152,11 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
                 </div>
               )}
               {owner && (
-                <span className="owner-badge" title={`בבעלות ${owner.name}`}>
+                <span className="owner-badge" title={t('ownedBy', { name: owner.name })}>
                   <Token token={owner.token} color="#fff" size="1em" />
                 </span>
               )}
-              {st.mortgaged && <span className="mort-tag">ממושכן</span>}
+              {st.mortgaged && <span className="mort-tag">{t('mortgaged', {}, edLang)}</span>}
             </div>
             {highlight?.space === sp.id && highlight.badge && (
               <span key={highlight.badge} dir="ltr" className={`space-badge ${highlight.tone}`}>
@@ -169,21 +174,21 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
         );
       })}
       <div className="board-center">
-        <div className="plaque" dir="rtl">
-          <span>ביג דיל</span>
+        <div className="plaque" dir={edDir}>
+          <span>{t('appName', {}, edLang)}</span>
           <div className="plaque-pot">
-            <b className="pot-label">🎰 קופת הלוטו</b>
+            <b className="pot-label">{t('lottoPotIcon', {}, edLang)}</b>
             <b key={game.pot} className="pot-amount" dir="ltr">
-              ₪{game.pot.toLocaleString('en-US')}
+              {money(game.pot)}
             </b>
           </div>
           <i className="mascot">🎩</i>
         </div>
         <div className="deck deck-chest">
-          <span>תיבת המזל</span>
+          <span>{edition().chestName}</span>
         </div>
         <div className="deck deck-chance">
-          <span>הפתעה</span>
+          <span>{edition().chanceName}</span>
         </div>
         {center}
       </div>

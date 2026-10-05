@@ -347,3 +347,64 @@
     transform-origin: right top;
   }
 }
+
+/* ---------- first-time questionnaire & settings ---------- */
+.welcome-q {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 900;
+  text-align: center;
+}
+.lang-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.lang-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 6px;
+  border-radius: 18px;
+  border: 3px solid transparent;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+.lang-card.on {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(245, 184, 46, 0.6), 0 6px 14px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+.lang-flag {
+  font-size: 40px;
+  line-height: 1;
+}
+.lang-card b {
+  font-size: 17px;
+  font-weight: 900;
+}
+.lang-card small {
+  font-size: 11px;
+  color: #555;
+  text-align: center;
+}
+.welcome-name {
+  width: 100%;
+  font: inherit;
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 3px solid #fff;
+  color: var(--ink);
+}
+.settings-version {
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.8;
+}

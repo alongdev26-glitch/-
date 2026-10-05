@@ -1,6 +1,7 @@
 import type { GameState } from '../engine/types';
 import { connect, newCode, roomRef, type Net, type Room, type Seat } from './net';
 import { TOKENS } from '../ui/Token';
+import { t } from '../i18n';
 
 export const MAX_SEATS = 4;
 /** the host's phone keeps its room here, so a reload can reopen it */
@@ -40,8 +41,8 @@ export interface RoomLink {
 /** A seat joins a lobby (or comes back to its own seat). Shared by both backends. */
 export function seatIn(room: Room, seat: Seat): { room: Room } | { error: string } {
   if (room.seats.some((s) => s.uid === seat.uid)) return { room };
-  if (room.status !== 'lobby') return { error: 'המשחק בחדר הזה כבר התחיל' };
-  if (room.seats.length + room.bots >= MAX_SEATS) return { error: 'החדר מלא' };
+  if (room.status !== 'lobby') return { error: t('roomStarted') };
+  if (room.seats.length + room.bots >= MAX_SEATS) return { error: t('roomFull') };
   const taken = new Set(room.seats.map((s) => s.token));
   const mine = { ...seat };
   if (taken.has(mine.token)) mine.token = TOKENS.find((t) => !taken.has(t.id))!.id;
@@ -70,7 +71,7 @@ export function claudeLink(net: Net): RoomLink {
         for (let i = 0; i < 5 && (await roomRef(net, c).get()).exists; i++) c = newCode();
         await roomRef(net, c).set(freshRoom(c, seat) as unknown as Record<string, unknown>);
       } catch {
-        throw new Error('לא הצלחתי ליצור חדר. בדוק שיש לך הרשאת עריכה בקישור ונסה שוב.');
+        throw new Error(t('roomCreateFail'));
       }
       return c;
     },
@@ -80,21 +81,21 @@ export function claudeLink(net: Net): RoomLink {
         const ref = roomRef(net, code);
         await ref.acquire({ holder: net.uid, ttlMs: 5000 });
         const snap = await ref.get();
-        if (!snap.exists) throw new Error('לא מצאתי חדר עם הקוד הזה');
+        if (!snap.exists) throw new Error(t('roomNotFound'));
         const r = snap.data() as unknown as Room;
         result = seatIn(r, seat);
         if ('room' in result && result.room !== r) await ref.update({ seats: result.room.seats });
       } catch (e) {
-        throw e instanceof Error && e.message.startsWith('לא מצאתי')
+        throw e instanceof Error && e.message === t('roomNotFound')
           ? e
-          : new Error('לא הצלחתי להיכנס לחדר. בדוק שיש לך הרשאת עריכה בקישור.');
+          : new Error(t('roomJoinFail'));
       }
       if ('error' in result) throw new Error(result.error);
     },
     subscribe(code, onRoom, onClosed) {
       return roomRef(net, code).onSnapshot(
-        (snap) => (snap.exists ? onRoom(snap.data() as unknown as Room) : onClosed('החדר נסגר')),
-        () => onClosed('החיבור לחדר נותק. נסה להיכנס שוב עם הקוד.'),
+        (snap) => (snap.exists ? onRoom(snap.data() as unknown as Room) : onClosed(t('roomClosed'))),
+        () => onClosed(t('roomLost')),
       );
     },
     patch(code, _room, p) {

@@ -18,6 +18,8 @@ import {
 import type { Action, GameState } from '../engine/types';
 import { SETS } from './groups';
 import './tabs.css';
+import { t } from '../i18n';
+import { money } from '../data/editions';
 
 interface Props {
   game: GameState;
@@ -55,27 +57,27 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace, onTrade, onBackToBu
   return (
     <div className="page">
       <div className="page-head">
-        <h2 className="page-title">הנכסים שלי</h2>
+        <h2 className="page-title">{t('tabMine')}</h2>
         <div className="stat">
-          <small>מזומן</small>
-          <b>ש"ח {player.money}</b>
+          <small>{t('cash')}</small>
+          <b>{money(player.money)}</b>
         </div>
         <div className="stat">
-          <small>נכסים</small>
+          <small>{t('properties')}</small>
           <b>{sets.reduce((n, s) => n + s.mine.length, 0)}</b>
         </div>
         {game.rules.mortgage && (
           <div className="stat gold">
-            <small>תשלום המשכנתא הבא</small>
-            <b>ש"ח {feeDue(game, me)}</b>
+            <small>{t('nextFee')}</small>
+            <b>{money(feeDue(game, me))}</b>
             <small>
-              {roundsToFee(game) === null ? 'מתחיל אחרי הקנייה הראשונה' : `בעוד ${roundsToFee(game)} סבבים`}
+              {roundsToFee(game) === null ? t('feeStartsAfter') : t('inRounds', { n: roundsToFee(game)! })}
             </small>
           </div>
         )}
         {player.jailCards.length > 0 && (
           <div className="stat">
-            <small>כרטיסי יציאה מהכלא</small>
+            <small>{t('jailCardsTitle')}</small>
             <b>{player.jailCards.length}</b>
           </div>
         )}
@@ -84,10 +86,10 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace, onTrade, onBackToBu
       {onBackToBuy && ph.t === 'buy' && (
         <div className="confirm">
           <span>
-            {BOARD[ph.space].name} מחכה לקנייה ב-ש"ח {BOARD[ph.space].price}. יש לך ש"ח {player.money}.
+            {t('waitsToBuy', { space: BOARD[ph.space].name, price: money(BOARD[ph.space].price!), money: money(player.money) })}
           </span>
           <button className="btn btn-red btn-sm" onClick={onBackToBuy}>
-            חזור לקנייה
+            {t('backToBuy')}
           </button>
         </div>
       )}
@@ -95,32 +97,32 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace, onTrade, onBackToBu
       {debt > 0 && (
         <div className="confirm">
           <span>
-            חוב פתוח: ש"ח {debt}. יש לך ש"ח {player.money}.
+            {t('openDebt', { debt: money(debt), money: money(player.money) })}
           </span>
           <button className="btn btn-red btn-sm" disabled={player.money < debt} onClick={() => act({ type: 'PAY_DEBT' })}>
-            שלם
+            {t('pay')}
           </button>
           {onTrade && (
             <button className="btn btn-gold btn-sm" onClick={onTrade}>
-              🤝 מכור לשחקן
+              {t('sellToPlayer')}
             </button>
           )}
           <button className="btn btn-black btn-sm" onClick={() => act({ type: 'BANKRUPT' })}>
-            פשיטת רגל
+            {t('bankrupt')}
           </button>
           {player.money < debt && (
             <small className="debt-hint">
-              אפשר למכור בתים, למכור נכס לבנק בחצי מחיר, או למכור נכסים לשחקן אחר.
+              {t('debtTip')}
             </small>
           )}
         </div>
       )}
 
       <div className="note">
-        🏠 בתים ומלון: כשיש לך את כל הרחובות באותה עיר, מופיע כאן כפתור "בנה". 4 בתים ואחריהם מלון, והבנייה חייבת להיות שווה בין הרחובות.
+        {t('buildTip')}
       </div>
 
-      {sets.length === 0 && <div className="empty">עוד לא קנית נכסים. נחת על נכס פנוי בלוח כדי לקנות אותו.</div>}
+      {sets.length === 0 && <div className="empty">{t('noPropsYet')}</div>}
 
       {sets.map((set) => {
         const full = set.mine.length === set.ids.length;
@@ -130,7 +132,7 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace, onTrade, onBackToBu
               <span>{set.title}</span>
               <span>
                 {set.mine.length}/{set.ids.length}
-                {full && set.key !== 'railroad' && set.key !== 'utility' ? ' · סדרה מלאה!' : ''}
+                {full && set.key !== 'railroad' && set.key !== 'utility' ? t('fullSet') : ''}
               </span>
             </div>
             {set.mine.map((id) => {
@@ -138,15 +140,15 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace, onTrade, onBackToBu
               const st = game.props[id];
               const rent =
                 sp.kind === 'utility'
-                  ? `פי ${game.props[12].owner === me && game.props[28].owner === me ? 10 : 4} מהקוביות`
-                  : `ש"ח ${rentFor(game, id, 7)}`;
+                  ? t('timesDice', { n: game.props[12].owner === me && game.props[28].owner === me ? 10 : 4 })
+                  : money(rentFor(game, id, 7));
               return (
                 <div className="row" key={id}>
                   <button className="row-main" onClick={() => onSpace(id)}>
                     <b>{sp.name}</b>
                     <small>
-                      שכירות עכשיו: {st.mortgaged ? 'אין (ממושכן)' : rent}
-                      {game.rules.mortgage && !st.mortgaged && ` · משכנתא: ש"ח ${feeFor(id)}`}
+                      {t('rentNow', { rent: st.mortgaged ? t('noneMortgaged') : rent })}
+                      {game.rules.mortgage && !st.mortgaged && t('mortgageFee', { amount: money(feeFor(id)) })}
                     </small>
                   </button>
                   <div className="row-tags">
@@ -155,43 +157,43 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace, onTrade, onBackToBu
                         {Array.from({ length: st.houses }, (_, k) => (
                           <House key={k} />
                         ))}
-                        {st.houses} {st.houses === 1 ? 'בית' : 'בתים'}
+                        {t('houses', { n: st.houses })}
                       </span>
                     )}
                     {st.houses === 5 && (
                       <span className="tag red tag-bld">
                         <Hotel />
-                        מלון
+                        {t('hotel')}
                       </span>
                     )}
                     {st.mortgaged && (
-                      <span className="tag red">ממושכן · בלי שכירות</span>
+                      <span className="tag red">{t('mortgagedNoRent')}</span>
                     )}
-                    {sp.kind === 'property' && !ownsGroup(game, me, sp.group!) && <span className="tag">חסר לסדרה</span>}
+                    {sp.kind === 'property' && !ownsGroup(game, me, sp.group!) && <span className="tag">{t('missingForSet')}</span>}
                   </div>
                   {myTurn && (
                     <div className="row-btns">
                       {sp.kind === 'property' && (
                         <>
                           <button className="btn btn-red" disabled={!canBuild(game, me, id)} onClick={() => act({ type: 'BUILD', space: id })}>
-                            בנה ({sp.houseCost})
+                            {t('build', { n: money(sp.houseCost!) })}
                           </button>
                           <button className="btn btn-white" disabled={!canSell(game, me, id)} onClick={() => act({ type: 'SELL', space: id })}>
-                            מכור מבנה (+{sellValue(id)})
+                            {t('sellBuilding', { n: money(sellValue(id)) })}
                           </button>
                         </>
                       )}
                       <button
                         className={`btn ${confirmId === id ? 'btn-red' : 'btn-white'}`}
                         disabled={!canSellToBank(game, me, id)}
-                        title={canSellToBank(game, me, id) ? undefined : 'קודם מכור את הבתים'}
+                        title={canSellToBank(game, me, id) ? undefined : t('sellHousesFirst')}
                         onClick={() => sellToBank(id)}
                       >
-                        {confirmId === id ? 'בטוח? מכור' : `מכור לבנק (+${bankSaleValue(game, id)})`}
+                        {confirmId === id ? t('sureSell') : t('sellToBank', { n: money(bankSaleValue(game, id)) })}
                       </button>
                       {st.mortgaged && (
                         <button className="btn btn-gold" disabled={!canUnmortgage(game, me, id)} onClick={() => act({ type: 'UNMORTGAGE', space: id })}>
-                          פדה ({unmortgageCost(id)})
+                          {t('redeem', { n: money(unmortgageCost(id)) })}
                         </button>
                       )}
                     </div>
@@ -205,10 +207,10 @@ export function MyPropsTab({ game, me, myTurn, act, onSpace, onTrade, onBackToBu
       {sets.length > 0 && (
         <div className="note">
           {game.rules.mortgage
-            ? `כל ${FEE_ROUNDS} סבבים משלמים לקופת הלוטו חצי ממחיר כל נכס.`
-            : 'במשחק הזה אין משכנתא.'}
-          {' אפשר למכור נכס בלי בתים לבנק בחצי ממחירו, והוא חוזר להיות פנוי.'}
-          {!myTurn && ' בנייה ומכירה אפשריות רק בתור שלך.'}
+            ? t('feeRule', { n: FEE_ROUNDS })
+            : t('noMortgageGame')}
+          {t('bankSaleRule')}
+          {!myTurn && t('onlyYourTurn')}
         </div>
       )}
     </div>

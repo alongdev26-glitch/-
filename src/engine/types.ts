@@ -1,3 +1,4 @@
+import type { Lang } from '../i18n';
 import type { Deck } from '../data/cards';
 
 export type TokenId =
@@ -128,6 +129,8 @@ export interface GameState {
   doubles: number;
   /** "קופת הלוטו": taxes and fines collect here, "חניה חופשית" takes it all */
   pot: number;
+  /** the board edition and log language of this game (shared by everyone online) */
+  lang?: Lang;
   /** full rounds played (a round ends when play wraps to the first seat) */
   round: number;
   /** round of the first purchase, when the mortgage-payment count starts */

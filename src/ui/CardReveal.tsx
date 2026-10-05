@@ -1,5 +1,7 @@
 import type { Deck } from '../data/cards';
 import './CardReveal.css';
+import { t } from '../i18n';
+import { edition } from '../data/editions';
 
 const CONFETTI = ['#ff4fa3', '#ffd23f', '#1fa24a', '#1e9bd7', '#f28c1e', '#7c3aed'];
 
@@ -53,8 +55,8 @@ export function CardReveal({ deck, who, text }: { deck: Deck; who: string; text:
           ))}
         </div>
       </div>
-      <div className="card-deck">{deck === 'chance' ? '? הפתעה' : '🧰 תיבת המזל'}</div>
-      <div className="card-who">{who} שלף כרטיס:</div>
+      <div className="card-deck">{deck === 'chance' ? `? ${edition().chanceName}` : `🧰 ${edition().chestName}`}</div>
+      <div className="card-who">{t('drewCard', { name: who })}</div>
       <div className="card-text cr-text">{text}</div>
     </div>
   );

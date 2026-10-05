@@ -133,6 +133,10 @@ button {
   content: '→';
   font-size: 1.1em;
 }
+/* English reads left to right: "back" points left */
+:root[dir='ltr'] .btn-back::before {
+  content: '←';
+}
 .btn-back:active {
   transform: translateY(2px);
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);

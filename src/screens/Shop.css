@@ -102,6 +102,7 @@
 }
 .shop-kind {
   position: absolute;
+  z-index: 2;
   top: 5px;
   inset-inline-start: 5px;
   font-size: 10px;

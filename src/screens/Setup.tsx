@@ -7,8 +7,13 @@ import { TOKENS, Token } from '../ui/Token';
 import { useWallet } from '../ui/Cosmetics';
 import { rememberChar } from '../ui/shop';
 import './Setup.css';
+import { getLang, t } from '../i18n';
+import { EDITIONS } from '../data/editions';
+import { getName } from '../ui/profile';
+import { tokenName } from '../data/tokens';
 
-const BOT_NAMES = ['הנרי', 'מרק', 'סופיה'];
+// the computer players' default names come from the edition of the chosen language
+const botNamesNow = () => EDITIONS[getLang()].bots;
 const MAX_PLAYERS = 4;
 
 type Mode = 'bots' | 'people';
@@ -19,7 +24,10 @@ interface Human {
 }
 
 const defaultHumans = (): Human[] =>
-  TOKENS.slice(0, MAX_PLAYERS).map((t, i) => ({ name: i === 0 ? 'אני' : `שחקן ${i + 1}`, token: t.id }));
+  TOKENS.slice(0, MAX_PLAYERS).map((tk, i) => ({
+    name: i === 0 ? getName() || t('me') : t('playerN', { n: i + 1 }),
+    token: tk.id,
+  }));
 
 interface Props {
   onStart: (players: PlayerSetup[], rules: GameRules) => void;
@@ -40,7 +48,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
   const [humanCount, setHumanCount] = useState(1);
   const [botCount, setBotCount] = useState(3);
   const [humans, setHumans] = useState<Human[]>(defaultHumans);
-  const [botNames, setBotNames] = useState(BOT_NAMES);
+  const [botNames, setBotNames] = useState(botNamesNow);
   const [who, setWho] = useState(0);
   const [mortgage, setMortgage] = useState(true);
   const wallet = useWallet();
@@ -65,13 +73,13 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
 
   const start = () => {
     const chosen = humans.slice(0, humanCount).map((h, i) => ({
-      name: h.name.trim() || `שחקן ${i + 1}`,
+      name: h.name.trim() || t('playerN', { n: i + 1 }),
       token: h.token,
       isBot: false,
     }));
-    const free = TOKENS.filter((t) => !chosen.some((c) => c.token === t.id));
+    const free = TOKENS.filter((tk) => !chosen.some((c) => c.token === tk.id));
     const bots = Array.from({ length: botCount }, (_, i) => ({
-      name: botNames[i].trim() || BOT_NAMES[i],
+      name: botNames[i].trim() || botNamesNow()[i],
       token: free[i].id,
       isBot: true,
     }));
@@ -93,7 +101,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
   };
 
   const total = humanCount + botCount;
-  const titles = ['מול מי משחקים?', 'כמה משתתפים?', 'בחר דמות!', 'חוקי המשחק'];
+  const titles = [t('setupWho'), t('setupHowMany'), t('setupPick'), t('setupRules')];
 
   return (
     <div className="setup">
@@ -101,7 +109,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
       <div className="setup-banner">
         <RibbonBanner text={titles[step]} />
       </div>
-      <div className="steps" aria-label={`שלב ${step + 1} מתוך 4`}>
+      <div className="steps" aria-label={t('stepOf', { n: step + 1 })}>
         {titles.map((_, i) => (
           <i key={i} className={i === step ? 'on' : i < step ? 'done' : ''} />
         ))}
@@ -111,18 +119,18 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
         <div className="choices">
           <button className={`choice${mode === 'bots' ? ' on' : ''}`} onClick={() => chooseMode('bots')}>
             <span className="choice-icon">🤖</span>
-            <b>נגד המחשב</b>
-            <small>אתה נגד 1 עד 3 בוטים</small>
+            <b>{t('vsComputer')}</b>
+            <small>{t('vsComputerNote')}</small>
           </button>
           <button className={`choice${mode === 'people' ? ' on' : ''}`} onClick={() => chooseMode('people')}>
             <span className="choice-icon">👫</span>
-            <b>עם חברים על הטלפון הזה</b>
-            <small>2 עד 4 שחקנים, מעבירים את הטלפון ביניכם</small>
+            <b>{t('samePhone')}</b>
+            <small>{t('samePhoneNote')}</small>
           </button>
           <button className="choice" onClick={onOnline}>
             <span className="choice-icon">🌐</span>
-            <b>עם חברים בקוד</b>
-            <small>כל אחד מהטלפון שלו: צור קוד או רשום קוד</small>
+            <b>{t('withCode')}</b>
+            <small>{t('withCodeNote')}</small>
           </button>
         </div>
       )}
@@ -131,7 +139,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
         <div className="setup-panel">
           {mode === 'people' && (
             <div className="setup-field">
-              כמה שחקנים אמיתיים?
+              {t('howManyHumans')}
               <div className="seg">
                 {[2, 3, 4].map((n) => (
                   <button
@@ -149,7 +157,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
             </div>
           )}
           <div className="setup-field">
-            {mode === 'bots' ? 'כמה בוטים?' : 'להוסיף גם בוטים?'}
+            {mode === 'bots' ? t('howManyBots') : t('addBots')}
             <div className="seg">
               {(mode === 'bots' ? [1, 2, 3] : Array.from({ length: MAX_PLAYERS - humanCount + 1 }, (_, i) => i)).map((n) => (
                 <button key={n} className={n === botCount ? 'on' : ''} onClick={() => setBotCount(n)}>
@@ -160,13 +168,13 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
           </div>
           {botCount > 0 && (
             <div className="setup-field">
-              שמות הבוטים
+              {t('botNames')}
               <div className="bot-names">
                 {botNames.slice(0, botCount).map((n, i) => (
                   <input
                     key={i}
                     id={`bot-${i}`}
-                    aria-label={`שם בוט ${i + 1}`}
+                    aria-label={t('botNameN', { n: i + 1 })}
                     value={n}
                     maxLength={10}
                     onChange={(e) => setBotNames((b) => b.map((x, j) => (j === i ? e.target.value : x)))}
@@ -176,8 +184,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
             </div>
           )}
           <div className="setup-summary">
-            סה"כ {total} שחקנים: {humanCount} {humanCount === 1 ? 'אמיתי' : 'אמיתיים'}
-            {botCount > 0 && ` ו-${botCount} ${botCount === 1 ? 'בוט' : 'בוטים'}`}
+            {t('totalPlayers', { total, humans: humanCount, bots: botCount })}
           </div>
         </div>
       )}
@@ -189,13 +196,13 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
               {humans.slice(0, humanCount).map((h, i) => (
                 <button key={i} className={i === who ? 'on' : ''} onClick={() => setWho(i)}>
                   <Token token={h.token} size="16px" />
-                  {h.name || `שחקן ${i + 1}`}
+                  {h.name || t('playerN', { n: i + 1 })}
                 </button>
               ))}
             </div>
           )}
           <label className="setup-field">
-            {humanCount > 1 ? `השם של שחקן ${who + 1}` : 'השם שלך'}
+            {humanCount > 1 ? t('nameOfPlayer', { n: who + 1 }) : t('yourName')}
             <input
               id={`player-name-${who}`}
               value={humans[who].name}
@@ -204,21 +211,21 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
             />
           </label>
           <div className="setup-grid">
-            {myTokens.map((t) => {
-              const taken = takenByOthers(who).has(t.id);
+            {myTokens.map((tk) => {
+              const taken = takenByOthers(who).has(tk.id);
               return (
                 <button
-                  key={t.id}
-                  className={`setup-tile${t.id === humans[who].token ? ' selected' : ''}`}
-                  style={{ ['--tc' as string]: t.color }}
+                  key={tk.id}
+                  className={`setup-tile${tk.id === humans[who].token ? ' selected' : ''}`}
+                  style={{ ['--tc' as string]: tk.color }}
                   disabled={taken}
                   onClick={() => {
                     sfx.pop();
-                    setHuman(who, { token: t.id });
+                    setHuman(who, { token: tk.id });
                   }}
                 >
-                  <Token token={t.id} size="clamp(22px, 7vw, 44px)" skin={wallet.skin} />
-                  <span>{taken ? 'תפוס' : t.name}</span>
+                  <Token token={tk.id} size="clamp(22px, 7vw, 44px)" skin={wallet.skin} />
+                  <span>{taken ? t('taken') : tokenName(tk.id)}</span>
                 </button>
               );
             })}
@@ -229,17 +236,17 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
       {step === 3 && (
         <div className="setup-panel">
           <div className="setup-field">
-            לשחק עם משכנתא?
+            {t('mortgageQ')}
             <div className="choices small">
               <button className={`choice${mortgage ? ' on' : ''}`} onClick={() => setMortgage(true)}>
                 <span className="choice-icon">🏦</span>
-                <b>כן</b>
-                <small>כל {FEE_ROUNDS} סבבים משלמים חצי ממחיר כל נכס לקופת הלוטו</small>
+                <b>{t('yes')}</b>
+                <small>{t('mortgageYes', { n: FEE_ROUNDS })}</small>
               </button>
               <button className={`choice${!mortgage ? ' on' : ''}`} onClick={() => setMortgage(false)}>
                 <span className="choice-icon">🚫</span>
-                <b>לא</b>
-                <small>בלי תשלומי משכנתא ובלי משכון</small>
+                <b>{t('no')}</b>
+                <small>{t('mortgageNo')}</small>
               </button>
             </div>
           </div>
@@ -247,7 +254,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
             {humans.slice(0, humanCount).map((h, i) => (
               <span key={`h${i}`}>
                 <Token token={h.token} size="22px" />
-                {h.name || `שחקן ${i + 1}`}
+                {h.name || t('playerN', { n: i + 1 })}
               </span>
             ))}
             {Array.from({ length: botCount }, (_, i) => (
@@ -260,17 +267,17 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
       <div className="setup-nav">
         {step === 3 ? (
           <button className="btn btn-red" onClick={start}>
-            יוצאים לדרך!
+            {t('letsGo')}
           </button>
         ) : (
           step > 0 && (
             <button className="btn btn-red" onClick={next}>
-              {step === 2 && who < humanCount - 1 ? `הבא: שחקן ${who + 2}` : 'המשך'}
+              {step === 2 && who < humanCount - 1 ? t('nextPlayer', { n: who + 2 }) : t('continue')}
             </button>
           )
         )}
         <button className="btn-back" onClick={back}>
-          חזרה
+          {t('back')}
         </button>
       </div>
     </div>

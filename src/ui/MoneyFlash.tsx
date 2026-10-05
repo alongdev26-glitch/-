@@ -2,27 +2,29 @@ import { BOARD } from '../data/board';
 import type { GameState, Payment } from '../engine/types';
 import { Token } from './Token';
 import './MoneyFlash.css';
+import { t } from '../i18n';
+import { edition, money } from '../data/editions';
 
 const BILLS = 6;
 
 function title(p: Payment): string {
   switch (p.kind) {
     case 'go':
-      return 'עברת בדרך צלחה!';
+      return t('passedGo', { go: BOARD[0].name });
     case 'go-land':
-      return 'נחתת בדרך צלחה! כפול!';
+      return t('landedGo', { go: BOARD[0].name });
     case 'tax':
-      return `מס: ${BOARD[p.space!].name}`;
+      return t('taxOf', { space: BOARD[p.space!].name });
     case 'rent':
-      return `שכירות: ${BOARD[p.space!].name}`;
+      return t('rentOf', { space: BOARD[p.space!].name });
     case 'pot':
-      return 'תשלום לקופת הלוטו';
+      return t('payToPot');
     case 'bank':
-      return 'הבנק משלם';
+      return t('bankPays');
     case 'lotto':
-      return 'זכייה בקופת הלוטו!';
+      return t('wonPot');
     default:
-      return 'תשלום';
+      return t('payment');
   }
 }
 
@@ -31,7 +33,7 @@ function Bills() {
     <span className="mf-bills" aria-hidden="true">
       {Array.from({ length: BILLS }, (_, i) => (
         <i key={i} style={{ left: `${8 + i * 15}%`, animationDelay: `${i * 0.12}s` }}>
-          ₪
+          {edition().symbol}
         </i>
       ))}
     </span>
@@ -46,7 +48,7 @@ export function MoneyFlash({ game, payment }: { game: GameState; payment: Paymen
   const amount = (sign: '+' | '−') => (
     <b className="mf-amount" dir="ltr">
       {sign}
-      {payment.amount} ₪
+      {money(payment.amount)}
     </b>
   );
 
@@ -68,7 +70,7 @@ export function MoneyFlash({ game, payment }: { game: GameState; payment: Paymen
     ) : (
       <div className="mf-row source">
         <span className="mf-icon">{payment.kind === 'lotto' ? '💰' : payment.kind.startsWith('go') ? '🏁' : '🏦'}</span>
-        <span className="mf-name">{payment.kind === 'lotto' ? 'קופת הלוטו' : payment.kind.startsWith('go') ? 'דרך צלחה' : 'הבנק'}</span>
+        <span className="mf-name">{payment.kind === 'lotto' ? t('lottoPot') : payment.kind.startsWith('go') ? BOARD[0].name : t('bank')}</span>
       </div>
     );
 
@@ -78,7 +80,7 @@ export function MoneyFlash({ game, payment }: { game: GameState; payment: Paymen
     ) : (
       <div className="mf-row pot">
         <span className="mf-icon">💰</span>
-        <span className="mf-name">קופת הלוטו</span>
+        <span className="mf-name">{t('lottoPot')}</span>
         {amount('+')}
         <Bills />
       </div>

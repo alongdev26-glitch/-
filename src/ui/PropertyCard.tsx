@@ -1,8 +1,10 @@
 import { House, Hotel } from './Building';
 import { BOARD, GROUP_COLORS } from '../data/board';
 import './PropertyCard.css';
+import { t, type Key } from '../i18n';
+import { money } from '../data/editions';
 
-const RENT_LABELS = ['שכר דירה', 'עם בית 1', 'עם 2 בתים', 'עם 3 בתים', 'עם 4 בתים', 'עם מלון'];
+const RENT_LABELS: Key[] = ['rentLabels0', 'rentLabels1', 'rentLabels2', 'rentLabels3', 'rentLabels4', 'rentLabels5'];
 
 /** Title-deed card for any ownable space. */
 export function PropertyCard({ id, ownerName }: { id: number; ownerName?: string }) {
@@ -24,19 +26,19 @@ export function PropertyCard({ id, ownerName }: { id: number; ownerName?: string
     <div className="deed">
       {head}
       <div className="deed-row hl">
-        <span>מחיר</span>
-        <b>ש"ח {sp.price}</b>
+        <span>{t('price')}</span>
+        <b>{money(sp.price!)}</b>
       </div>
       <div className="deed-row hl">
-        <span>משכנתא</span>
-        <b>ש"ח {sp.price! / 2}</b>
+        <span>{t('mortgage')}</span>
+        <b>{money(sp.price! / 2)}</b>
       </div>
       {sp.kind === 'property' && (
         <>
           {sp.rent!.map((r, i) => (
             <div className="deed-row" key={i}>
               <span>
-                {RENT_LABELS[i]}
+                {t(RENT_LABELS[i])}
                 {i > 0 && i < 5 && (
                   <span className="mini-blds">
                     {Array.from({ length: i }, (_, k) => (
@@ -50,38 +52,38 @@ export function PropertyCard({ id, ownerName }: { id: number; ownerName?: string
                   </span>
                 )}
               </span>
-              <b>ש"ח {r}</b>
+              <b>{money(r)}</b>
             </div>
           ))}
           <div className="deed-row">
-            <span>עם כל הצבע (בלי בתים)</span>
-            <b>ש"ח {sp.rent![0] * 2}</b>
+            <span>{t('fullColor')}</span>
+            <b>{money(sp.rent![0] * 2)}</b>
           </div>
           <div className="deed-foot">
-            מחיר בית ש"ח {sp.houseCost} · מחיר מלון ש"ח {sp.houseCost}
+            {t('houseHotelCost', { house: money(sp.houseCost!), hotel: money(sp.houseCost!) })}
           </div>
         </>
       )}
       {sp.kind === 'railroad' &&
         [1, 2, 3, 4].map((n) => (
           <div className="deed-row" key={n}>
-            <span>עם {n === 1 ? 'רכבת אחת' : `${n} רכבות`}</span>
-            <b>ש"ח {25 * 2 ** (n - 1)}</b>
+            <span>{t('withRails', { n })}</span>
+            <b>{money(25 * 2 ** (n - 1))}</b>
           </div>
         ))}
       {sp.kind === 'utility' && (
         <>
           <div className="deed-row">
-            <span>עם חברה אחת</span>
-            <b>פי 4 מהקוביות</b>
+            <span>{t('withOneUtil')}</span>
+            <b>{t('times4')}</b>
           </div>
           <div className="deed-row">
-            <span>עם שתי החברות</span>
-            <b>פי 10 מהקוביות</b>
+            <span>{t('withBothUtil')}</span>
+            <b>{t('times10')}</b>
           </div>
         </>
       )}
-      {ownerName && <div className="deed-owner">בבעלות: {ownerName}</div>}
+      {ownerName && <div className="deed-owner">{t('ownerX', { name: ownerName })}</div>}
     </div>
   );
 }

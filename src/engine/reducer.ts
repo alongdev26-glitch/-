@@ -22,11 +22,16 @@ import {
   validSide,
   type RentMod,
 } from './rules';
+import { applyEdition, money } from '../data/editions';
+import { t, type Key, type Lang, type Params } from '../i18n';
 import type { Action, Announcement, Phase, GameRules, GameState, Owed, Payment, PlayerSetup, TradeOffer, TradeSide } from './types';
 
 const MAX_LOG = 40;
 
-const fmt = (n: number) => `ש"ח ${n}`;
+// money in the game's edition (the edition is switched in at the start of every reduce)
+const fmt = (n: number) => money(n);
+/** a log line in the game's language */
+const tr = (s: GameState, key: Key, p: Params = {}) => t(key, p, s.lang ?? 'he');
 
 function shuffle(n: number, rng: () => number): number[] {
   const a = Array.from({ length: n }, (_, i) => i);
@@ -43,7 +48,9 @@ export function newGame(
   setup: PlayerSetup[],
   rng: () => number = Math.random,
   rules: GameRules = DEFAULT_RULES,
+  lang: Lang = 'he',
 ): GameState {
+  applyEdition(lang);
   return {
     rules: { ...rules },
     players: setup.map((p, id) => ({
@@ -79,7 +86,8 @@ export function newGame(
     blocks: [],
     again: false,
     decks: { chance: shuffle(DECKS.chance.length, rng), chest: shuffle(DECKS.chest.length, rng) },
-    log: ['המשחק התחיל! בהצלחה'],
+    log: [t('log.start', {}, lang)],
+    lang,
     turn: 1,
   };
 }
@@ -114,7 +122,7 @@ function charge(s: GameState, owed: Owed[]) {
     finishMove(s);
   } else {
     s.phase = { t: 'debt', owed, resume: 'end' };
-    log(s, `${p.name} חייב ${fmt(total)} ואין לו מספיק מזומן`);
+    log(s, tr(s, 'log.owesNoCash', { name: p.name, amount: fmt(total) }));
   }
 }
 
@@ -166,7 +174,7 @@ function sellToBank(s: GameState, player: number, id: number) {
   s.players[player].money += value;
   s.props[id] = { owner: null, houses: 0, mortgaged: false };
   if (value > 0) moneyEvent(s, { kind: 'bank', from: null, to: player, amount: value, space: id });
-  log(s, `${s.players[player].name} מכר את ${BOARD[id].name} לבנק ב-${fmt(value)}`);
+  log(s, tr(s, 'log.soldBank', { name: s.players[player].name, space: BOARD[id].name, amount: fmt(value) }));
 }
 
 function sendToJail(s: GameState, reason: string) {
@@ -176,7 +184,7 @@ function sendToJail(s: GameState, reason: string) {
   p.jailTurns = 0;
   s.again = false;
   announce(s, { kind: 'jail', player: p.id, space: null, price: 0, detail: reason });
-  log(s, `${p.name} נשלח לכלא!`);
+  log(s, tr(s, 'log.toJail', { name: p.name }));
 }
 
 function moveTo(s: GameState, target: number, passGo = true) {
@@ -187,7 +195,7 @@ function moveTo(s: GameState, target: number, passGo = true) {
     p.money += pay;
     p.lapped = true;
     moneyEvent(s, { kind: target === 0 ? 'go-land' : 'go', from: null, to: p.id, amount: pay, space: 0 });
-    log(s, target === 0 ? `${p.name} נחת ב"דרך צלחה" וקיבל ${fmt(pay)}!` : `${p.name} עבר ב"דרך צלחה" וקיבל ${fmt(pay)}`);
+    log(s, tr(s, target === 0 ? 'log.goLand' : 'log.goPass', { name: p.name, go: BOARD[0].name, amount: fmt(pay) }));
   }
   p.pos = target;
 }
@@ -202,7 +210,7 @@ function land(s: GameState, mod?: RentMod) {
     if (st.owner === null) {
       // the first lap is free: a player may buy only after passing "דרך צלחה" once
       if (!p.lapped) {
-        log(s, `${p.name} עוד לא השלים סיבוב – אי אפשר לקנות את ${sp.name}`);
+        log(s, tr(s, 'log.notLapped', { name: p.name, space: sp.name }));
         return finishMove(s);
       }
       s.phase = { t: 'buy', space: sp.id };
@@ -212,18 +220,18 @@ function land(s: GameState, mod?: RentMod) {
       return finishMove(s);
     }
     if (st.mortgaged) {
-      log(s, `${sp.name} ממושכן, אין שכירות`);
+      log(s, tr(s, 'log.mortgagedNoRent', { space: sp.name }));
       return finishMove(s);
     }
     const rent = rentFor(s, sp.id, diceTotal, mod);
     const owner = s.players[st.owner];
-    log(s, `${p.name} משלם ${fmt(rent)} ל${owner.name} על ${sp.name}`);
+    log(s, tr(s, 'log.paysRent', { name: p.name, amount: fmt(rent), owner: owner.name, space: sp.name }));
     return charge(s, [{ to: owner.id, amount: rent, space: sp.id }]);
   }
 
   switch (sp.kind) {
     case 'tax':
-      log(s, `${p.name} משלם ${sp.name}: ${fmt(sp.amount!)}`);
+      log(s, tr(s, 'log.paysTax', { name: p.name, space: sp.name, amount: fmt(sp.amount!) }));
       return charge(s, [{ to: null, amount: sp.amount!, space: sp.id }]);
     case 'chance':
     case 'chest': {
@@ -233,13 +241,13 @@ function land(s: GameState, mod?: RentMod) {
       return;
     }
     case 'gotojail':
-      sendToJail(s, 'נחת על "גש לכלא"');
+      sendToJail(s, tr(s, 'jail.landed', { space: BOARD[30].name }));
       return finishMove(s);
     case 'parking':
       if (s.pot > 0) {
         p.money += s.pot;
         moneyEvent(s, { kind: 'lotto', from: null, to: p.id, amount: s.pot, space: 20 });
-        log(s, `${p.name} זכה בקופת הלוטו: ${fmt(s.pot)}!`);
+        log(s, tr(s, 'log.lotto', { name: p.name, amount: fmt(s.pot) }));
         s.pot = 0;
       }
       return finishMove(s);
@@ -298,7 +306,7 @@ function applyCard(s: GameState, deck: Deck, cardIdx: number) {
       return charge(s, [{ to: null, amount: houses * effect.house + hotels * effect.hotel }]);
     }
     case 'gotojail':
-      sendToJail(s, 'כרטיס: גש לכלא');
+      sendToJail(s, tr(s, 'jail.card', { space: BOARD[30].name }));
       return finishMove(s);
   }
 }
@@ -310,7 +318,7 @@ function returnJailCard(s: GameState, deck: Deck) {
 function goBankrupt(s: GameState, player: number, creditor: number | null, toPot = true) {
   const p = s.players[player];
   p.bankrupt = true;
-  log(s, `${p.name} פשט רגל!`);
+  log(s, tr(s, 'log.bankrupt', { name: p.name }));
   for (const id of ownedBy(s, player)) {
     const st = s.props[id];
     if (creditor !== null) {
@@ -330,7 +338,7 @@ function goBankrupt(s: GameState, player: number, creditor: number | null, toPot
   const left = alive(s);
   if (left.length === 1) {
     s.phase = { t: 'gameover', winner: left[0].id };
-    log(s, `${left[0].name} ניצח במשחק!`);
+    log(s, tr(s, 'log.won', { name: left[0].name }));
   }
 }
 
@@ -338,7 +346,7 @@ function goBankrupt(s: GameState, player: number, creditor: number | null, toPot
 function noteFirstPurchase(s: GameState) {
   if (s.feeStart === null && s.rules.mortgage) {
     s.feeStart = s.round;
-    log(s, `הנכס הראשון נקנה! כל ${FEE_ROUNDS} סבבים משלמים משכנתא על כל נכס`);
+    log(s, tr(s, 'log.firstBuy', { n: FEE_ROUNDS }));
   }
 }
 
@@ -363,7 +371,7 @@ function chargeOffTurn(s: GameState, pid: number, owed: Owed[]): boolean {
   }
   if (!p.isBot) {
     p.owes.push(...owed);
-    log(s, `${p.name} חייב ${fmt(total)} וישלם בתור הבא`);
+    log(s, tr(s, 'log.owesNext', { name: p.name, amount: fmt(total) }));
     return false;
   }
   autoRaise(s, pid, total);
@@ -390,7 +398,7 @@ function collectFees(s: GameState) {
   for (const p of alive(s)) {
     const due = feeDue(s, p.id);
     if (due <= 0) continue;
-    log(s, `${p.name} צריך לשלם משכנתא: ${fmt(due)} לקופת הלוטו`);
+    log(s, tr(s, 'log.feeDue', { name: p.name, amount: fmt(due) }));
     chargeOffTurn(s, p.id, [{ to: null, amount: due }]);
   }
 }
@@ -411,7 +419,7 @@ function nextTurn(s: GameState) {
     s.round++;
     if (s.blocks) s.blocks = s.blocks.filter((b) => b.until > s.round);
     if (s.rules.mortgage && s.feeStart !== null && (s.round - s.feeStart) % FEE_ROUNDS === 0) {
-      log(s, `סבב ${s.round}: זמן תשלום המשכנתא!`);
+      log(s, tr(s, 'log.feeRound', { n: s.round }));
       collectFees(s);
       if (cur(s).bankrupt && (s.phase as GameState['phase']).t !== 'gameover') return nextTurn(s);
     }
@@ -423,10 +431,10 @@ function nextTurn(s: GameState) {
     const total = owed.reduce((a, o) => a + o.amount, 0);
     if (c.money >= total) {
       settle(s, c.id, owed);
-      log(s, `${c.name} שילם את החוב מהסבב הקודם: ${fmt(total)}`);
+      log(s, tr(s, 'log.paidOldDebt', { name: c.name, amount: fmt(total) }));
     } else {
       s.phase = { t: 'debt', owed, resume: 'roll' };
-      log(s, `${c.name} צריך לסגור חוב של ${fmt(total)} לפני שמטילים`);
+      log(s, tr(s, 'log.mustCloseDebt', { name: c.name, amount: fmt(total) }));
     }
   }
 }
@@ -441,11 +449,11 @@ function startAuction(s: GameState, space: number) {
     if (!s.players[id].bankrupt && s.players[id].lapped) order.push(id);
   }
   if (!order.length) {
-    log(s, `אף אחד עוד לא יכול לקנות את ${BOARD[space].name}, והנכס נשאר פנוי`);
+    log(s, tr(s, 'log.noBidders', { space: BOARD[space].name }));
     return finishMove(s);
   }
   s.phase = { t: 'auction', space, bid: 0, bidder: null, active: order, turn: 0 };
-  log(s, `מכירה פומבית על ${BOARD[space].name}`);
+  log(s, tr(s, 'log.auction', { space: BOARD[space].name }));
   afterAuctionMove(s);
 }
 
@@ -458,9 +466,9 @@ function closeAuction(s: GameState) {
     s.props[ph.space].owner = w.id;
     noteFirstPurchase(s);
     announce(s, { kind: 'auction', player: w.id, space: ph.space, price: ph.bid });
-    log(s, `${w.name} זכה במכירה הפומבית על ${BOARD[ph.space].name} ב-${fmt(ph.bid)}`);
+    log(s, tr(s, 'log.auctionWon', { name: w.name, space: BOARD[ph.space].name, amount: fmt(ph.bid) }));
   } else {
-    log(s, `אף אחד לא קנה את ${BOARD[ph.space].name}`);
+    log(s, tr(s, 'log.auctionNone', { space: BOARD[ph.space].name }));
   }
   finishMove(s);
 }
@@ -476,11 +484,12 @@ function afterAuctionMove(s: GameState) {
 /** Whose input the game is waiting for. */
 export const MAX_TRADE_ROUNDS = 3;
 
-function describeSide(t: TradeSide): string {
-  const parts = t.props.map((id) => BOARD[id].name);
-  if (t.money > 0) parts.push(fmt(t.money));
-  if (t.jailCards > 0) parts.push(t.jailCards === 1 ? 'כרטיס יציאה מהכלא' : `${t.jailCards} כרטיסי יציאה מהכלא`);
-  return parts.length ? parts.join(', ') : 'כלום';
+function describeSide(s: GameState, side: TradeSide): string {
+  const parts = side.props.map((id) => BOARD[id].name);
+  if (side.money > 0) parts.push(fmt(side.money));
+  if (side.jailCards > 0)
+    parts.push(side.jailCards === 1 ? tr(s, 'side.jailCard') : tr(s, 'side.jailCards', { n: side.jailCards }));
+  return parts.length ? parts.join(', ') : tr(s, 'nothing');
 }
 
 /** Move one side of a trade from player `a` to player `b`. */
@@ -511,6 +520,7 @@ function manageAllowed(s: GameState) {
 
 export function reduce(prev: GameState, a: Action): GameState {
   if (prev.phase.t === 'gameover') return prev;
+  applyEdition(prev.lang ?? 'he');
   const s: GameState = structuredClone(prev);
   s.payEvents = [];
   const out = step(prev, s, a);
@@ -530,13 +540,13 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       const isDouble = d1 === d2;
       s.dice = [d1, d2];
       s.rollSeq++;
-      log(s, `${p.name} הטיל ${d1} + ${d2}`);
+      log(s, tr(s, 'log.rolled', { name: p.name, a: d1, b: d2 }));
 
       if (p.inJail) {
         if (isDouble) {
           p.inJail = false;
           p.jailTurns = 0;
-          log(s, `${p.name} יצא מהכלא עם דאבל`);
+          log(s, tr(s, 'log.doublesOut', { name: p.name }));
         } else {
           p.jailTurns++;
           if (p.jailTurns < 3) {
@@ -550,14 +560,14 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
           }
           p.inJail = false;
           p.jailTurns = 0;
-          log(s, `${p.name} שילם ${fmt(JAIL_FINE)} ויצא מהכלא`);
+          log(s, tr(s, 'log.paidFine', { name: p.name, amount: fmt(JAIL_FINE) }));
         }
         s.again = false;
       } else {
         s.doubles = isDouble ? s.doubles + 1 : 0;
         if (s.doubles === 3) {
-          log(s, 'שלושה דאבלים ברצף!');
-          sendToJail(s, 'שלושה דאבלים ברצף');
+          log(s, tr(s, 'log.threeDoubles'));
+          sendToJail(s, tr(s, 'jail.doubles'));
           finishMove(s);
           return s;
         }
@@ -574,7 +584,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       s.pot += JAIL_FINE;
       p.inJail = false;
       p.jailTurns = 0;
-      log(s, `${p.name} שילם ${fmt(JAIL_FINE)} ויצא מהכלא`);
+      log(s, tr(s, 'log.paidFine', { name: p.name, amount: fmt(JAIL_FINE) }));
       return s;
 
     case 'USE_JAIL_CARD': {
@@ -582,7 +592,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       returnJailCard(s, p.jailCards.shift()!);
       p.inJail = false;
       p.jailTurns = 0;
-      log(s, `${p.name} השתמש בכרטיס יציאה מהכלא`);
+      log(s, tr(s, 'log.usedCard', { name: p.name }));
       return s;
     }
 
@@ -594,7 +604,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       s.props[ph.space].owner = p.id;
       noteFirstPurchase(s);
       announce(s, { kind: 'buy', player: p.id, space: ph.space, price });
-      log(s, `${p.name} קנה את ${BOARD[ph.space].name} ב-${fmt(price)}`);
+      log(s, tr(s, 'log.bought', { name: p.name, space: BOARD[ph.space].name, amount: fmt(price) }));
       finishMove(s);
       return s;
     }
@@ -605,7 +615,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
         startAuction(s, ph.space);
       } else {
         // with only two players left, an auction would just hand the property to the other one
-        log(s, `${p.name} ויתר על ${BOARD[ph.space].name}, והנכס נשאר פנוי`);
+        log(s, tr(s, 'log.declined', { name: p.name, space: BOARD[ph.space].name }));
         finishMove(s);
       }
       return s;
@@ -645,14 +655,14 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
         space: a.space,
         price: BOARD[a.space].houseCost!,
       });
-      log(s, `${p.name} בנה ${s.props[a.space].houses === 5 ? 'מלון' : 'בית'} ב${BOARD[a.space].name}`);
+      log(s, tr(s, s.props[a.space].houses === 5 ? 'log.builtHotel' : 'log.builtHouse', { name: p.name, space: BOARD[a.space].name }));
       return s;
 
     case 'SELL':
       if (!manageAllowed(s) || !canSell(s, p.id, a.space)) return prev;
       s.props[a.space].houses--;
       p.money += sellValue(a.space);
-      log(s, `${p.name} מכר מבנה ב${BOARD[a.space].name}`);
+      log(s, tr(s, 'log.soldBuilding', { name: p.name, space: BOARD[a.space].name }));
       return s;
 
     case 'SELL_BANK':
@@ -664,7 +674,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       if (!manageAllowed(s) || !canUnmortgage(s, p.id, a.space)) return prev;
       s.props[a.space].mortgaged = false;
       p.money -= unmortgageCost(a.space);
-      log(s, `${p.name} פדה את ${BOARD[a.space].name}`);
+      log(s, tr(s, 'log.unmortgaged', { name: p.name, space: BOARD[a.space].name }));
       return s;
 
     case 'PAY_DEBT': {
@@ -672,7 +682,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       const total = ph.owed.reduce((x, o) => x + o.amount, 0);
       if (p.money < total) return prev;
       settle(s, p.id, ph.owed);
-      log(s, `${p.name} שילם את החוב`);
+      log(s, tr(s, 'log.paidDebt', { name: p.name }));
       if (ph.resume === 'roll') s.phase = { t: 'roll' };
       else finishMove(s);
       return s;
@@ -690,7 +700,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
     case 'RESIGN': {
       if (!canResign(s, a.player)) return prev;
       const quitter = s.players[a.player];
-      log(s, `${quitter.name} הכריז על פשיטת רגל ויצא מהמשחק`);
+      log(s, tr(s, 'log.resigned', { name: quitter.name }));
       goBankrupt(s, a.player, null, false);
       quitter.resigned = true;
       if (s.phase.t === 'gameover') return s;
@@ -699,7 +709,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       if (left.every((o) => o.isBot)) {
         const best = left.reduce((b, o) => (netWorth(s, o.id) > netWorth(s, b.id) ? o : b));
         s.phase = { t: 'gameover', winner: best.id };
-        log(s, `${best.name} ניצח במשחק!`);
+        log(s, tr(s, 'log.won', { name: best.name }));
         return s;
       }
       if (s.current === a.player) nextTurn(s);
@@ -710,7 +720,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       const target = s.players[a.player];
       if (!target || target.bankrupt || target.isBot === a.isBot) return prev;
       target.isBot = a.isBot;
-      log(s, a.isBot ? `המחשב משחק עכשיו במקום ${target.name}` : `${target.name} חזר לשחק`);
+      log(s, tr(s, a.isBot ? 'log.botTook' : 'log.backHuman', { name: target.name }));
       return s;
     }
 
@@ -720,7 +730,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       if (!s.players[a.to] || !tradeOk(s, offer) || isBlocked(s, p.id, a.to)) return prev;
       s.tradesThisTurn++;
       s.phase = { t: 'trade', offer, awaiting: a.to, resume: ph.t === 'debt' ? ph : ph.t };
-      log(s, `${p.name} מציע ל${s.players[a.to].name}: נותן ${describeSide(a.give)}, מבקש ${describeSide(a.get)}`);
+      log(s, tr(s, 'log.offer', { name: p.name, to: s.players[a.to].name, give: describeSide(s, a.give), get: describeSide(s, a.get) }));
       return s;
     }
 
@@ -728,7 +738,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       if (ph.t !== 'trade') return prev;
       const o = ph.offer;
       if (!tradeOk(s, o)) {
-        log(s, 'העסקה כבר לא אפשרית');
+        log(s, tr(s, 'log.tradeGone'));
         s.phase = resumePhase(ph.resume);
         return s;
       }
@@ -736,14 +746,14 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       transfer(s, o.to, o.from, o.get);
       const from = s.players[o.from];
       const to = s.players[o.to];
-      log(s, `עסקה נסגרה בין ${from.name} ל${to.name}`);
+      log(s, tr(s, 'log.tradeDone', { a: from.name, b: to.name }));
       announce(s, {
         kind: 'trade',
         player: o.from,
         other: o.to,
         space: o.give.props[0] ?? o.get.props[0] ?? null,
         price: o.give.money + o.get.money,
-        detail: `${from.name} נותן: ${describeSide(o.give)} · ${to.name} נותן: ${describeSide(o.get)}`,
+        detail: tr(s, 'trade.detail', { a: from.name, ga: describeSide(s, o.give), b: to.name, gb: describeSide(s, o.get) }),
       });
       s.phase = resumePhase(ph.resume);
       return s;
@@ -751,7 +761,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
 
     case 'REJECT_TRADE': {
       if (ph.t !== 'trade') return prev;
-      log(s, `${s.players[ph.awaiting].name} סירב להצעה`);
+      log(s, tr(s, 'log.refused', { name: s.players[ph.awaiting].name }));
       s.phase = resumePhase(ph.resume);
       return s;
     }
@@ -762,7 +772,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       const from = ph.offer.from === by ? ph.offer.to : ph.offer.from;
       s.blocks = (s.blocks ?? []).filter((b) => !(b.by === by && b.from === from));
       s.blocks.push({ by, from, until: s.round + BLOCK_ROUNDS });
-      log(s, `${s.players[by].name} סירב וחסם הצעות מ${s.players[from].name} ל-${BLOCK_ROUNDS} סבבים`);
+      log(s, tr(s, 'log.blocked', { by: s.players[by].name, from: s.players[from].name, n: BLOCK_ROUNDS }));
       s.phase = resumePhase(ph.resume);
       return s;
     }
@@ -774,7 +784,7 @@ function step(prev: GameState, s: GameState, a: Action): GameState {
       const offer: TradeOffer = { from: me, to: other, give: a.give, get: a.get, round: ph.offer.round + 1 };
       if (!tradeOk(s, offer)) return prev;
       s.phase = { t: 'trade', offer, awaiting: other, resume: ph.resume };
-      log(s, `${s.players[me].name} מציע הצעה נגדית: נותן ${describeSide(a.give)}, מבקש ${describeSide(a.get)}`);
+      log(s, tr(s, 'log.counter', { name: s.players[me].name, give: describeSide(s, a.give), get: describeSide(s, a.get) }));
       return s;
     }
 

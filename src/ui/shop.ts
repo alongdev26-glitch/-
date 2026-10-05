@@ -2,6 +2,8 @@
 // Every 3 days the shop shows a fresh mix of 9 items. Kept on this device.
 import { BASE_TOKENS, TOKENS, type Rarity } from '../data/tokens';
 import type { TokenId } from '../engine/types';
+import { t, type Key } from '../i18n';
+import { tokenName } from '../data/tokens';
 
 export type { Rarity };
 
@@ -11,46 +13,41 @@ export const START_COINS = 200;
 export interface ShopItem {
   id: string;
   kind: 'char' | 'skin' | 'board';
-  name: string;
   price: number;
-  desc: string;
   rarity: Rarity;
 }
 
-export const RARITY_NAME: Record<Rarity, string> = {
-  common: 'רגיל',
-  rare: 'נדיר',
-  epic: 'אפי',
-  legendary: 'אגדי',
-};
+/** An item's name and line in the UI language. */
+export const itemName = (i: ShopItem) => (i.kind === 'char' ? tokenName(i.id as TokenId) : t(`item.${i.id}` as Key));
+export const itemDesc = (i: ShopItem) => (i.kind === 'char' ? t('newChar') : t(`desc.${i.id}` as Key));
+export const rarityName = (r: Rarity) => t(`rarity_${r}` as Key);
+
 const CHAR_PRICE: Record<Rarity, number> = { common: 120, rare: 220, epic: 350, legendary: 500 };
 
 export const SKINS: ShopItem[] = [
-  { id: 'skin-none', kind: 'skin', name: 'רגיל', price: 0, desc: 'הדמות כמו שהיא', rarity: 'common' },
-  { id: 'skin-gold', kind: 'skin', name: 'זהב', price: 150, desc: 'טבעת זהב נוצצת', rarity: 'rare' },
-  { id: 'skin-neon', kind: 'skin', name: 'ניאון', price: 200, desc: 'זוהר ורוד-תכלת', rarity: 'rare' },
-  { id: 'skin-fire', kind: 'skin', name: 'אש', price: 250, desc: 'להבות סביב הדמות', rarity: 'epic' },
-  { id: 'skin-ice', kind: 'skin', name: 'קרח', price: 250, desc: 'כחול וקריר', rarity: 'epic' },
-  { id: 'skin-rainbow', kind: 'skin', name: 'קשת', price: 350, desc: 'טבעת קשת מסתובבת', rarity: 'epic' },
-  { id: 'skin-galaxy', kind: 'skin', name: 'גלקסיה', price: 450, desc: 'חלל עם כוכבים', rarity: 'legendary' },
+  { id: 'skin-none', kind: 'skin', price: 0, rarity: 'common' },
+  { id: 'skin-gold', kind: 'skin', price: 150, rarity: 'rare' },
+  { id: 'skin-neon', kind: 'skin', price: 200, rarity: 'rare' },
+  { id: 'skin-fire', kind: 'skin', price: 250, rarity: 'epic' },
+  { id: 'skin-ice', kind: 'skin', price: 250, rarity: 'epic' },
+  { id: 'skin-rainbow', kind: 'skin', price: 350, rarity: 'epic' },
+  { id: 'skin-galaxy', kind: 'skin', price: 450, rarity: 'legendary' },
 ];
 
 export const BOARDS: ShopItem[] = [
-  { id: 'board-classic', kind: 'board', name: 'קלאסי', price: 0, desc: 'הלוח הרגיל', rarity: 'common' },
-  { id: 'board-ocean', kind: 'board', name: 'ים', price: 200, desc: 'כחול של חוף הים', rarity: 'rare' },
-  { id: 'board-desert', kind: 'board', name: 'מדבר', price: 250, desc: 'חול חם וזהוב', rarity: 'rare' },
-  { id: 'board-night', kind: 'board', name: 'לילה', price: 300, desc: 'לוח כהה עם אורות', rarity: 'epic' },
-  { id: 'board-candy', kind: 'board', name: 'ממתקים', price: 300, desc: 'ורוד ומתוק', rarity: 'epic' },
-  { id: 'board-luxury', kind: 'board', name: 'יוקרה', price: 500, desc: 'לבד ירוק וזהב', rarity: 'legendary' },
+  { id: 'board-classic', kind: 'board', price: 0, rarity: 'common' },
+  { id: 'board-ocean', kind: 'board', price: 200, rarity: 'rare' },
+  { id: 'board-desert', kind: 'board', price: 250, rarity: 'rare' },
+  { id: 'board-night', kind: 'board', price: 300, rarity: 'epic' },
+  { id: 'board-candy', kind: 'board', price: 300, rarity: 'epic' },
+  { id: 'board-luxury', kind: 'board', price: 500, rarity: 'legendary' },
 ];
 
 /** The characters you can buy (the six base ones are free). */
 export const CHARS: ShopItem[] = TOKENS.filter((t) => t.rarity).map((t) => ({
   id: t.id,
   kind: 'char',
-  name: t.name,
   price: CHAR_PRICE[t.rarity!],
-  desc: 'דמות חדשה למשחק',
   rarity: t.rarity!,
 }));
 

@@ -7,25 +7,41 @@ import { Online } from './screens/Online';
 import { Setup } from './screens/Setup';
 import { Shop } from './screens/Shop';
 import { sfx } from './ui/sound';
+import { hasChosenLang, useLang } from './i18n';
+import { Welcome } from './screens/Welcome';
+import { Settings } from './screens/Settings';
 
 /** A click sound for every button on the opening screens (the game screen has its own sounds). */
 const tapSound = (e: ReactMouseEvent) => {
   if ((e.target as HTMLElement).closest('button')) sfx.tap();
 };
 
-type Screen = { s: 'menu' } | { s: 'setup' } | { s: 'online' } | { s: 'shop' } | { s: 'game'; game: GameState; key: number };
+type Screen =
+  | { s: 'welcome' }
+  | { s: 'menu' }
+  | { s: 'settings' }
+  | { s: 'setup' }
+  | { s: 'online' }
+  | { s: 'shop' }
+  | { s: 'game'; game: GameState; key: number };
 
 export function App() {
-  const [screen, setScreen] = useState<Screen>({ s: 'menu' });
+  // the first time ever: a short questionnaire (language, name)
+  const [screen, setScreen] = useState<Screen>(() => (hasChosenLang() ? { s: 'menu' } : { s: 'welcome' }));
+  // every screen re-renders in the new language when it changes
+  const lang = useLang();
   const saved = screen.s === 'menu' ? loadGame() : null;
 
   return (
     <>
-      <div className="intro-screens" onClickCapture={screen.s === 'game' ? undefined : tapSound}>
+      <div className="intro-screens" key={lang} onClickCapture={screen.s === 'game' ? undefined : tapSound}>
+        {screen.s === 'welcome' && <Welcome onDone={() => setScreen({ s: 'menu' })} />}
+        {screen.s === 'settings' && <Settings onBack={() => setScreen({ s: 'menu' })} />}
         {screen.s === 'menu' && (
           <Menu
             onPlay={() => setScreen({ s: 'setup' })}
             onShop={() => setScreen({ s: 'shop' })}
+            onSettings={() => setScreen({ s: 'settings' })}
             onResume={saved ? () => setScreen({ s: 'game', game: saved, key: Date.now() }) : undefined}
           />
         )}
@@ -35,7 +51,7 @@ export function App() {
             onOnline={() => setScreen({ s: 'online' })}
             onStart={(players, rules) => {
               sfx.start();
-              setScreen({ s: 'game', game: newGame(players, Math.random, rules), key: Date.now() });
+              setScreen({ s: 'game', game: newGame(players, Math.random, rules, lang), key: Date.now() });
             }}
           />
         )}

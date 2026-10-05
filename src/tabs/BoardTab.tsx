@@ -8,6 +8,8 @@ import { Dice } from '../ui/Dice';
 import { Token } from '../ui/Token';
 import { useCosmetics } from '../ui/Cosmetics';
 import './tabs.css';
+import { t } from '../i18n';
+import { money } from '../data/editions';
 
 interface Props {
   game: GameState;
@@ -35,9 +37,9 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
 
   let main: { label: string; action: Action } | null = null;
   if (ready && (ph.t === 'roll' || (ph.t === 'end' && game.again))) {
-    main = { label: me.inJail ? 'נסה דאבל' : game.again ? 'הטל שוב' : 'הטל', action: { type: 'ROLL', dice: rollDice() } };
+    main = { label: me.inJail ? t('tryDouble') : game.again ? t('rollAgain') : t('roll'), action: { type: 'ROLL', dice: rollDice() } };
   } else if (ready && ph.t === 'end') {
-    main = { label: 'סיים תור', action: { type: 'END_TURN' } };
+    main = { label: t('endTurn'), action: { type: 'END_TURN' } };
   }
 
   return (
@@ -56,13 +58,13 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
               {p.name}
               {p.inJail ? ' ⛓️' : ''}
             </span>
-            <b className="pchip-money">{p.bankrupt ? 'פשט רגל' : `ש"ח ${p.money}`}</b>
+            <b className="pchip-money">{p.bankrupt ? t('wentBankrupt') : money(p.money)}</b>
           </div>
         ))}
       </div>
       <SoundToggle className="board-sound" />
       {!me.lapped && !me.bankrupt && (
-        <div className="round-one">🚫 {me.name}: אפשר לקנות רק אחרי שעוברים ב"דרך צלחה"</div>
+        <div className="round-one">{t('firstLap', { name: me.name, go: BOARD[0].name })}</div>
       )}
       <Board
         game={game}
@@ -93,26 +95,26 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
                   {main.label}
                 </button>
               ) : (
-                <div className="fab fab-wait">{busy ? '...' : `${me.name} משחק`}</div>
+                <div className="fab fab-wait">{busy ? '...' : t('plays', { name: me.name })}</div>
               )}
               {!main && !busy && onTakeover && (
                 <button className="btn btn-black btn-sm" onClick={onTakeover}>
-                  🤖 העבר לבוט
+                  {t('toBot')}
                 </button>
               )}
               {canBuildAny && (
                 <button className="btn btn-gold btn-sm" onClick={onBuild}>
-                  🏠 בנה בתים
+                  {t('buildHouses')}
                 </button>
               )}
               {ready && ph.t === 'roll' && me.inJail && (
                 <div className="fab-extra">
                   <button className="btn btn-gold btn-sm" disabled={me.money < JAIL_FINE} onClick={() => act({ type: 'PAY_JAIL' })}>
-                    שלם {JAIL_FINE} וצא
+                    {t('payFineOut', { n: money(JAIL_FINE) })}
                   </button>
                   {me.jailCards.length > 0 && (
                     <button className="btn btn-gold btn-sm" onClick={() => act({ type: 'USE_JAIL_CARD' })}>
-                      כרטיס יציאה
+                      {t('jailCard')}
                     </button>
                   )}
                 </div>
