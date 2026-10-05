@@ -35,6 +35,9 @@ export const en: Dict = {
   edition_he: 'Israel board · ₪',
   edition_en: 'USA board · $',
   edition_ar: 'UAE board · د.إ',
+  edition_fr: 'France board · €',
+  edition_ru: 'Russia board · ₽',
+  edition_ja: 'Japan board · ¥',
 
   playNow: 'Play now',
   resumeGame: 'Continue saved game',

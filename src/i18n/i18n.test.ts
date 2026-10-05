@@ -5,6 +5,9 @@ import { EDITIONS, applyEdition, money } from '../data/editions';
 import { newGame, reduce } from '../engine/reducer';
 import { en } from './en';
 import { ar } from './ar';
+import { fr } from './fr';
+import { ru } from './ru';
+import { ja } from './ja';
 import { he } from './he';
 import { t } from './index';
 
@@ -20,14 +23,14 @@ describe('languages', () => {
     }
   });
 
-  it('English and Arabic have every key and no Hebrew left in them', () => {
-    for (const d of [en, ar]) {
+  it('every other language has every key and no Hebrew left in it', () => {
+    for (const d of [en, ar, fr, ru, ja]) {
       expect(Object.keys(d).sort()).toEqual(Object.keys(he).sort());
       for (const [k, v] of Object.entries(d)) {
         const s = typeof v === 'function' ? v({ n: 2, d: 1, h: 3, total: 3, humans: 1, bots: 2, coins: 300, auction: 1 }) : v;
         expect(HEBREW.test(s), `${k}: ${s}`).toBe(false);
       }
-      for (const e of [EDITIONS.en, EDITIONS.ar]) {
+      for (const e of [EDITIONS.en, EDITIONS.ar, EDITIONS.fr, EDITIONS.ru, EDITIONS.ja]) {
         for (const s of [...e.names, ...Object.values(e.cities), ...e.chance, ...e.chest]) expect(HEBREW.test(s)).toBe(false);
       }
     }
@@ -53,6 +56,33 @@ describe('languages', () => {
     s = reduce(s, { type: 'BUY' });
     expect(s.log[0]).toBe('Ann bought Broadway for $100');
     expect(s.log.some((l) => HEBREW.test(l))).toBe(false);
+  });
+
+  it('French, Russian and Japanese games use their own boards and money', () => {
+    const players = [
+      { name: 'A', token: 'cat' as const, isBot: false },
+      { name: 'B', token: 'car' as const, isBot: false },
+    ];
+    const cases = [
+      ['fr', 'Champs-Élysées', '200 €', 'A achète Place de la Bourse pour 100 €'],
+      ['ru', 'Красная площадь', '200 ₽', 'A купил Кремлёвская ул. за 100 ₽'],
+      ['ja', '銀座', '¥200', 'Aが中洲を¥100で買った'],
+    ] as const;
+    for (const [lang, street, cash, line] of cases) {
+      let s = newGame(players, () => 0.5, { mortgage: true }, lang);
+      expect(BOARD[39].name).toBe(street);
+      expect(money(200)).toBe(cash);
+      for (const p of s.players) p.lapped = true;
+      s = reduce(s, { type: 'ROLL', dice: [4, 4] });
+      s = reduce(s, { type: 'BUY' });
+      expect(s.log[0]).toBe(line);
+    }
+  });
+
+  it('Russian plurals', () => {
+    expect(t('houses', { n: 1 }, 'ru')).toBe('1 дом');
+    expect(t('houses', { n: 3 }, 'ru')).toBe('3 дома');
+    expect(t('houses', { n: 5 }, 'ru')).toBe('5 домов');
   });
 
   it('the Hebrew edition comes back for a Hebrew game', () => {

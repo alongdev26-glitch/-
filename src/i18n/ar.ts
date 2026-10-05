@@ -33,6 +33,9 @@ export const ar: Dict = {
   edition_he: 'لوحة إسرائيل · ₪',
   edition_en: 'لوحة أمريكا · $',
   edition_ar: 'لوحة الإمارات · د.إ',
+  edition_fr: 'لوحة فرنسا · €',
+  edition_ru: 'لوحة روسيا · ₽',
+  edition_ja: 'لوحة اليابان · ¥',
 
   playNow: 'العب الآن',
   resumeGame: 'تابع اللعبة المحفوظة',

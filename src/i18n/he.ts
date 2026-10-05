@@ -34,6 +34,9 @@ export const he = {
   edition_he: 'לוח ישראל · ש"ח',
   edition_en: 'לוח ארה"ב · $',
   edition_ar: 'לוח האמירויות · د.إ',
+  edition_fr: 'לוח צרפת · €',
+  edition_ru: 'לוח רוסיה · ₽',
+  edition_ja: 'לוח יפן · ¥',
 
   // ---------- menu ----------
   playNow: 'שחק עכשיו',

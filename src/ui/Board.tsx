@@ -175,7 +175,7 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
       })}
       <div className="board-center">
         <div className="plaque" dir={edDir}>
-          <span>{t('appName', {}, edLang)}</span>
+          <span className={edLang === 'ja' ? 'long' : undefined}>{t('appName', {}, edLang)}</span>
           <div className="plaque-pot">
             <b className="pot-label">{t('lottoPotIcon', {}, edLang)}</b>
             <b key={game.pot} className="pot-amount" dir="ltr">

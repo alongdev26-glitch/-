@@ -4,12 +4,18 @@ import { useEffect, useState } from 'react';
 import { he } from './he';
 import { en } from './en';
 import { ar } from './ar';
+import { fr } from './fr';
+import { ru } from './ru';
+import { ja } from './ja';
 
-export type Lang = 'he' | 'en' | 'ar';
+export type Lang = 'he' | 'en' | 'ar' | 'fr' | 'ru' | 'ja';
 export const LANGS: { id: Lang; flag: string; name: string }[] = [
   { id: 'he', flag: '🇮🇱', name: 'עברית' },
   { id: 'en', flag: '🇺🇸', name: 'English' },
   { id: 'ar', flag: '🇦🇪', name: 'العربية' },
+  { id: 'fr', flag: '🇫🇷', name: 'Français' },
+  { id: 'ru', flag: '🇷🇺', name: 'Русский' },
+  { id: 'ja', flag: '🇯🇵', name: '日本語' },
 ];
 
 export type Params = Record<string, string | number>;
@@ -17,10 +23,10 @@ export type Entry = string | ((p: Params) => string);
 export type Key = keyof typeof he;
 export type Dict = Record<Key, Entry>;
 
-const DICTS: Record<Lang, Dict> = { he, en, ar };
+const DICTS: Record<Lang, Dict> = { he, en, ar, fr, ru, ja };
 
 const KEY = 'bigdeal-lang';
-const isLang = (x: unknown): x is Lang => x === 'he' || x === 'en' || x === 'ar';
+const isLang = (x: unknown): x is Lang => typeof x === 'string' && ['he', 'en', 'ar', 'fr', 'ru', 'ja'].includes(x);
 
 /** The phone's own language, if we have it; Hebrew otherwise. */
 export function deviceLang(): Lang {
@@ -30,6 +36,9 @@ export function deviceLang(): Lang {
       if (code === 'he' || code === 'iw') return 'he';
       if (code === 'ar') return 'ar';
       if (code === 'en') return 'en';
+      if (code === 'fr') return 'fr';
+      if (code === 'ru') return 'ru';
+      if (code === 'ja') return 'ja';
     }
   } catch {
     /* no navigator (tests) */
@@ -58,7 +67,7 @@ let current: Lang = (() => {
 const listeners = new Set<(l: Lang) => void>();
 
 export const getLang = () => current;
-export const dir = (l: Lang = current) => (l === 'en' ? 'ltr' : 'rtl');
+export const dir = (l: Lang = current) => (l === 'he' || l === 'ar' ? 'rtl' : 'ltr');
 
 export function setLang(l: Lang) {
   current = l;
@@ -96,4 +105,5 @@ export function t(key: Key, p: Params = {}, lang: Lang = current): string {
 }
 
 /** Date/time in the UI language's own format. */
-export const locale = (l: Lang = current) => (l === 'he' ? 'he-IL' : l === 'ar' ? 'ar-AE' : 'en-US');
+const LOCALES: Record<Lang, string> = { he: 'he-IL', en: 'en-US', ar: 'ar-AE', fr: 'fr-FR', ru: 'ru-RU', ja: 'ja-JP' };
+export const locale = (l: Lang = current) => LOCALES[l];

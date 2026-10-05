@@ -334,7 +334,12 @@
   line-height: 1;
   color: #fff;
   letter-spacing: 0.02em;
+  white-space: nowrap;
   text-shadow: 0 0.4cqw 0 #c7c7c7, 0 0.8cqw 0 #8e8e8e, 0 1.2cqw 1.5cqw rgba(0, 0, 0, 0.5);
+}
+/* the wide Japanese name (ビッグディール) still fits the sign */
+.plaque span.long {
+  font-size: 4.3cqw;
 }
 .mascot {
   position: absolute;

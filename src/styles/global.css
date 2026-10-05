@@ -18,7 +18,7 @@
   --overlay: rgba(18, 18, 18, 0.7);
   --radius: 18px;
   --shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-  --font: 'Rubik', 'Assistant', 'Arial Hebrew', sans-serif;
+  --font: 'Rubik', 'Assistant', 'Arial Hebrew', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', 'Noto Sans CJK JP', sans-serif;
   color-scheme: light;
 }
 
@@ -175,7 +175,7 @@ button {
   --paper: #fbf8f0;
   --ivory: #f6f1e4;
   --muted: #6b6457;
-  --serif: 'Frank Ruhl Libre', 'David Libre', 'Times New Roman', serif;
+  --serif: 'Frank Ruhl Libre', 'David Libre', 'Times New Roman', 'Hiragino Mincho ProN', 'Noto Serif JP', serif;
   --gold-light: #e6c97a;
   --burgundy: #7a1c24;
   --felt: #0f3d2e;
