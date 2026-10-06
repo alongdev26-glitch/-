@@ -133,7 +133,6 @@ function Corner({ sp }: { sp: Space }) {
           <span className="parking-car">
             <ParkingCar />
           </span>
-          <span className="parking-pill">🎰 {edition().corners.parkingPill}</span>
         </div>
       );
     default:

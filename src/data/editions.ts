@@ -23,8 +23,6 @@ export interface Edition {
     parking2: string;
     toJail1: string;
     toJail2: string;
-    /** the small pill under the car: the lotto pot is collected here */
-    parkingPill: string;
   };
   /** the two card decks */
   chestName: string;
@@ -75,7 +73,6 @@ const he: Edition = {
     parking2: 'חינם',
     toJail1: 'גש',
     toJail2: 'לכלא',
-    parkingPill: 'קופת לוטו',
   },
   chestName: 'תיבת המזל',
   chanceName: 'הפתעה',
@@ -153,7 +150,6 @@ const en: Edition = {
     parking2: 'Parking',
     toJail1: 'Off to',
     toJail2: 'Jail',
-    parkingPill: 'Lotto pot',
   },
   chestName: 'Lucky Chest',
   chanceName: 'Surprise',
@@ -231,7 +227,6 @@ const ar: Edition = {
     parking2: 'بلا رسوم',
     toJail1: 'اذهب إلى',
     toJail2: 'السجن',
-    parkingPill: 'اليانصيب',
   },
   chestName: 'صندوق الحظ',
   chanceName: 'مفاجأة',
@@ -309,7 +304,6 @@ const fr: Edition = {
     parking2: 'sans frais',
     toJail1: 'Allez en',
     toJail2: 'prison',
-    parkingPill: 'Cagnotte',
   },
   chestName: 'Coffre chance',
   chanceName: 'Surprise',
@@ -387,7 +381,6 @@ const ru: Edition = {
     parking2: 'без оплаты',
     toJail1: 'Иди в',
     toJail2: 'тюрьму',
-    parkingPill: 'Банк лото',
   },
   chestName: 'Сундук удачи',
   chanceName: 'Сюрприз',
@@ -465,7 +458,6 @@ const ja: Edition = {
     parking2: 'パーキング',
     toJail1: '刑務所',
     toJail2: 'へ行け',
-    parkingPill: '宝くじ',
   },
   chestName: 'ラッキーボックス',
   chanceName: 'サプライズ',

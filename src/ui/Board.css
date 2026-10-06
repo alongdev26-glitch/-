@@ -438,22 +438,13 @@
   line-height: 1;
 }
 .parking-car {
-  width: 74cqi;
+  width: 82cqi;
   line-height: 0;
   margin: 2cqi 0 1cqi;
 }
 .parking-car svg {
   width: 100%;
   height: auto;
-}
-.parking-pill {
-  background: #1b1b1b;
-  color: #fff;
-  font-weight: 800;
-  font-size: 9cqi;
-  padding: 1.5cqi 4cqi;
-  border-radius: 999px;
-  white-space: nowrap;
 }
 
 /* ---------- money highlights ---------- */
