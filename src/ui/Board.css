@@ -391,8 +391,8 @@
 .deck-chest .deck-under,
 .deck-chest .deck-card {
   background:
-    radial-gradient(circle at 50% 40%, rgba(255, 230, 140, 0.55), transparent 60%),
-    linear-gradient(160deg, #c2773a, #8a4516 70%, #6b3410);
+    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.35), transparent 55%),
+    linear-gradient(160deg, #4fc3ff, #1e88e5 55%, #0d4fa3);
 }
 .deck-chance .deck-under,
 .deck-chance .deck-card {
