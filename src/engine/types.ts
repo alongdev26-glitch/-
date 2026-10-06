@@ -127,7 +127,7 @@ export interface GameState {
   phase: Phase;
   dice: [number, number];
   doubles: number;
-  /** "קופת הלוטו": taxes and fines collect here, "פינת הלוטו" takes it all */
+  /** "קופת הלוטו": taxes and fines collect here, "חניה חינם" takes it all */
   pot: number;
   /** the board edition and log language of this game (shared by everyone online) */
   lang?: Lang;

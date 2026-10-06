@@ -102,7 +102,7 @@ export const BOARD: Space[] = [
   { id: 17, kind: 'chest', name: 'תיבת המזל', icon: 'chest' },
   prop(18, 'orange', 'נתניה', "רח' הרצל", 170, rents(170), 90),
   prop(19, 'orange', 'נתניה', 'כיכר העצמאות', 190, rents(190), 90),
-  { id: 20, kind: 'parking', name: 'פינת הלוטו' },
+  { id: 20, kind: 'parking', name: 'חניה חינם' },
   // Right column, top → bottom
   prop(21, 'red', 'רמת-גן', 'דרך אבא הלל', 210, rents(210), 140),
   { id: 22, kind: 'chance', name: 'הפתעה', qColor: '#1c4fa0' },

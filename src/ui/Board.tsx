@@ -31,6 +31,43 @@ function ChestIcon() {
   );
 }
 
+/** The red car of the free-parking corner, drawn in the game's cartoon style. */
+function ParkingCar() {
+  return (
+    <svg viewBox="0 0 120 70" aria-hidden="true">
+      {/* motion lines */}
+      <path d="M104 30h12M106 37h10" stroke="#e3001b" strokeWidth="3" strokeLinecap="round" />
+      {/* body */}
+      <path
+        d="M10 44c0-8 4-12 12-13l14-2 12-14c2-2 4-3 7-3h24c3 0 5 1 7 3l11 14 8 1c6 1 9 5 9 11v6c0 2-2 4-4 4H14c-2 0-4-2-4-4z"
+        fill="#e3001b"
+        stroke="#3a0008"
+        strokeWidth="3"
+        strokeLinejoin="round"
+      />
+      {/* roof shine and windows */}
+      <path d="M52 17h12v13H41z" fill="#bfe8ff" stroke="#3a0008" strokeWidth="2.5" strokeLinejoin="round" />
+      <path d="M69 17h10c2 0 3 1 4 2l9 11H69z" fill="#bfe8ff" stroke="#3a0008" strokeWidth="2.5" strokeLinejoin="round" />
+      <path d="M47 27l6-8M73 27l4-8" stroke="#fff" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
+      {/* door line, handle, lights */}
+      <path d="M66 31v18" stroke="#3a0008" strokeWidth="2" />
+      <rect x="55" y="35" width="7" height="2.5" rx="1.2" fill="#3a0008" />
+      <rect x="10" y="37" width="7" height="7" rx="3" fill="#ffd23f" stroke="#3a0008" strokeWidth="2" />
+      <rect x="105" y="41" width="5" height="6" rx="1.5" fill="#fff" stroke="#3a0008" strokeWidth="2" />
+      {/* wheels */}
+      {[33, 89].map((x) => (
+        <g key={x}>
+          <circle cx={x} cy="52" r="10" fill="#1b1b1b" />
+          <circle cx={x} cy="52" r="6" fill="#fff" />
+          <circle cx={x} cy="52" r="2.6" fill="#e3001b" />
+        </g>
+      ))}
+      {/* the road */}
+      <path d="M4 66h112" stroke="#1b1b1b" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function SpaceFace({ sp }: { sp: Space }) {
   if (sp.kind === 'property') {
     return (
@@ -90,10 +127,13 @@ function Corner({ sp }: { sp: Space }) {
       );
     case 'parking':
       return (
-        <div className="corner-inner">
+        <div className="corner-inner parking">
           <b>{edition().corners.parking1}</b>
-          <span className="corner-icon">🎰</span>
           <b>{edition().corners.parking2}</b>
+          <span className="parking-car">
+            <ParkingCar />
+          </span>
+          <span className="parking-pill">🎰 {edition().corners.parkingPill}</span>
         </div>
       );
     default:
@@ -184,11 +224,24 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
           </div>
           <i className="mascot">🎩</i>
         </div>
+        {/* the two card decks, as real-looking stacks */}
         <div className="deck deck-chest">
-          <span>{edition().chestName}</span>
+          <i className="deck-under" />
+          <i className="deck-under" />
+          <div className="deck-card">
+            <span className="deck-art">
+              <ChestIcon />
+            </span>
+            <span className="deck-label">{edition().chestName}</span>
+          </div>
         </div>
         <div className="deck deck-chance">
-          <span>{edition().chanceName}</span>
+          <i className="deck-under" />
+          <i className="deck-under" />
+          <div className="deck-card">
+            <span className="deck-q">?</span>
+            <span className="deck-label">{edition().chanceName}</span>
+          </div>
         </div>
         {center}
       </div>
