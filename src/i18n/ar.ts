@@ -30,6 +30,7 @@ export const ar: Dict = {
   settingsName: 'اسمي',
   settingsSound: 'الأصوات',
   version: 'الإصدار',
+  privacy: 'سياسة الخصوصية',
   edition_he: 'لوحة إسرائيل · ₪',
   edition_en: 'لوحة أمريكا · $',
   edition_ar: 'لوحة الإمارات · د.إ',

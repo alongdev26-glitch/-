@@ -403,6 +403,14 @@
   border: 3px solid #fff;
   color: var(--ink);
 }
+.settings-privacy {
+  display: block;
+  text-align: center;
+  font-weight: 700;
+  color: inherit;
+  margin-bottom: 6px;
+}
+
 .settings-version {
   text-align: center;
   font-size: 12px;

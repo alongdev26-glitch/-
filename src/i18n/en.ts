@@ -32,6 +32,7 @@ export const en: Dict = {
   settingsName: 'My name',
   settingsSound: 'Sounds',
   version: 'Version',
+  privacy: 'Privacy policy',
   edition_he: 'Israel board · ₪',
   edition_en: 'USA board · $',
   edition_ar: 'UAE board · د.إ',

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { locale, t } from '../i18n';
+import { APP_URL } from '../online/referral';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { getName, setName } from '../ui/profile';
 import { SoundToggle } from '../ui/SoundToggle';
@@ -40,6 +41,10 @@ export function Settings({ onBack }: { onBack: () => void }) {
         <h2 className="welcome-q">🔊 {t('settingsSound')}</h2>
         <SoundToggle className="btn btn-white" label />
       </div>
+
+      <a className="settings-privacy" href={`${APP_URL}privacy.html`} target="_blank" rel="noopener">
+        🔒 {t('privacy')}
+      </a>
 
       <div className="settings-version">
         {t('version')}: {new Date(__BUILD__).toLocaleString(locale(), { dateStyle: 'short', timeStyle: 'short' })}

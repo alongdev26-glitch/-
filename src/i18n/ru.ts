@@ -41,6 +41,7 @@ export const ru: Dict = {
   settingsName: 'Моё имя',
   settingsSound: 'Звуки',
   version: 'Версия',
+  privacy: 'Политика конфиденциальности',
   edition_he: 'Поле Израиль · ₪',
   edition_en: 'Поле США · $',
   edition_ar: 'Поле ОАЭ · د.إ',

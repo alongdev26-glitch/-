@@ -32,6 +32,7 @@ export const fr: Dict = {
   settingsName: 'Mon prénom',
   settingsSound: 'Sons',
   version: 'Version',
+  privacy: 'Politique de confidentialité',
   edition_he: 'Plateau Israël · ₪',
   edition_en: 'Plateau USA · $',
   edition_ar: 'Plateau Émirats · د.إ',

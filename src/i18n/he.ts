@@ -31,6 +31,7 @@ export const he = {
   settingsName: 'השם שלי',
   settingsSound: 'צלילים',
   version: 'גרסה',
+  privacy: 'מדיניות פרטיות',
   edition_he: 'לוח ישראל · ש"ח',
   edition_en: 'לוח ארה"ב · $',
   edition_ar: 'לוח האמירויות · د.إ',

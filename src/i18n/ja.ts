@@ -30,6 +30,7 @@ export const ja: Dict = {
   settingsName: 'わたしの名前',
   settingsSound: 'サウンド',
   version: 'バージョン',
+  privacy: 'プライバシーポリシー',
   edition_he: 'イスラエル版 · ₪',
   edition_en: 'アメリカ版 · $',
   edition_ar: 'UAE版 · د.إ',
