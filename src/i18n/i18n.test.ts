@@ -65,9 +65,9 @@ describe('languages', () => {
       { name: 'B', token: 'car' as const, isBot: false },
     ];
     const cases = [
-      ['fr', 'Champs-Élysées', '200 €', 'A achète Place de la Bourse pour 90 €'],
-      ['ru', 'Красная площадь', '200 ₽', 'A купил Кремлёвская ул. за 90 ₽'],
-      ['ja', '銀座', '¥200', 'Aが中洲を¥90で買った'],
+      ['fr', 'Champs-Élysées', '200 €', 'A achète Vieux-Port pour 90 €'],
+      ['ru', 'Красная площадь', '200 ₽', 'A купил ул. Ленина за 90 ₽'],
+      ['ja', '銀座', '¥200', 'Aが平和大通りを¥90で買った'],
     ] as const;
     for (const [lang, street, cash, line] of cases) {
       let s = newGame(players, () => 0.5, { mortgage: true }, lang);
