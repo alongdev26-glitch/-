@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<style>
+@font-face { font-family: Rubik; src: url(rubik-hebrew.woff2) format('woff2'); font-weight: 300 900; unicode-range: U+0590-05FF, U+200C-2010, U+20AA, U+FB1D-FB4F; }
+@font-face { font-family: Rubik; src: url(rubik-latin.woff2) format('woff2'); font-weight: 300 900; unicode-range: U+0000-00FF, U+2000-206F; }
+* { box-sizing: border-box; }
+html, body { margin: 0; overflow: hidden; background: #000; }
+body { font-family: Rubik, 'Noto Color Emoji', sans-serif; }
+#stage { position: relative; overflow: hidden; background: radial-gradient(circle at 50% 40%, #2e9bff, #0d4fa3 70%, #082f66); }
+.abs { position: absolute; left: 0; top: 0; will-change: transform, opacity; }
+.c { transform-origin: 50% 50%; }
+.band { position: absolute; left: 0; right: 0; display: flex; z-index: 50; }
+.band i { flex: 1; }
+.rays { border-radius: 50%; background: repeating-conic-gradient(rgba(255,255,255,.16) 0 10deg, rgba(255,255,255,0) 10deg 20deg); }
+.headline { color: #fff; font-weight: 900; text-align: center; line-height: 1.05; text-shadow: 0 .06em .18em rgba(0,0,0,.45); white-space: nowrap; }
+.headline .w { display: inline-block; }
+.sub { color: #FFD54A; font-weight: 800; text-align: center; text-shadow: 0 .06em .16em rgba(0,0,0,.45); white-space: nowrap; }
+.coin { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff6c4, #ffd23f 35%, #e0a526 70%, #a8740b); box-shadow: inset 0 0 0 .09em #c98a10, 0 .05em .12em rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; color: #9a6400; font-weight: 900; }
+.die { background: linear-gradient(145deg, #fff, #ece6da); border-radius: 18%; box-shadow: inset 0 -.06em .1em rgba(0,0,0,.18), 0 .08em .2em rgba(0,0,0,.4); }
+.die b { position: absolute; width: 19%; height: 19%; border-radius: 50%; background: #222; transform: translate(-50%,-50%); }
+.phone { border-radius: 7%/3.9%; background: #111; padding: 3.2%; box-shadow: 0 .4em 1.2em rgba(0,0,0,.5), inset 0 0 0 .12em #333; }
+.phone .scr { width: 100%; height: 100%; border-radius: 5%/2.8%; overflow: hidden; position: relative; background: #000; }
+.phone img { width: 100%; height: 100%; display: block; }
+.tok { border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 35% 30%, #fff, #f3f3f3 55%, #ddd); box-shadow: 0 .06em .14em rgba(0,0,0,.4); }
+.stamp { color: #fff; background: #E3001B; border: .08em solid #fff; border-radius: .3em; font-weight: 900; padding: .08em .35em; box-shadow: 0 .08em .2em rgba(0,0,0,.4); white-space: nowrap; }
+.tile { background: #fff; border-radius: .14em; box-shadow: 0 .06em .2em rgba(0,0,0,.35); overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+.tile .hd { width: 100%; height: 24%; }
+.tile .nm { font-weight: 800; color: #222; margin-top: 12%; text-align: center; line-height: 1.1; }
+.tile .pr { font-weight: 700; color: #555; margin-top: auto; margin-bottom: 9%; }
+.counter { background: #fff; border-radius: 1em; font-weight: 900; color: #1b7a2f; padding: .15em .7em; box-shadow: 0 .08em .25em rgba(0,0,0,.35); white-space: nowrap; direction: rtl; }
+.card { border-radius: .12em; box-shadow: 0 .06em .2em rgba(0,0,0,.4); backface-visibility: hidden; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+.card.blue { background: linear-gradient(150deg, #4fc3ff, #1e88e5 50%, #0d4fa3); border: .04em solid #fff; }
+.card.pink { background: linear-gradient(150deg, #ff7ac2, #e0218a 55%, #a3105e); border: .04em solid #fff; }
+.card.face { background: #fffdf5; border: .04em solid #e8dcc0; color: #222; text-align: center; padding: 8%; line-height: 1.2; }
+.card .lbl { color: #fff; background: rgba(0,0,0,.18); border-radius: 1em; font-weight: 800; padding: .05em .5em; margin-top: 8%; white-space: nowrap; }
+.card .q { color: #fff; font-weight: 900; line-height: 1; text-shadow: 0 .04em .08em rgba(0,0,0,.3); }
+.flagcard { background: #fff; border-radius: .16em; box-shadow: 0 .06em .2em rgba(0,0,0,.35); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.flagcard .fl { line-height: 1; }
+.flagcard .ln { font-weight: 800; color: #222; margin-top: .12em; white-space: nowrap; }
+.flagcard .ed { color: #666; font-weight: 500; white-space: nowrap; }
+.av { border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #fff; }
+.badge { background: linear-gradient(#ffe48a, #f5c542 50%, #c98a10); color: #5a3a00; border-radius: 1em; font-weight: 900; padding: .1em .6em; box-shadow: 0 .08em .25em rgba(0,0,0,.4), inset 0 0 0 .06em #fff6; white-space: nowrap; }
+.cta { background: linear-gradient(#ff3b4f, #E3001B 55%, #a10013); color: #fff; border-radius: 1em; font-weight: 900; padding: .18em .9em; box-shadow: 0 .1em 0 #7a000e, 0 .2em .4em rgba(0,0,0,.4); white-space: nowrap; }
+.url { color: #fff; font-weight: 600; opacity: .95; white-space: nowrap; direction: ltr; }
+.shine { background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.65) 50%, transparent 65%); mix-blend-mode: overlay; }
+.flash { background: #fff; }
+.z3, .cta, .url, .sub { z-index: 3; }
+.spark { color: #fff7c0; text-shadow: 0 0 .3em #ffd23f; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const q = Object.fromEntries(new URLSearchParams(location.search));
+const W = +(q.w || 1080), H = +(q.h || 1920), LAND = W > H;
+const U = Math.min(W, H) / 100;           // 1 unit = 1% of the short side
+const stage = document.getElementById('stage');
+stage.style.width = W + 'px'; stage.style.height = H + 'px';
+const CX = W / 2, CY = H / 2;
+
+// ---------- helpers ----------
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const eOut = (k) => 1 - Math.pow(1 - k, 3);
+const eIn = (k) => k * k * k;
+const eInOut = (k) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const eBack = (k) => { const c = 1.9; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+const eElastic = (k) => (k === 0 || k === 1 ? k : Math.pow(2, -10 * k) * Math.sin((k * 10 - 0.75) * (2 * Math.PI) / 3) + 1);
+const eBounce = (k) => { const n = 7.5625, d = 2.75; if (k < 1 / d) return n * k * k; if (k < 2 / d) return n * (k -= 1.5 / d) * k + 0.75; if (k < 2.5 / d) return n * (k -= 2.25 / d) * k + 0.9375; return n * (k -= 2.625 / d) * k + 0.984375; };
+function rng(seed) { return () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+
+function el(cls, parent = stage, html = '', tag = 'div') {
+  const e = document.createElement(tag); e.className = 'abs ' + cls; if (html) e.innerHTML = html; parent.appendChild(e); return e;
+}
+// place an element centered at (x,y) with size, scale, rotation, opacity
+function put(e, { x = 0, y = 0, w, h, s = 1, r = 0, o = 1, ry = 0, rx = 0, fs } = {}) {
+  if (w != null) e.style.width = w + 'px';
+  if (h != null) e.style.height = h + 'px';
+  if (fs != null) e.style.fontSize = fs + 'px';
+  e.style.display = o <= 0.001 ? 'none' : '';
+  const ww = w != null ? w : e.offsetWidth, hh = h != null ? h : e.offsetHeight;
+  e.style.transform = `translate(${x - ww / 2}px, ${y - hh / 2}px) perspective(${40 * U}px) rotateX(${rx}deg) rotateY(${ry}deg) rotate(${r}deg) scale(${s})`;
+  e.style.opacity = o;
+}
+const hide = (e) => { e.style.opacity = 0; e.style.display = 'none'; };
+
+// ---------- scenes timeline ----------
+const T = { logo: [0, 3], board: [3, 7], build: [7, 10], cards: [10, 13], langs: [13, 16], shop: [16, 19], friends: [19, 22], end: [22, 26] };
+const DURATION = 26;
+// scene visibility: in over 0.35s, out over 0.3s (the last scene stays)
+function vis(t, [a, b], last) {
+  const i = eOut(prog(t, a, a + 0.35)); const o = last ? 1 : 1 - eIn(prog(t, b - 0.3, b));
+  return { i, o, v: t >= a && t < (last ? 1e9 : b), k: Math.min(i, o) };
+}
+
+// text block: where headlines go in each layout
+const TXT = LAND ? { x: W * 0.72, y: H * 0.42, fs: 7.6 * U, subY: H * 0.58, subFs: 4.2 * U }
+                 : { x: CX, y: H * 0.13, fs: 9.2 * U, subY: H * 0.195, subFs: 5 * U };
+const VIS = LAND ? { x: W * 0.3, y: CY } : { x: CX, y: H * 0.58 };
+
+function headline(text) {
+  const e = el('headline'); e.innerHTML = text.split(' ').map((w) => `<span class="w">${w}</span>`).join(' '); return e;
+}
+function animHeadline(e, t, a, y = TXT.y, fs = TXT.fs, x = TXT.x, out = 1) {
+  e.style.fontSize = fs + 'px';
+  const words = [...e.querySelectorAll('.w')];
+  words.forEach((w, i) => { const k = eBack(prog(t, a + i * 0.09, a + i * 0.09 + 0.45)); w.style.transform = `translateY(${(1 - k) * 0.6}em) scale(${0.4 + 0.6 * k})`; w.style.opacity = clamp(k * 1.5); });
+  put(e, { x, y, o: out });
+}
+
+// ---------- shared background ----------
+const rays = el('rays c');
+const bgCoins = [];
+{ const R = rng(7); for (let i = 0; i < 18; i++) bgCoins.push({ e: el('coin', stage, '₪'), x: R() * W, sp: 0.04 + R() * 0.07, d: (2 + R() * 3.5) * U, ph: R() * 10, rot: R() * 360 }); }
+const bandTop = el('band'), bandBot = el('band');
+const COLORS = ['#8B3A2B', '#1E9AD6', '#E0218A', '#F28C1C', '#E3001B', '#F7D117', '#1FA34A', '#1F4E9E'];
+for (const b of [bandTop, bandBot]) { b.innerHTML = COLORS.map((c) => `<i style="background:${c}"></i>`).join(''); b.style.height = 1.6 * U + 'px'; b.style.width = W + 'px'; }
+// transition wipe: 8 colored bars sweeping across
+const wipe = el('band'); wipe.style.flexDirection = 'column'; wipe.innerHTML = COLORS.map((c) => `<i style="background:${c}"></i>`).join('');
+const flash = el('flash'); flash.style.width = W + 'px'; flash.style.height = H + 'px'; flash.style.zIndex = 60;
+
+// ---------- scene 1: logo ----------
+const S1 = {};
+S1.d1 = el('die'); S1.d2 = el('die');
+S1.logo = el('c', stage, `<img src="icon.png" style="width:100%;height:100%;border-radius:22%;box-shadow:0 1.2em 2.4em rgba(0,0,0,.45)">`);
+S1.shineWrap = el('c'); S1.shineWrap.style.overflow = 'hidden'; S1.shineWrap.style.borderRadius = '22%'; S1.shine = el('shine', S1.shineWrap);
+S1.title = headline('ביג דיל'); S1.sub = el('sub', stage, 'קונים · בונים · מנצחים');
+S1.burst = []; { const R = rng(11); for (let i = 0; i < 26; i++) S1.burst.push({ e: el('coin', stage, '₪'), a: R() * Math.PI * 2, v: (40 + R() * 55) * U, d: (3 + R() * 3) * U, spin: (R() - 0.5) * 900 }); }
+const PIPS = { 1: [[50, 50]], 2: [[28, 28], [72, 72]], 3: [[26, 26], [50, 50], [74, 74]], 4: [[28, 28], [72, 28], [28, 72], [72, 72]], 5: [[27, 27], [73, 27], [50, 50], [27, 73], [73, 73]], 6: [[28, 24], [72, 24], [28, 50], [72, 50], [28, 76], [72, 76]] };
+function dieFace(e, n) { if (e._n === n) return; e._n = n; e.innerHTML = PIPS[n].map(([x, y]) => `<b style="left:${x}%;top:${y}%"></b>`).join(''); }
+
+function scene1(t) {
+  const V = vis(t, T.logo); const all = [S1.d1, S1.d2, S1.logo, S1.shineWrap, S1.title, S1.sub, ...S1.burst.map((b) => b.e)];
+  if (!V.v) return all.forEach(hide);
+  const out = V.o;
+  const LS = (LAND ? 38 : 58) * U;                      // logo size
+  const LY = LAND ? CY - 17 * U : H * 0.42;
+  // dice tumble in from both sides and bounce on the floor under the logo
+  const floor = LY + LS * 0.5 + (LAND ? 7 : 14) * U, ds = (LAND ? 9 : 14) * U;
+  [[S1.d1, -1, 0], [S1.d2, 1, 0.12]].forEach(([d, side, delay]) => {
+    const k = prog(t, 0.05 + delay, 0.95 + delay);
+    const x = CX + side * lerp(W * 0.75, (LAND ? 17 : 15) * U, eOut(k));
+    const y = lerp(-ds, floor, eBounce(k));
+    const rolling = k < 0.85; dieFace(d, rolling ? 1 + Math.floor(t * 17 + side * 3 + 9) % 6 : side < 0 ? 6 : 5);
+    const pop = eBack(prog(t, 2.1, 2.5)); // a little hop when the title lands
+    put(d, { x, y: y - Math.sin(pop * Math.PI) * 3 * U, w: ds, h: ds, r: (1 - eOut(k)) * side * -720 + side * 12, o: out });
+  });
+  // logo slams in at 0.9s with a squash
+  const lk = prog(t, 0.85, 1.25), s = lk <= 0 ? 0 : lerp(3.2, 1, eIn(lk));
+  const squash = lk >= 1 ? 1 + 0.08 * Math.sin(prog(t, 1.25, 1.65) * Math.PI) * (1 - prog(t, 1.25, 1.65)) : 1;
+  const breathe = 1 + 0.015 * Math.sin(t * 4);
+  put(S1.logo, { x: CX, y: LY, w: LS, h: LS, s: s * squash * breathe, o: lk <= 0 ? 0 : Math.min(1, lk * 3) * out, r: (1 - eOut(lk)) * -8 });
+  // shine sweep
+  const sk = prog(t, 1.55, 2.25);
+  put(S1.shineWrap, { x: CX, y: LY, w: LS, h: LS, s: breathe, o: sk > 0 && sk < 1 ? out : 0 });
+  put(S1.shine, { x: LS / 2 + lerp(-LS, LS, sk), y: LS / 2, w: LS, h: LS });
+  // coin burst from the slam
+  S1.burst.forEach((b) => {
+    const bt = t - 1.2; if (bt < 0) return hide(b.e);
+    const x = CX + Math.cos(b.a) * b.v * bt, y = LY + Math.sin(b.a) * b.v * bt + 0.5 * 140 * U * bt * bt;
+    put(b.e, { x, y, w: b.d, h: b.d, fs: b.d * 0.55, r: b.spin * bt, o: clamp(1.8 - bt) * out });
+  });
+  const ty = LAND ? floor + 10 * U : floor + 16 * U;
+  animHeadline(S1.title, t, 1.45, ty, (LAND ? 11 : 14) * U, CX, out);
+  put(S1.sub, { x: CX, y: ty + (LAND ? 9.5 : 12) * U, fs: (LAND ? 4.6 : 5.6) * U, o: eOut(prog(t, 1.9, 2.3)) * out, s: lerp(0.7, 1, eBack(prog(t, 1.9, 2.3))) });
+}
+
+// ---------- phone helper ----------
+function makePhone(src) { const p = el('phone c'); p.innerHTML = `<div class="scr"><img src="${src}"></div>`; return p; }
+const PH = (LAND ? 76 : 104) * U;  // phone height (in units of the short side)
+const PW = PH * 0.5625 * 1.07;
+
+// ---------- scene 2: board ----------
+const S2 = { phone: makePhone('he-2-board.png') }; S2.scr = S2.phone.querySelector('.scr');
+S2.tok = el('tok', S2.scr, '🐈'); S2.tok.style.boxShadow = '0 0 0 .12em #FF8A00, 0 .1em .2em rgba(0,0,0,.5)';
+S2.stamp = el('stamp', S2.scr, 'נקנה! 🏠');
+S2.h = headline('קונים רחובות'); S2.s = el('sub', stage, 'בערים אמיתיות');
+// squares in the 1080×1920 screenshot: GO bottom-left, then up the left column
+const PATH = [[95, 1515], [95, 1405], [95, 1321], [95, 1237], [95, 1153]];
+function scene2(t) {
+  const V = vis(t, T.board); if (!V.v) return [S2.phone, S2.h, S2.s].forEach(hide);
+  const lt = t - T.board[0];
+  const ik = eBack(prog(lt, 0, 0.6));
+  const float = Math.sin(lt * 2.2) * 1.2 * U;
+  const zoom = 1 + 0.06 * eInOut(prog(lt, 0.8, 3.6));
+  put(S2.phone, { x: VIS.x, y: VIS.y + (1 - ik) * H * 0.7 + float, w: PW, h: PH, r: (1 - ik) * 14 + Math.sin(lt * 1.6) * 1.2, ry: 0, s: zoom, o: V.o });
+  const sw = S2.scr.offsetWidth, k = sw / 1080;
+  // token hops 3 squares, then the buy stamp
+  const hops = [1.0, 1.45, 1.9]; let pos = PATH[0], lift = 0;
+  hops.forEach((h0, i) => { const hk = prog(lt, h0, h0 + 0.36); if (hk > 0) { pos = [lerp(PATH[i][0], PATH[i + 1][0], hk), lerp(PATH[i][1], PATH[i + 1][1], hk)]; lift = Math.sin(hk * Math.PI) * 70; } });
+  const ts = 150 * k, land = prog(lt, 2.26, 2.5);
+  put(S2.tok, { x: pos[0] * k + 30 * k, y: (pos[1] - lift) * k, w: ts, h: ts, fs: ts * 0.62, s: 1 + 0.15 * Math.sin(land * Math.PI), o: eOut(prog(lt, 0.5, 0.8)) });
+  const st = eElastic(prog(lt, 2.45, 3.1));
+  put(S2.stamp, { x: 330 * k, y: 1110 * k, fs: 90 * k, s: st, r: -12, o: prog(lt, 2.45, 2.5) });
+  animHeadline(S2.h, t, T.board[0] + 0.25, TXT.y, TXT.fs, TXT.x, V.o);
+  put(S2.s, { x: TXT.x, y: TXT.subY, fs: TXT.subFs, o: eOut(prog(lt, 0.7, 1.1)) * V.o, s: lerp(0.6, 1, eBack(prog(lt, 0.7, 1.1))) });
+}
+
+// ---------- scene 3: build ----------
+const HOUSE = `<svg viewBox="0 0 20 20" width="100%" height="100%"><path d="M10 2 L19 9 L17 9 L17 18 L3 18 L3 9 L1 9 Z" fill="#1FA34A" stroke="#0b5a22" stroke-width="1.2" stroke-linejoin="round"/><rect x="8" y="12" width="4" height="6" fill="#0b5a22"/></svg>`;
+const HOTEL = `<svg viewBox="0 0 30 24" width="100%" height="100%"><path d="M2 8 L15 1 L28 8 L28 23 L2 23 Z" fill="#E3001B" stroke="#7a000e" stroke-width="1.3" stroke-linejoin="round"/><g fill="#ffe9a8"><rect x="6" y="11" width="4" height="4"/><rect x="13" y="11" width="4" height="4"/><rect x="20" y="11" width="4" height="4"/><rect x="6" y="17" width="4" height="4"/><rect x="20" y="17" width="4" height="4"/></g><rect x="13" y="17" width="4" height="6" fill="#7a000e"/></svg>`;
+const S3 = { tiles: [], houses: [], coins: [] };
+[['רח\' הרצל', '₪170', '#F28C1C'], ['שד\' בנימין', '₪170', '#F28C1C'], ['כיכר העצמאות', '₪190', '#F28C1C']].forEach(([n, p, c]) => {
+  S3.tiles.push(el('tile', stage, `<div class="hd" style="background:${c}"></div><div class="nm">${n}</div><div class="pr">${p}</div>`));
+});
+for (let i = 0; i < 6; i++) S3.houses.push(el('', stage, HOUSE));
+S3.hotel = el('', stage, HOTEL); S3.puff = el('', stage, '💥');
+S3.counter = el('counter'); S3.h = headline('בונים בתים ומלונות'); S3.s = el('sub', stage, 'וגובים שכר דירה');
+{ const R = rng(23); for (let i = 0; i < 14; i++) S3.coins.push({ e: el('coin', stage, '₪'), d: R() * 0.5, sx: R(), off: (R() - 0.5) }); }
+function scene3(t) {
+  const V = vis(t, T.build); const all = [...S3.tiles, ...S3.houses, S3.hotel, S3.puff, S3.counter, S3.h, S3.s, ...S3.coins.map((c) => c.e)];
+  if (!V.v) return all.forEach(hide);
+  const lt = t - T.build[0], o = V.o;
+  const tw = (LAND ? 21 : 26) * U, th = tw * 1.45, gap = tw * 0.12, ty = LAND ? VIS.y + 6 * U : VIS.y + 4 * U;
+  const xs = [-1, 0, 1].map((i) => VIS.x - i * (tw + gap)); // RTL: first tile on the right
+  S3.tiles.forEach((tl, i) => { const k = eBack(prog(lt, 0.05 + i * 0.1, 0.5 + i * 0.1)); tl.querySelector('.nm').style.fontSize = tw * 0.13 + 'px'; tl.querySelector('.pr').style.fontSize = tw * 0.12 + 'px'; put(tl, { x: xs[i], y: ty + (1 - k) * 40 * U, w: tw, h: th, s: k, o }); });
+  // houses drop: 2 per tile on the first two, then the hotel on the third
+  const hs = tw * 0.42;
+  S3.houses.forEach((h, i) => {
+    const tile = Math.floor(i / 2), side = i % 2 ? 1 : -1, t0 = 0.55 + i * 0.22;
+    if (tile > 1) return hide(h);
+    const k = prog(lt, t0, t0 + 0.32);
+    put(h, { x: xs[tile] + side * hs * 0.55, y: lerp(ty - th, ty - th / 2 - hs * 0.32, eBounce(k)), w: hs, h: hs, o: k > 0 ? o : 0, s: 1 + 0.12 * Math.sin(prog(lt, t0 + 0.32, t0 + 0.5) * Math.PI) });
+  });
+  const hk = prog(lt, 1.55, 1.95), hw = tw * 0.95;
+  put(S3.hotel, { x: xs[2], y: lerp(ty - th * 1.4, ty - th / 2 - hw * 0.3, eBounce(hk)), w: hw, h: hw * 0.8, o: hk > 0 ? o : 0, s: 1 + 0.15 * Math.sin(prog(lt, 1.95, 2.2) * Math.PI) });
+  const pk = prog(lt, 1.9, 2.3);
+  put(S3.puff, { x: xs[2], y: ty - th / 2, fs: tw * 0.6, s: 0.5 + pk * 1.4, o: pk > 0 && pk < 1 ? (1 - pk) * o : 0 });
+  // rent coins fly from the tiles to the counter
+  const cy = ty + th / 2 + (LAND ? 10 : 12) * U;
+  S3.coins.forEach((c, i) => {
+    const k = prog(lt, 1.6 + c.d + i * 0.05, 2.15 + c.d + i * 0.05); if (k <= 0 || k >= 1) return hide(c.e);
+    const sx = xs[i % 3], sy = ty - th * 0.1, d = 4 * U;
+    put(c.e, { x: lerp(sx, VIS.x, eInOut(k)) + Math.sin(k * Math.PI) * c.off * 20 * U, y: lerp(sy, cy, eIn(k)) - Math.sin(k * Math.PI) * 14 * U, w: d, h: d, fs: d * 0.55, r: k * 540, o });
+  });
+  const money = Math.round(lerp(1500, 2350, eOut(prog(lt, 1.8, 2.8))) / 10) * 10;
+  S3.counter.textContent = '💰 ₪' + money.toLocaleString('en-US');
+  put(S3.counter, { x: VIS.x, y: cy, fs: (LAND ? 5.6 : 7) * U, s: eBack(prog(lt, 0.3, 0.7)) * (1 + 0.06 * Math.sin(prog(lt, 2.75, 2.95) * Math.PI)), o });
+  animHeadline(S3.h, t, T.build[0] + 0.2, TXT.y, TXT.fs * (LAND ? 0.82 : 0.86), TXT.x, o);
+  put(S3.s, { x: TXT.x, y: TXT.subY, fs: TXT.subFs, o: eOut(prog(lt, 0.7, 1.1)) * o, s: lerp(0.6, 1, eBack(prog(lt, 0.7, 1.1))) });
+}
+
+// ---------- scene 4: cards ----------
+const CHEST = `<svg viewBox="0 0 32 26" width="100%"><path d="M3 11 C3 4 9 2 16 2 C23 2 29 4 29 11 Z" fill="#b5652f" stroke="#3f1d05" stroke-width="1.2"/><rect x="3" y="11" width="26" height="13" rx="1.5" fill="#8b4513" stroke="#3f1d05" stroke-width="1.2"/><rect x="3" y="10" width="26" height="2.6" fill="#e0a526" stroke="#7a4a00" stroke-width=".6"/><rect x="6.5" y="2.6" width="3" height="21.4" fill="#e0a526" stroke="#7a4a00" stroke-width=".6"/><rect x="22.5" y="2.6" width="3" height="21.4" fill="#e0a526" stroke="#7a4a00" stroke-width=".6"/><rect x="13.5" y="9" width="5" height="6" rx="1" fill="#ffd23f" stroke="#7a4a00" stroke-width=".7"/></svg>`;
+const S4 = { blue: [], pink: [] };
+for (let i = 0; i < 4; i++) S4.blue.push(el('card blue c', stage, `<div style="width:46%">${CHEST}</div><div class="lbl">תיבת המזל</div>`));
+for (let i = 0; i < 4; i++) S4.pink.push(el('card pink c', stage, `<div class="q">?</div><div class="lbl">הפתעה</div>`));
+S4.fb = el('card face c', stage, `<div style="font-size:1.6em">🍳🏆</div><div style="font-weight:800;margin-top:.3em">זכית בתחרות בישול!</div><div style="color:#1b7a2f;font-weight:900;font-size:1.6em;margin-top:.2em;white-space:nowrap" dir="ltr">+₪100</div>`);
+S4.fp = el('card face c', stage, `<div style="font-size:1.6em">🏖️</div><div style="font-weight:800;margin-top:.3em">סוף שבוע חופשי!</div><div style="color:#E0218A;font-weight:900;font-size:1.25em;margin-top:.2em">סע לאילת</div>`);
+S4.h = headline('קלפי מזל והפתעות'); S4.s = el('sub', stage, 'כל קלף משנה את המשחק');
+function scene4(t) {
+  const V = vis(t, T.cards); const all = [...S4.blue, ...S4.pink, S4.fb, S4.fp, S4.h, S4.s];
+  if (!V.v) return all.forEach(hide);
+  const lt = t - T.cards[0], o = V.o;
+  const cw = (LAND ? 28 : 36) * U, ch = cw * 1.4, dx = cw * 0.6;
+  const decks = [[S4.blue, VIS.x + dx, -1, S4.fb, 0.95], [S4.pink, VIS.x - dx, 1, S4.fp, 1.55]];
+  decks.forEach(([cards, x, side, face, flipAt], di) => {
+    const ik = eBack(prog(lt, di * 0.15, 0.5 + di * 0.15));
+    const fan = eOut(prog(lt, 0.45, 0.85)) * (1 - eInOut(prog(lt, flipAt - 0.15, flipAt + 0.1)));
+    cards.forEach((c, i) => {
+      const r = side * -8 + (i - 1.5) * 9 * fan, ox = (i - 1.5) * 2.5 * U * fan;
+      const isTop = i === 3, fk = isTop ? eInOut(prog(lt, flipAt, flipAt + 0.45)) : 0;
+      const lift = isTop ? Math.sin(fk * Math.PI) * 8 * U + eOut(prog(lt, flipAt, flipAt + 0.45)) * 3 * U : 0;
+      c.style.fontSize = cw * 0.13 + 'px'; c.querySelector('.q') && (c.querySelector('.q').style.fontSize = cw * 0.6 + 'px');
+      put(c, { x: x + ox, y: VIS.y + (1 - ik) * H * 0.6 - i * 0.5 * U - lift, w: cw, h: ch, r: r * (isTop ? 1 - fk : 1), ry: fk * 180, o: fk >= 0.5 ? 0 : o, s: 1 + fk * 0.12 });
+    });
+    const fk = eInOut(prog(lt, flipAt, flipAt + 0.45));
+    face.style.fontSize = cw * 0.1 + 'px';
+    const pulse = 1 + 0.04 * Math.sin(prog(lt, flipAt + 0.45, flipAt + 0.8) * Math.PI);
+    put(face, { x, y: VIS.y - 1.5 * U - Math.sin(fk * Math.PI) * 8 * U - 3 * U * fk, w: cw, h: ch, ry: (1 - fk) * -180, o: fk >= 0.5 ? o : 0, s: (1 + 0.12 * fk) * pulse });
+  });
+  animHeadline(S4.h, t, T.cards[0] + 0.2, TXT.y, TXT.fs * 0.9, TXT.x, o);
+  put(S4.s, { x: TXT.x, y: TXT.subY, fs: TXT.subFs, o: eOut(prog(lt, 0.7, 1.1)) * o, s: lerp(0.6, 1, eBack(prog(lt, 0.7, 1.1))) });
+}
+
+// ---------- scene 5: languages ----------
+const LANGS = [['🇮🇱', 'עברית', 'לוח ישראל · ₪'], ['🇺🇸', 'English', 'USA board · $'], ['🇦🇪', 'العربية', 'لوحة الإمارات'], ['🇫🇷', 'Français', 'Plateau France · €'], ['🇷🇺', 'Русский', 'Поле Россия · ₽'], ['🇯🇵', '日本語', '日本版 · ¥']];
+const S5 = { cards: LANGS.map(([f, n, e]) => el('flagcard c', stage, `<div class="fl">${f}</div><div class="ln">${n}</div><div class="ed">${e}</div>`)) };
+S5.h = headline('6 שפות · 6 לוחות'); S5.s = el('sub', stage, 'לכל מדינה לוח משלה');
+function scene5(t) {
+  const V = vis(t, T.langs); if (!V.v) return [...S5.cards, S5.h, S5.s].forEach(hide);
+  const lt = t - T.langs[0], o = V.o;
+  const cols = LAND ? 3 : 2, cw = (LAND ? 22 : 36) * U, ch = cw * (LAND ? 0.95 : 0.78), g = 2.5 * U;
+  const rows = Math.ceil(6 / cols), gw = cols * cw + (cols - 1) * g, gh = rows * ch + (rows - 1) * g;
+  const glow = Math.floor(prog(lt, 1.2, 2.9) * 6.99);
+  S5.cards.forEach((c, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const x = VIS.x + gw / 2 - cw / 2 - col * (cw + g), y = VIS.y - gh / 2 + ch / 2 + row * (ch + g) + (LAND ? 0 : 3 * U);
+    const k = prog(lt, 0.1 + i * 0.11, 0.6 + i * 0.11), a = (i * 137) % 360 * Math.PI / 180;
+    c.querySelector('.fl').style.fontSize = cw * 0.34 + 'px'; c.querySelector('.ln').style.fontSize = cw * 0.13 + 'px'; c.querySelector('.ed').style.fontSize = cw * 0.075 + 'px';
+    const on = lt > 1.2 && glow === i;
+    c.style.boxShadow = on ? `0 0 0 ${0.8 * U}px #FFD23F, 0 0 ${4 * U}px #FFD23F` : '';
+    put(c, { x: lerp(x + Math.cos(a) * W, x, eOut(k)), y: lerp(y + Math.sin(a) * H, y, eOut(k)), w: cw, h: ch, r: (1 - eBack(k)) * 120, s: (on ? 1.08 : 1) * lerp(0.3, 1, eBack(k)), o: k > 0 ? o : 0 });
+  });
+  animHeadline(S5.h, t, T.langs[0] + 0.2, TXT.y, TXT.fs, TXT.x, o);
+  put(S5.s, { x: TXT.x, y: TXT.subY, fs: TXT.subFs, o: eOut(prog(lt, 0.7, 1.1)) * o, s: lerp(0.6, 1, eBack(prog(lt, 0.7, 1.1))) });
+}
+
+// ---------- scene 6: shop ----------
+const PARADE = [['🦄', '#E040FB', 'L'], ['🐉', '#2E7D32', 'L'], ['👑', '#FFC400', 'L'], ['🦁', '#E0A100', 'E'], ['🚀', '#C62828', 'E'], ['🦈', '#0277BD', 'E'], ['🐼', '#455A64', 'R'], ['🐯', '#F57C00', 'R'], ['🦊', '#E65100', 'C'], ['🐸', '#4CAF50', 'C'], ['🛸', '#7E57C2', 'E'], ['🐙', '#D81B60', 'R']];
+const RARE = { L: '#FFD23F', E: '#C77DFF', R: '#4FC3FF', C: '#ffffff' };
+const S6 = { phone: (() => { const p = makePhone('he-4-shop.png'); p.style.zIndex = 2; return p; })(), toks: PARADE.map(([e, c]) => { const t = el('tok c', stage, e); t.style.boxShadow = `0 0 0 .1em ${c}, 0 .08em .2em rgba(0,0,0,.4)`; return t; }) };
+S6.sparks = []; { const R = rng(41); for (let i = 0; i < 16; i++) S6.sparks.push({ e: el('spark', stage, '✦'), a: R() * Math.PI * 2, r: 0.6 + R() * 0.6, ph: R() }); }
+S6.h = headline('דמויות וסקינים'); S6.s = el('sub', stage, '🛍️ חדשים בחנות כל 3 ימים');
+function scene6(t) {
+  const V = vis(t, T.shop); if (!V.v) return [S6.phone, ...S6.toks, ...S6.sparks.map((s) => s.e), S6.h, S6.s].forEach(hide);
+  const lt = t - T.shop[0], o = V.o;
+  const ph = PH * (LAND ? 0.95 : 0.78), pw = ph * 0.5625 * 1.07, ik = eBack(prog(lt, 0, 0.55));
+  const py = LAND ? VIS.y : VIS.y - 6 * U;
+  put(S6.phone, { x: VIS.x, y: py + (1 - ik) * H * 0.6 + Math.sin(lt * 2.3) * U, w: pw, h: ph, r: -4 + Math.sin(lt * 1.7) * 1.5, o });
+  // tokens orbit around the phone on an ellipse, front ones bigger
+  const n = S6.toks.length, rx = LAND ? 34 * U : 44 * U, ry = LAND ? 36 * U : 50 * U;
+  S6.toks.forEach((tk, i) => {
+    const k = eBack(prog(lt, 0.3 + i * 0.06, 0.75 + i * 0.06));
+    const a = (i / n) * Math.PI * 2 + lt * 0.9;
+    const depth = (Math.sin(a) + 1) / 2, d = lerp(9, 15, depth) * U;
+    tk.style.zIndex = depth > 0.5 ? 5 : 1;
+    put(tk, { x: VIS.x + Math.cos(a) * rx, y: py + Math.sin(a) * ry * 0.9 + Math.sin(lt * 5 + i) * U, w: d, h: d, fs: d * 0.6, s: k, o: o * lerp(0.75, 1, depth) });
+    const rr = PARADE[i][2]; tk.style.background = rr === 'C' ? '' : `radial-gradient(circle at 35% 30%, #fff, ${RARE[rr]}55 60%, ${RARE[rr]})`;
+  });
+  S6.sparks.forEach((s) => { const ph2 = (lt * 1.3 + s.ph) % 1; put(s.e, { x: VIS.x + Math.cos(s.a) * rx * s.r, y: py + Math.sin(s.a) * ry * s.r, fs: 5 * U, s: Math.sin(ph2 * Math.PI) * 1.2, r: ph2 * 90, o: o * prog(lt, 0.6, 0.9) }); });
+  animHeadline(S6.h, t, T.shop[0] + 0.2, TXT.y, TXT.fs, TXT.x, o);
+  put(S6.s, { x: TXT.x, y: TXT.subY, fs: TXT.subFs, o: eOut(prog(lt, 0.7, 1.1)) * o, s: lerp(0.6, 1, eBack(prog(lt, 0.7, 1.1))) });
+}
+
+// ---------- scene 7: friends ----------
+const S7 = { phone: makePhone('he-1-menu.png') };
+const FR = [['🐈', '#FF8A00'], ['🏎️', '#D90429'], ['🦖', '#16A34A'], ['🐕', '#8B5A2B']];
+S7.lines = el(''); S7.lines.innerHTML = `<svg width="100%" height="100%" style="overflow:visible"></svg>`; S7.svg = S7.lines.firstChild;
+S7.av = FR.map(([e, c]) => { const a = el('av c', stage, e); a.style.boxShadow = `0 0 0 .1em ${c}, 0 .1em .25em rgba(0,0,0,.45)`; return a; });
+S7.badge = el('badge c', stage, '<span dir="ltr" style="unicode-bidi:isolate">🎁 +150 🪙</span>'); S7.badge.style.zIndex = 4; S7.badgeSub = el('sub', stage, 'על כל חבר שמצטרף');
+S7.coins = []; { const R = rng(77); for (let i = 0; i < 16; i++) S7.coins.push({ e: el('coin', stage, '₪'), a: R() * Math.PI * 2, v: (25 + R() * 30) * U }); }
+S7.h = headline('שחקו עם חברים'); S7.s = el('sub', stage, 'אונליין, על אותו טלפון, או נגד בוטים 🤖');
+function scene7(t) {
+  const V = vis(t, T.friends); const all = [S7.phone, S7.lines, ...S7.av, S7.badge, S7.badgeSub, ...S7.coins.map((c) => c.e), S7.h, S7.s];
+  if (!V.v) return all.forEach(hide);
+  const lt = t - T.friends[0], o = V.o;
+  const ph = PH * (LAND ? 0.8 : 0.62), pw = ph * 0.5625 * 1.07, ik = eBack(prog(lt, 0, 0.5));
+  const py = LAND ? VIS.y : VIS.y - 8 * U;
+  put(S7.phone, { x: VIS.x, y: py + (1 - ik) * H * 0.6 + Math.sin(lt * 2) * U, w: pw, h: ph, o });
+  const pos = LAND ? [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b]) => [VIS.x + a * 26 * U, py + b * 26 * U]) : [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b]) => [VIS.x + a * 36 * U, py + b * 22 * U]);
+  put(S7.lines, { x: W / 2, y: H / 2, w: W, h: H, o });
+  S7.svg.innerHTML = pos.map(([x, y], i) => { const k = prog(lt, 0.5 + i * 0.12, 0.9 + i * 0.12); return `<line x1="${VIS.x}" y1="${py}" x2="${lerp(VIS.x, x, k)}" y2="${lerp(py, y, k)}" stroke="#FFD23F" stroke-width="${0.9 * U}" stroke-dasharray="${2.4 * U} ${1.6 * U}" stroke-dashoffset="${-lt * 12 * U}" stroke-linecap="round" opacity="${k > 0 ? 0.9 : 0}"/>`; }).join('');
+  S7.av.forEach((a, i) => { const k = eElastic(prog(lt, 0.75 + i * 0.12, 1.5 + i * 0.12)), d = 15 * U; put(a, { x: pos[i][0], y: pos[i][1] + Math.sin(lt * 4 + i * 1.7) * 1.2 * U, w: d, h: d, fs: d * 0.58, s: k, o: k > 0 ? o : 0 }); });
+  const bk = eElastic(prog(lt, 1.6, 2.3)), by = LAND ? py + ph / 2 - 2 * U : py + ph / 2 + 9 * U;
+  put(S7.badge, { x: VIS.x, y: by, fs: (LAND ? 6.5 : 8) * U, s: bk * (1 + 0.04 * Math.sin(lt * 9)), r: -4, o: bk > 0 ? o : 0 });
+  put(S7.badgeSub, { x: VIS.x, y: by + (LAND ? 7.5 : 9) * U, fs: (LAND ? 3.6 : 4.6) * U, o: eOut(prog(lt, 1.9, 2.2)) * o });
+  S7.coins.forEach((c) => { const bt = lt - 1.7; if (bt < 0) return hide(c.e); const d = 4 * U; put(c.e, { x: VIS.x + Math.cos(c.a) * c.v * bt, y: by + Math.sin(c.a) * c.v * bt + 70 * U * bt * bt, w: d, h: d, fs: d * 0.55, r: bt * 600, o: clamp(1.4 - bt) * o }); });
+  animHeadline(S7.h, t, T.friends[0] + 0.2, TXT.y, TXT.fs, TXT.x, o);
+  put(S7.s, { x: TXT.x, y: TXT.subY, fs: TXT.subFs * 0.82, o: eOut(prog(lt, 0.7, 1.1)) * o, s: lerp(0.6, 1, eBack(prog(lt, 0.7, 1.1))) });
+}
+
+// ---------- scene 8: end card ----------
+const S8 = { logo: el('c z3', stage, `<img src="icon.png" style="width:100%;height:100%;border-radius:22%;box-shadow:0 1.2em 2.4em rgba(0,0,0,.45)">`) };
+S8.title = headline('ביג דיל'); S8.title.style.zIndex = 3; S8.cta = el('cta c', stage, 'שחקו עכשיו – בחינם!');
+S8.soon = el('sub', stage, '📲 בקרוב בחנות <bdi dir="ltr">Google Play</bdi>'); S8.url = el('url', stage, 'alongdev26-glitch.github.io/-1');
+S8.rain = []; { const R = rng(99); for (let i = 0; i < 24; i++) S8.rain.push({ e: el('coin', stage, '₪'), x: R() * W, sp: (35 + R() * 40) * U, d: (3 + R() * 3) * U, ph: R() * 3, rot: (R() - 0.5) * 400 }); }
+function scene8(t) {
+  const V = vis(t, T.end, true); const all = [S8.logo, S8.title, S8.cta, S8.soon, S8.url, ...S8.rain.map((r) => r.e)];
+  if (!V.v) return all.forEach(hide);
+  const lt = t - T.end[0];
+  S8.rain.forEach((r) => { const y = -r.d + ((lt + r.ph) * r.sp) % (H + 2 * r.d); put(r.e, { x: r.x, y, w: r.d, h: r.d, fs: r.d * 0.55, r: lt * r.rot, o: 0.85 * prog(lt, 0.3, 0.8) }); r.e.style.zIndex = 0; });
+  const LS = (LAND ? 34 : 54) * U, ly = LAND ? H * 0.27 : H * 0.33;
+  const k = eElastic(prog(lt, 0.05, 1.0));
+  put(S8.logo, { x: CX, y: ly, w: LS, h: LS, s: k * (1 + 0.025 * Math.sin(lt * 4)), r: (1 - k) * 20, o: k > 0 ? 1 : 0 });
+  const ty = ly + LS / 2 + (LAND ? 8 : 10) * U;
+  animHeadline(S8.title, t, T.end[0] + 0.45, ty, (LAND ? 9 : 13) * U, CX);
+  const ck = eBack(prog(lt, 0.9, 1.3)), pulse = 1 + 0.05 * Math.sin(Math.max(0, lt - 1.3) * 6);
+  const cy = ty + (LAND ? 12 : 16) * U;
+  put(S8.cta, { x: CX, y: cy, fs: (LAND ? 5.5 : 7) * U, s: ck * pulse, o: ck > 0 ? 1 : 0 });
+  put(S8.soon, { x: CX, y: cy + (LAND ? 10 : 13) * U, fs: (LAND ? 4 : 5.2) * U, o: eOut(prog(lt, 1.35, 1.7)) });
+  put(S8.url, { x: CX, y: cy + (LAND ? 16 : 21) * U, fs: (LAND ? 3 : 3.8) * U, o: eOut(prog(lt, 1.6, 2.0)) });
+}
+
+// ---------- background, bands, transitions ----------
+function background(t) {
+  // hue drifts per scene
+  const hues = [[46, 155, 255, 13, 79, 163], [255, 120, 70, 200, 30, 40], [70, 200, 110, 15, 110, 50], [130, 90, 255, 60, 25, 150], [46, 155, 255, 13, 79, 163], [255, 90, 170, 140, 20, 90], [255, 170, 40, 200, 80, 10], [46, 155, 255, 13, 79, 163]];
+  const keys = Object.values(T); let i = keys.findIndex(([a, b]) => t >= a && t < b); if (i < 0) i = keys.length - 1;
+  const k = eInOut(prog(t, keys[i][0] - 0.25, keys[i][0] + 0.35)), p = hues[Math.max(0, i - 1)], c = hues[i];
+  const m = (j) => Math.round(lerp(i === 0 ? c[j] : p[j], c[j], k));
+  stage.style.background = `radial-gradient(circle at 50% 40%, rgb(${m(0)},${m(1)},${m(2)}), rgb(${m(3)},${m(4)},${m(5)}) 72%, #061d40)`;
+  const rs = Math.max(W, H) * 1.6;
+  put(rays, { x: VIS.x, y: VIS.y, w: rs, h: rs, r: t * 12, o: 0.55 });
+  bgCoins.forEach((c) => { const y = H + c.d - ((t * c.sp * H + c.ph * H) % (H + 2 * c.d)); put(c.e, { x: c.x + Math.sin(t + c.ph) * 3 * U, y, w: c.d, h: c.d, fs: c.d * 0.55, r: c.rot + t * 60, o: 0.28 }); });
+  put(bandTop, { x: W / 2, y: 0.8 * U, w: W, o: 1 }); put(bandBot, { x: W / 2, y: H - 0.8 * U, w: W, o: 1 });
+  // color-bar wipe at each cut
+  const cuts = Object.values(T).slice(1).map(([a]) => a); const cut = cuts.find((c) => t > c - 0.45 && t < c + 0.45);
+  if (cut != null) { const wk = prog(t, cut - 0.45, cut + 0.45), ww = Math.max(W, H) * 0.5; put(wipe, { x: lerp(W + ww * 1.5, -ww * 1.5, eInOut(wk)), y: CY, w: ww, h: Math.hypot(W, H) * 1.2, r: 18, o: 1 }); }
+  else hide(wipe);
+  // flash on the logo slam
+  const fk = prog(t, 1.22, 1.5); put(flash, { x: W / 2, y: H / 2, w: W, h: H, o: fk > 0 && fk < 1 ? 0.55 * (1 - fk) : 0 });
+  // small screen shake after the slam
+  const sh = prog(t, 1.22, 1.6); const amp = sh > 0 && sh < 1 ? (1 - sh) * 1.4 * U : 0;
+  return amp ? `translate(${Math.sin(t * 90) * amp}px, ${Math.cos(t * 77) * amp}px)` : '';
+}
+
+window.render = (t) => {
+  const shake = background(t);
+  scene1(t); scene2(t); scene3(t); scene4(t); scene5(t); scene6(t); scene7(t); scene8(t);
+  stage.style.transform = shake;
+};
+window.DURATION = DURATION;
+window.ready = Promise.all([document.fonts.ready, ...[...document.images].map((i) => i.decode().catch(() => {}))]);
+render(0);
+</script>
+</body>
+</html>
