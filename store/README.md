@@ -1,4 +1,4 @@
-# ביג דיל: ערכת Google Play
+# דיל סיטי (Deal City): ערכת Google Play
 
 הערכה כוללת:
 - `icon-512.png`: אייקון האפליקציה (512×512).
@@ -10,8 +10,8 @@
 ## 1. בניית קובץ האפליקציה (AAB)
 1. נכנסים ל-https://www.pwabuilder.com ומדביקים את הכתובת `https://alongdev26-glitch.github.io/-1/`.
 2. לוחצים **Package For Stores**, בוחרים **Android** ואז **Generate Package**.
-   - Package ID: `io.github.alongdev26glitch.bigdeal`
-   - App name: `ביג דיל`
+   - Package ID: `io.github.alongdev26glitch.dealcity`
+   - App name: `דיל סיטי`
    - Signing key: לבחור **Create new**.
 3. מורידים את ה-zip. הוא מכיל:
    - `*.aab`: הקובץ שמעלים לגוגל פליי.
@@ -20,13 +20,13 @@
    - אם בוחרים ב-Play App Signing (מומלץ): אחרי ההעלאה הראשונה מעתיקים את טביעת האצבע SHA-256 מ-Play Console, מהעמוד Setup → App signing, ומוסיפים אותה ל-`assetlinks.json`.
 
 ## 2. דף החנות (Main store listing)
-**שם:** ביג דיל: משחק נדל"ן
+**שם:** דיל סיטי – Deal City
 
 **תיאור קצר (עד 80 תווים):**
 > קונים רחובות, בונים בתים ומלונות ומנצחים חברים! משחק לוח ב-6 שפות 🎲
 
 **תיאור מלא:**
-> 🎲 ביג דיל הוא משחק לוח קלאסי של קנייה, בנייה ומסחר בנכסים, בעיצוב צבעוני ומודרני!
+> 🎲 דיל סיטי הוא משחק לוח קלאסי של קנייה, בנייה ומסחר בנכסים, בעיצוב צבעוני ומודרני!
 >
 > 🏙️ קונים רחובות בערים אמיתיות, בונים בתים ומלונות וגובים שכר דירה מהיריבים.
 > 🤝 עושים עסקאות והחלפות עם שחקנים אחרים.
@@ -42,7 +42,7 @@
 > Buy streets, build hotels and beat your friends! A board game in 6 languages 🎲
 
 **Full description (EN):**
-> 🎲 Big Deal is a classic property-trading board game with a bright, modern look!
+> 🎲 Deal City is a property-trading board game with a bright, modern look!
 >
 > 🏙️ Buy streets in real cities, build houses and hotels, and collect rent from your rivals.
 > 🤝 Make deals and trades with other players.

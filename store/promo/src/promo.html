@@ -47,6 +47,7 @@ body { font-family: Rubik, 'Noto Color Emoji', sans-serif; }
 .shine { background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.65) 50%, transparent 65%); mix-blend-mode: overlay; }
 .flash { background: #fff; }
 .z3, .cta, .url, .sub { z-index: 3; }
+html[dir=ltr] .counter, html[dir=ltr] .badge, html[dir=ltr] .stamp { direction: ltr; }
 .spark { color: #fff7c0; text-shadow: 0 0 .3em #ffd23f; }
 </style>
 </head>
@@ -54,6 +55,10 @@ body { font-family: Rubik, 'Noto Color Emoji', sans-serif; }
 <div id="stage"></div>
 <script>
 const q = Object.fromEntries(new URLSearchParams(location.search));
+const LANG = q.lang || 'he', EN = LANG === 'en';
+const L = (he, en) => (EN ? en : he);
+const CUR = EN ? '$' : '₪';
+if (EN) { document.documentElement.dir = 'ltr'; document.documentElement.lang = 'en'; }
 const W = +(q.w || 1080), H = +(q.h || 1920), LAND = W > H;
 const U = Math.min(W, H) / 100;           // 1 unit = 1% of the short side
 const stage = document.getElementById('stage');
@@ -106,6 +111,10 @@ function headline(text) {
 }
 function animHeadline(e, t, a, y = TXT.y, fs = TXT.fs, x = TXT.x, out = 1) {
   e.style.fontSize = fs + 'px';
+  // long headlines shrink to fit the frame
+  const maxW = LAND ? W * 0.46 : W * 0.9;
+  e.style.display = '';
+  if (e.scrollWidth > maxW) e.style.fontSize = (fs * maxW) / e.scrollWidth + 'px';
   const words = [...e.querySelectorAll('.w')];
   words.forEach((w, i) => { const k = eBack(prog(t, a + i * 0.09, a + i * 0.09 + 0.45)); w.style.transform = `translateY(${(1 - k) * 0.6}em) scale(${0.4 + 0.6 * k})`; w.style.opacity = clamp(k * 1.5); });
   put(e, { x, y, o: out });
@@ -114,9 +123,9 @@ function animHeadline(e, t, a, y = TXT.y, fs = TXT.fs, x = TXT.x, out = 1) {
 // ---------- shared background ----------
 const rays = el('rays c');
 const bgCoins = [];
-{ const R = rng(7); for (let i = 0; i < 18; i++) bgCoins.push({ e: el('coin', stage, '₪'), x: R() * W, sp: 0.04 + R() * 0.07, d: (2 + R() * 3.5) * U, ph: R() * 10, rot: R() * 360 }); }
+{ const R = rng(7); for (let i = 0; i < 18; i++) bgCoins.push({ e: el('coin', stage, CUR), x: R() * W, sp: 0.04 + R() * 0.07, d: (2 + R() * 3.5) * U, ph: R() * 10, rot: R() * 360 }); }
 const bandTop = el('band'), bandBot = el('band');
-const COLORS = ['#8B3A2B', '#1E9AD6', '#E0218A', '#F28C1C', '#E3001B', '#F7D117', '#1FA34A', '#1F4E9E'];
+const COLORS = ['#0fa3a3', '#6fae12', '#2e86de', '#8e44ad', '#f08a00', '#e2337f', '#c0392b', '#c99a06'];
 for (const b of [bandTop, bandBot]) { b.innerHTML = COLORS.map((c) => `<i style="background:${c}"></i>`).join(''); b.style.height = 1.6 * U + 'px'; b.style.width = W + 'px'; }
 // transition wipe: 8 colored bars sweeping across
 const wipe = el('band'); wipe.style.flexDirection = 'column'; wipe.innerHTML = COLORS.map((c) => `<i style="background:${c}"></i>`).join('');
@@ -127,8 +136,8 @@ const S1 = {};
 S1.d1 = el('die'); S1.d2 = el('die');
 S1.logo = el('c', stage, `<img src="icon.png" style="width:100%;height:100%;border-radius:22%;box-shadow:0 1.2em 2.4em rgba(0,0,0,.45)">`);
 S1.shineWrap = el('c'); S1.shineWrap.style.overflow = 'hidden'; S1.shineWrap.style.borderRadius = '22%'; S1.shine = el('shine', S1.shineWrap);
-S1.title = headline('ביג דיל'); S1.sub = el('sub', stage, 'קונים · בונים · מנצחים');
-S1.burst = []; { const R = rng(11); for (let i = 0; i < 26; i++) S1.burst.push({ e: el('coin', stage, '₪'), a: R() * Math.PI * 2, v: (40 + R() * 55) * U, d: (3 + R() * 3) * U, spin: (R() - 0.5) * 900 }); }
+S1.title = headline(L("דיל סיטי", "Deal City")); S1.sub = el('sub', stage, L("קונים · בונים · מנצחים", "Buy \u00b7 Build \u00b7 Win"));
+S1.burst = []; { const R = rng(11); for (let i = 0; i < 26; i++) S1.burst.push({ e: el('coin', stage, CUR), a: R() * Math.PI * 2, v: (40 + R() * 55) * U, d: (3 + R() * 3) * U, spin: (R() - 0.5) * 900 }); }
 const PIPS = { 1: [[50, 50]], 2: [[28, 28], [72, 72]], 3: [[26, 26], [50, 50], [74, 74]], 4: [[28, 28], [72, 28], [28, 72], [72, 72]], 5: [[27, 27], [73, 27], [50, 50], [27, 73], [73, 73]], 6: [[28, 24], [72, 24], [28, 50], [72, 50], [28, 76], [72, 76]] };
 function dieFace(e, n) { if (e._n === n) return; e._n = n; e.innerHTML = PIPS[n].map(([x, y]) => `<b style="left:${x}%;top:${y}%"></b>`).join(''); }
 
@@ -174,11 +183,11 @@ const PH = (LAND ? 76 : 104) * U;  // phone height (in units of the short side)
 const PW = PH * 0.5625 * 1.07;
 
 // ---------- scene 2: board ----------
-const S2 = { phone: makePhone('he-2-board.png') }; S2.scr = S2.phone.querySelector('.scr');
+const S2 = { phone: makePhone(`${LANG}-2-board.png`) }; S2.scr = S2.phone.querySelector('.scr');
 S2.tok = el('tok', S2.scr, '🐈'); S2.tok.style.boxShadow = '0 0 0 .12em #FF8A00, 0 .1em .2em rgba(0,0,0,.5)';
-S2.stamp = el('stamp', S2.scr, 'נקנה! 🏠');
-S2.h = headline('קונים רחובות'); S2.s = el('sub', stage, 'בערים אמיתיות');
-S2.dice = el('counter c'); S2.dice.style.direction = 'ltr'; S2.chips = el('url c', stage, '<span style="background:rgba(0,0,0,.28);border-radius:1em;padding:.2em .7em">40 משבצות · 22 רחובות · 4 רכבות</span>'); S2.chips.style.direction = 'rtl';
+S2.stamp = el('stamp', S2.scr, L("נקנה! 🏠", "SOLD! \ud83c\udfe0"));
+S2.h = headline(L("קונים רחובות", "Buy streets")); S2.s = el('sub', stage, L("בערים אמיתיות", "in real cities"));
+S2.dice = el('counter c'); S2.dice.style.direction = 'ltr'; S2.chips = el('url c', stage, '<span style="background:rgba(0,0,0,.28);border-radius:1em;padding:.2em .7em">' + L("40 משבצות · 22 רחובות · 4 רכבות", "40 squares \u00b7 22 streets \u00b7 4 stations") + '</span>'); S2.chips.style.direction = EN ? 'ltr' : 'rtl';
 // squares in the 1080×1920 screenshot: GO bottom-left, then up the left column
 const PATH = [[95, 1515], [95, 1405], [95, 1321], [95, 1237], [95, 1153]];
 function scene2(t) {
@@ -208,19 +217,19 @@ function scene2(t) {
 const HOUSE = `<svg viewBox="0 0 20 20" width="100%" height="100%"><path d="M10 2 L19 9 L17 9 L17 18 L3 18 L3 9 L1 9 Z" fill="#1FA34A" stroke="#0b5a22" stroke-width="1.2" stroke-linejoin="round"/><rect x="8" y="12" width="4" height="6" fill="#0b5a22"/></svg>`;
 const HOTEL = `<svg viewBox="0 0 30 24" width="100%" height="100%"><path d="M2 8 L15 1 L28 8 L28 23 L2 23 Z" fill="#E3001B" stroke="#7a000e" stroke-width="1.3" stroke-linejoin="round"/><g fill="#ffe9a8"><rect x="6" y="11" width="4" height="4"/><rect x="13" y="11" width="4" height="4"/><rect x="20" y="11" width="4" height="4"/><rect x="6" y="17" width="4" height="4"/><rect x="20" y="17" width="4" height="4"/></g><rect x="13" y="17" width="4" height="6" fill="#7a000e"/></svg>`;
 const S3 = { tiles: [], houses: [], coins: [] };
-[['רח\' הרצל', '₪170', '#F28C1C'], ['שד\' בנימין', '₪170', '#F28C1C'], ['כיכר העצמאות', '₪190', '#F28C1C']].forEach(([n, p, c]) => {
+(EN ? [['Ocean Drive', '$170', '#8e44ad'], ['Collins Avenue', '$170', '#8e44ad'], ['Lincoln Road', '$190', '#8e44ad']] : [['רח\' הרצל', '₪170', '#8e44ad'], ['שד\' בנימין', '₪170', '#8e44ad'], ['כיכר העצמאות', '₪190', '#8e44ad']]).forEach(([n, p, c]) => {
   S3.tiles.push(el('tile', stage, `<div class="hd" style="background:${c}"></div><div class="nm">${n}</div><div class="pr">${p}</div>`));
 });
 for (let i = 0; i < 6; i++) S3.houses.push(el('', stage, HOUSE));
 S3.hotel = el('', stage, HOTEL); S3.puff = el('', stage, '💥');
-S3.rent = el('badge c', stage, '<span dir="ltr" style="unicode-bidi:isolate">+₪240</span> שכר דירה'); S3.counter = el('counter'); S3.h = headline('בונים בתים ומלונות'); S3.s = el('sub', stage, 'וגובים שכר דירה');
-{ const R = rng(23); for (let i = 0; i < 14; i++) S3.coins.push({ e: el('coin', stage, '₪'), d: R() * 0.5, sx: R(), off: (R() - 0.5) }); }
+S3.rent = el('badge c', stage, '<span dir="ltr" style="unicode-bidi:isolate">+' + CUR + '240</span> ' + L("שכר דירה", "rent")); S3.counter = el('counter'); S3.h = headline(L("בונים בתים ומלונות", "Build houses & hotels")); S3.s = el('sub', stage, L("וגובים שכר דירה", "and collect rent"));
+{ const R = rng(23); for (let i = 0; i < 14; i++) S3.coins.push({ e: el('coin', stage, CUR), d: R() * 0.5, sx: R(), off: (R() - 0.5) }); }
 function scene3(t) {
   const V = vis(t, T.build); const all = [...S3.tiles, ...S3.houses, S3.hotel, S3.puff, S3.counter, S3.rent, S3.h, S3.s, ...S3.coins.map((c) => c.e)];
   if (!V.v) return all.forEach(hide);
   const lt = t - T.build[0], o = V.o;
   const tw = (LAND ? 21 : 26) * U, th = tw * 1.45, gap = tw * 0.12, ty = LAND ? VIS.y + 6 * U : VIS.y + 4 * U;
-  const xs = [-1, 0, 1].map((i) => VIS.x - i * (tw + gap)); // RTL: first tile on the right
+  const xs = [-1, 0, 1].map((i) => VIS.x - (EN ? -i : i) * (tw + gap)); // cheapest first in reading order
   S3.tiles.forEach((tl, i) => { const k = eBack(prog(lt, 0.05 + i * 0.1, 0.5 + i * 0.1)); tl.querySelector('.nm').style.fontSize = tw * 0.13 + 'px'; tl.querySelector('.pr').style.fontSize = tw * 0.12 + 'px'; put(tl, { x: xs[i], y: ty + (1 - k) * 40 * U, w: tw, h: th, s: k, o }); });
   // houses drop: 2 per tile on the first two, then the hotel on the third
   const hs = tw * 0.42;
@@ -244,7 +253,7 @@ function scene3(t) {
   const rk = prog(lt, 2.5, 2.8);
   put(S3.rent, { x: xs[2], y: ty - th / 2 - tw * 0.95 - rk * 4 * U, fs: (LAND ? 3.6 : 4.6) * U, s: eBack(rk), r: -6, o: rk > 0 ? o * (1 - prog(lt, 3.3, 3.5)) : 0 });
   const money = Math.round(lerp(1500, 2590, eOut(prog(lt, 1.8, 3.0))) / 10) * 10;
-  S3.counter.textContent = '💰 ₪' + money.toLocaleString('en-US');
+  S3.counter.textContent = '💰 ' + CUR + money.toLocaleString('en-US');
   put(S3.counter, { x: VIS.x, y: cy, fs: (LAND ? 5.6 : 7) * U, s: eBack(prog(lt, 0.3, 0.7)) * (1 + 0.06 * Math.sin(prog(lt, 2.75, 2.95) * Math.PI)), o });
   animHeadline(S3.h, t, T.build[0] + 0.2, TXT.y, TXT.fs * (LAND ? 0.82 : 0.86), TXT.x, o);
   put(S3.s, { x: TXT.x, y: TXT.subY, fs: TXT.subFs, o: eOut(prog(lt, 0.7, 1.1)) * o, s: lerp(0.6, 1, eBack(prog(lt, 0.7, 1.1))) });
@@ -253,11 +262,11 @@ function scene3(t) {
 // ---------- scene 4: cards ----------
 const CHEST = `<svg viewBox="0 0 32 26" width="100%"><path d="M3 11 C3 4 9 2 16 2 C23 2 29 4 29 11 Z" fill="#b5652f" stroke="#3f1d05" stroke-width="1.2"/><rect x="3" y="11" width="26" height="13" rx="1.5" fill="#8b4513" stroke="#3f1d05" stroke-width="1.2"/><rect x="3" y="10" width="26" height="2.6" fill="#e0a526" stroke="#7a4a00" stroke-width=".6"/><rect x="6.5" y="2.6" width="3" height="21.4" fill="#e0a526" stroke="#7a4a00" stroke-width=".6"/><rect x="22.5" y="2.6" width="3" height="21.4" fill="#e0a526" stroke="#7a4a00" stroke-width=".6"/><rect x="13.5" y="9" width="5" height="6" rx="1" fill="#ffd23f" stroke="#7a4a00" stroke-width=".7"/></svg>`;
 const S4 = { blue: [], pink: [] };
-for (let i = 0; i < 4; i++) S4.blue.push(el('card blue c', stage, `<div style="width:46%">${CHEST}</div><div class="lbl">תיבת המזל</div>`));
-for (let i = 0; i < 4; i++) S4.pink.push(el('card pink c', stage, `<div class="q">?</div><div class="lbl">הפתעה</div>`));
-S4.fb = el('card face c', stage, `<div style="font-size:1.6em">🍳🏆</div><div style="font-weight:800;margin-top:.3em">זכית בתחרות בישול!</div><div style="color:#1b7a2f;font-weight:900;font-size:1.6em;margin-top:.2em;white-space:nowrap" dir="ltr">+₪100</div>`);
-S4.fp = el('card face c', stage, `<div style="font-size:1.6em">🏖️</div><div style="font-weight:800;margin-top:.3em">סוף שבוע חופשי!</div><div style="color:#E0218A;font-weight:900;font-size:1.25em;margin-top:.2em">סע לאילת</div>`);
-S4.h = headline('קלפי מזל והפתעות'); S4.s = el('sub', stage, 'כל קלף משנה את המשחק');
+for (let i = 0; i < 4; i++) S4.blue.push(el('card blue c', stage, `<div style="width:46%">${CHEST}</div><div class="lbl">${L("תיבת המזל", "Lucky Chest")}</div>`));
+for (let i = 0; i < 4; i++) S4.pink.push(el('card pink c', stage, `<div class="q">?</div><div class="lbl">${L("הפתעה", "Surprise")}</div>`));
+S4.fb = el('card face c', stage, `<div style="font-size:1.6em">🍳🏆</div><div style="font-weight:800;margin-top:.3em">${L("זכית בתחרות בישול!", "You won a cooking contest!")}</div><div style="color:#1b7a2f;font-weight:900;font-size:1.6em;margin-top:.2em;white-space:nowrap" dir="ltr">+${CUR}100</div>`);
+S4.fp = el('card face c', stage, `<div style="font-size:1.6em">🏖️</div><div style="font-weight:800;margin-top:.3em">${L("סוף שבוע חופשי!", "A free weekend!")}</div><div style="color:#E0218A;font-weight:900;font-size:1.25em;margin-top:.2em">${L("סע לאילת", "Go to Miami")}</div>`);
+S4.h = headline(L("קלפי מזל והפתעות", "Lucky & Surprise cards")); S4.s = el('sub', stage, L("כל קלף משנה את המשחק", "Every card changes the game"));
 function scene4(t) {
   const V = vis(t, T.cards); const all = [...S4.blue, ...S4.pink, S4.fb, S4.fp, S4.h, S4.s];
   if (!V.v) return all.forEach(hide);
@@ -286,7 +295,7 @@ function scene4(t) {
 // ---------- scene 5: languages ----------
 const LANGS = [['🇮🇱', 'עברית', 'לוח ישראל · ₪'], ['🇺🇸', 'English', 'USA board · $'], ['🇦🇪', 'العربية', 'لوحة الإمارات'], ['🇫🇷', 'Français', 'Plateau France · €'], ['🇷🇺', 'Русский', 'Поле Россия · ₽'], ['🇯🇵', '日本語', '日本版 · ¥']];
 const S5 = { cards: LANGS.map(([f, n, e]) => el('flagcard c', stage, `<div class="fl">${f}</div><div class="ln">${n}</div><div class="ed">${e}</div>`)) };
-S5.h = headline('6 שפות · 6 לוחות'); S5.s = el('sub', stage, 'לכל מדינה לוח משלה');
+S5.h = headline(L("6 שפות · 6 לוחות", "6 languages \u00b7 6 boards")); S5.s = el('sub', stage, L("לכל מדינה לוח משלה", "Every country, its own board"));
 function scene5(t) {
   const V = vis(t, T.langs); if (!V.v) return [...S5.cards, S5.h, S5.s].forEach(hide);
   const lt = t - T.langs[0], o = V.o;
@@ -295,7 +304,7 @@ function scene5(t) {
   const glow = Math.floor(prog(lt, 1.2, 2.9) * 6.99);
   S5.cards.forEach((c, i) => {
     const col = i % cols, row = Math.floor(i / cols);
-    const x = VIS.x + gw / 2 - cw / 2 - col * (cw + g), y = VIS.y - gh / 2 + ch / 2 + row * (ch + g) + (LAND ? 0 : 3 * U);
+    const x = EN ? VIS.x - gw / 2 + cw / 2 + col * (cw + g) : VIS.x + gw / 2 - cw / 2 - col * (cw + g), y = VIS.y - gh / 2 + ch / 2 + row * (ch + g) + (LAND ? 0 : 3 * U);
     const k = prog(lt, 0.1 + i * 0.11, 0.6 + i * 0.11), a = (i * 137) % 360 * Math.PI / 180;
     c.querySelector('.fl').style.fontSize = cw * 0.34 + 'px'; c.querySelector('.ln').style.fontSize = cw * 0.13 + 'px'; c.querySelector('.ed').style.fontSize = cw * 0.075 + 'px';
     const on = lt > 1.2 && glow === i;
@@ -309,10 +318,10 @@ function scene5(t) {
 // ---------- scene 6: shop ----------
 const PARADE = [['🦄', '#E040FB', 'L'], ['🐉', '#2E7D32', 'L'], ['👑', '#FFC400', 'L'], ['🦁', '#E0A100', 'E'], ['🚀', '#C62828', 'E'], ['🦈', '#0277BD', 'E'], ['🐼', '#455A64', 'R'], ['🐯', '#F57C00', 'R'], ['🦊', '#E65100', 'C'], ['🐸', '#4CAF50', 'C'], ['🛸', '#7E57C2', 'E'], ['🐙', '#D81B60', 'R']];
 const RARE = { L: '#FFD23F', E: '#C77DFF', R: '#4FC3FF', C: '#ffffff' };
-const S6 = { phone: (() => { const p = makePhone('he-4-shop.png'); p.style.zIndex = 2; return p; })(), toks: PARADE.map(([e, c]) => { const t = el('tok c', stage, e); t.style.boxShadow = `0 0 0 .1em ${c}, 0 .08em .2em rgba(0,0,0,.4)`; return t; }) };
+const S6 = { phone: (() => { const p = makePhone(`${LANG}-4-shop.png`); p.style.zIndex = 2; return p; })(), toks: PARADE.map(([e, c]) => { const t = el('tok c', stage, e); t.style.boxShadow = `0 0 0 .1em ${c}, 0 .08em .2em rgba(0,0,0,.4)`; return t; }) };
 S6.sparks = []; { const R = rng(41); for (let i = 0; i < 16; i++) S6.sparks.push({ e: el('spark', stage, '✦'), a: R() * Math.PI * 2, r: 0.6 + R() * 0.6, ph: R() }); }
-S6.rar = el('url c', stage, '<span style="color:#FFD23F">★ אגדי</span> · <span style="color:#E2B6FF">★ אפי</span> · <span style="color:#9BE3FF">★ נדיר</span>'); S6.rar.style.direction = 'rtl'; S6.rib = el('stamp c', stage, 'חדש!'); S6.rib.style.zIndex = 6;
-S6.h = headline('דמויות וסקינים'); S6.s = el('sub', stage, '🛍️ חדשים בחנות כל 3 ימים');
+S6.rar = el('url c', stage, '<span style="color:#FFD23F">★ ' + L("אגדי", "Legendary") + '</span> · <span style="color:#E2B6FF">★ ' + L("אפי", "Epic") + '</span> · <span style="color:#9BE3FF">★ ' + L("נדיר", "Rare") + '</span>'); S6.rar.style.direction = EN ? 'ltr' : 'rtl'; S6.rib = el('stamp c', stage, L("חדש!", "NEW!")); S6.rib.style.zIndex = 6;
+S6.h = headline(L("דמויות וסקינים", "Characters & skins")); S6.s = el('sub', stage, L("🛍️ חדשים בחנות כל 3 ימים", "\ud83d\udecd\ufe0f New in the shop every 3 days"));
 function scene6(t) {
   const V = vis(t, T.shop); if (!V.v) return [S6.phone, S6.rar, S6.rib, ...S6.toks, ...S6.sparks.map((s) => s.e), S6.h, S6.s].forEach(hide);
   const lt = t - T.shop[0], o = V.o;
@@ -337,14 +346,14 @@ function scene6(t) {
 }
 
 // ---------- scene 7: friends ----------
-const S7 = { phone: makePhone('he-1-menu.png') };
+const S7 = { phone: makePhone(`${LANG}-1-menu.png`) };
 const FR = [['🐈', '#FF8A00'], ['🏎️', '#D90429'], ['🦖', '#16A34A'], ['🤖', '#546E7A']];
 S7.lines = el(''); S7.lines.innerHTML = `<svg width="100%" height="100%" style="overflow:visible"></svg>`; S7.svg = S7.lines.firstChild;
 S7.av = FR.map(([e, c]) => { const a = el('av c', stage, e); a.style.boxShadow = `0 0 0 .1em ${c}, 0 .1em .25em rgba(0,0,0,.45)`; return a; });
-S7.badge = el('badge c', stage, '<span dir="ltr" style="unicode-bidi:isolate">🎁 +150 🪙</span>'); S7.badge.style.zIndex = 4; S7.badgeSub = el('sub', stage, 'על כל חבר שמצטרף');
-S7.coins = []; { const R = rng(77); for (let i = 0; i < 16; i++) S7.coins.push({ e: el('coin', stage, '₪'), a: R() * Math.PI * 2, v: (25 + R() * 30) * U }); }
-S7.room = el('counter c', stage, '🔗 חדר: <b dir="ltr">4821</b>'); S7.room.style.zIndex = 4;
-S7.h = headline('שחקו עם חברים'); S7.s = el('sub', stage, 'אונליין, על אותו טלפון, או נגד בוטים 🤖');
+S7.badge = el('badge c', stage, '<span dir="ltr" style="unicode-bidi:isolate">🎁 +150 🪙</span>'); S7.badge.style.zIndex = 4; S7.badgeSub = el('sub', stage, L("על כל חבר שמצטרף", "for every friend who joins"));
+S7.coins = []; { const R = rng(77); for (let i = 0; i < 16; i++) S7.coins.push({ e: el('coin', stage, CUR), a: R() * Math.PI * 2, v: (25 + R() * 30) * U }); }
+S7.room = el('counter c', stage, '🔗 ' + L("חדר", "Room") + ': <b dir="ltr">4821</b>'); S7.room.style.zIndex = 4;
+S7.h = headline(L("שחקו עם חברים", "Play with friends")); S7.s = el('sub', stage, L("אונליין, על אותו טלפון, או נגד בוטים 🤖", "Online, on one phone, or vs. bots \ud83e\udd16"));
 function scene7(t) {
   const V = vis(t, T.friends); const all = [S7.phone, S7.room, S7.lines, ...S7.av, S7.badge, S7.badgeSub, ...S7.coins.map((c) => c.e), S7.h, S7.s];
   if (!V.v) return all.forEach(hide);
@@ -367,10 +376,10 @@ function scene7(t) {
 
 // ---------- scene 8: end card ----------
 const S8 = { logo: el('c z3', stage, `<img src="icon.png" style="width:100%;height:100%;border-radius:22%;box-shadow:0 1.2em 2.4em rgba(0,0,0,.45)">`) };
-S8.title = headline('ביג דיל'); S8.title.style.zIndex = 3; S8.cta = el('cta c', stage, 'שחקו עכשיו – בחינם!');
-S8.soon = el('sub', stage, '📲 בקרוב בחנות <bdi dir="ltr">Google Play</bdi>'); S8.url = el('url', stage, 'alongdev26-glitch.github.io/-1');
-S8.checks = ['✔ בלי פרסומות', '✔ בלי הרשמה', '✔ עובד גם בלי אינטרנט'].map((c) => el('url c', stage, `<span dir="rtl" style="display:inline-block;direction:rtl;background:rgba(0,0,0,.25);border-radius:1em;padding:.15em .6em">${c}</span>`));
-S8.rain = []; { const R = rng(99); for (let i = 0; i < 24; i++) S8.rain.push({ e: el('coin', stage, '₪'), x: R() * W, sp: (35 + R() * 40) * U, d: (3 + R() * 3) * U, ph: R() * 3, rot: (R() - 0.5) * 400 }); }
+S8.title = headline(L("דיל סיטי", "Deal City")); S8.title.style.zIndex = 3; S8.cta = el('cta c', stage, L("שחקו עכשיו – בחינם!", "Play now \u2013 it\u2019s free!"));
+S8.soon = el('sub', stage, L("📲 בקרוב בחנות <bdi dir=\"ltr\">Google Play</bdi>", "\ud83d\udcf2 Coming soon to Google Play")); S8.url = el('url', stage, 'alongdev26-glitch.github.io/-1');
+S8.checks = (EN ? ['✔ No ads', '✔ No sign-up', '✔ Works offline'] : ['✔ בלי פרסומות', '✔ בלי הרשמה', '✔ עובד גם בלי אינטרנט']).map((c) => el('url c', stage, `<span dir="${EN ? 'ltr' : 'rtl'}" style="display:inline-block;direction:${EN ? 'ltr' : 'rtl'};background:rgba(0,0,0,.25);border-radius:1em;padding:.15em .6em">${c}</span>`));
+S8.rain = []; { const R = rng(99); for (let i = 0; i < 24; i++) S8.rain.push({ e: el('coin', stage, CUR), x: R() * W, sp: (35 + R() * 40) * U, d: (3 + R() * 3) * U, ph: R() * 3, rot: (R() - 0.5) * 400 }); }
 function scene8(t) {
   const V = vis(t, T.end, true); const all = [S8.logo, S8.title, S8.cta, S8.soon, S8.url, ...S8.checks, ...S8.rain.map((r) => r.e)];
   if (!V.v) return all.forEach(hide);
@@ -386,20 +395,20 @@ function scene8(t) {
   put(S8.cta, { x: CX, y: cy, fs: (LAND ? 5.5 : 7) * U, s: ck * pulse, o: ck > 0 ? 1 : 0 });
   put(S8.soon, { x: CX, y: cy + (LAND ? 10 : 13) * U, fs: (LAND ? 4 : 5.2) * U, o: eOut(prog(lt, 1.35, 1.7)) });
   const chY = cy + (LAND ? 17 : 22) * U;
-  S8.checks.forEach((c, i) => { const k = eBack(prog(lt, 1.7 + i * 0.25, 2.05 + i * 0.25)); c.style.direction = 'rtl';
-    put(c, LAND ? { x: CX + (1 - i) * 30 * U, y: chY, fs: 3.2 * U, s: k, o: k > 0 ? 1 : 0 } : { x: CX, y: chY + i * 7 * U, fs: 4.2 * U, s: k, o: k > 0 ? 1 : 0 }); });
+  S8.checks.forEach((c, i) => { const k = eBack(prog(lt, 1.7 + i * 0.25, 2.05 + i * 0.25)); c.style.direction = EN ? 'ltr' : 'rtl';
+    put(c, LAND ? { x: CX + (EN ? i - 1 : 1 - i) * 30 * U, y: chY, fs: 3.2 * U, s: k, o: k > 0 ? 1 : 0 } : { x: CX, y: chY + i * 7 * U, fs: 4.2 * U, s: k, o: k > 0 ? 1 : 0 }); });
   put(S8.url, { x: CX, y: chY + (LAND ? 7 : 23) * U, fs: (LAND ? 3 : 3.8) * U, o: eOut(prog(lt, 2.6, 3.0)) });
 }
 
 // ---------- scene: auction ----------
 const CAR_SVG = `<svg viewBox="0 0 120 70" width="100%" height="100%"><path d="M104 30h12M106 37h10" stroke="#e3001b" stroke-width="3" stroke-linecap="round"/><path d="M10 44c0-8 4-12 12-13l14-2 12-14c2-2 4-3 7-3h24c3 0 5 1 7 3l11 14 8 1c6 1 9 5 9 11v6c0 2-2 4-4 4H14c-2 0-4-2-4-4z" fill="#e3001b" stroke="#3a0008" stroke-width="3" stroke-linejoin="round"/><path d="M52 17h12v13H41z" fill="#bfe8ff" stroke="#3a0008" stroke-width="2.5" stroke-linejoin="round"/><path d="M69 17h10c2 0 3 1 4 2l9 11H69z" fill="#bfe8ff" stroke="#3a0008" stroke-width="2.5" stroke-linejoin="round"/><path d="M66 31v18" stroke="#3a0008" stroke-width="2"/><rect x="10" y="37" width="7" height="7" rx="3" fill="#ffd23f" stroke="#3a0008" stroke-width="2"/><rect x="105" y="41" width="5" height="6" rx="1.5" fill="#fff" stroke="#3a0008" stroke-width="2"/><g class="wh"><circle cx="33" cy="52" r="10" fill="#1b1b1b"/><circle cx="33" cy="52" r="6" fill="#fff"/><circle cx="29" cy="52" r="2.6" fill="#e3001b"/></g><g class="wh"><circle cx="89" cy="52" r="10" fill="#1b1b1b"/><circle cx="89" cy="52" r="6" fill="#fff"/><circle cx="85" cy="52" r="2.6" fill="#e3001b"/></g></svg>`;
 function tokEl(emoji, color, parent = stage) { const t = el('tok c', parent, emoji); t.style.boxShadow = `0 0 0 .1em ${color}, 0 .08em .2em rgba(0,0,0,.45)`; return t; }
-const SA = { tile: el('tile c', stage, `<div class="hd" style="background:#1F4E9E"></div><div class="nm">רח' דיזנגוף</div><div class="pr">תל-אביב</div>`) };
-SA.tag = el('badge c'); SA.gavel = el('c', stage, '🔨'); SA.sold = el('stamp c', stage, 'נמכר! ✔');
+const SA = { tile: el('tile c', stage, `<div class="hd" style="background:#c99a06"></div><div class="nm">${L("רח' דיזנגוף", "Fifth Avenue")}</div><div class="pr">${L("תל-אביב", "New York")}</div>`) };
+SA.tag = el('badge c'); SA.gavel = el('c', stage, '🔨'); SA.sold = el('stamp c', stage, L("נמכר! ✔", "SOLD! \u2714"));
 SA.bidders = [['🐈', '#FF8A00'], ['🏎️', '#D90429'], ['🦖', '#16A34A']].map(([e, c]) => tokEl(e, c));
 SA.bubbles = [0, 1, 2, 3].map(() => el('counter c'));
-SA.coins = []; { const R = rng(55); for (let i = 0; i < 14; i++) SA.coins.push({ e: el('coin', stage, '₪'), a: R() * Math.PI * 2, v: (25 + R() * 30) * U }); }
-SA.h = headline('מכירות פומביות'); SA.s = el('sub', stage, 'מי ייתן יותר? 🔥');
+SA.coins = []; { const R = rng(55); for (let i = 0; i < 14; i++) SA.coins.push({ e: el('coin', stage, CUR), a: R() * Math.PI * 2, v: (25 + R() * 30) * U }); }
+SA.h = headline(L("מכירות פומביות", "Auctions")); SA.s = el('sub', stage, L("מי ייתן יותר? 🔥", "Who bids more? \ud83d\udd25"));
 const BIDS = [[0.75, 0, 220], [1.1, 1, 260], [1.45, 2, 300], [1.8, 0, 340]];
 function sceneAuction(t) {
   const V = vis(t, T.auction); const all = [SA.tile, SA.tag, SA.gavel, SA.sold, ...SA.bidders, ...SA.bubbles, ...SA.coins.map((c) => c.e), SA.h, SA.s];
@@ -411,13 +420,13 @@ function sceneAuction(t) {
   put(SA.tile, { x: VIS.x, y: ty + (1 - tk) * H * 0.5 + Math.sin(hit * Math.PI) * 1.5 * U, w: tw, h: th, r: -3 + Math.sin(lt * 2) * 1.5, o });
   // price tag climbs with each bid
   let price = 180; BIDS.forEach(([b, , p]) => { if (lt >= b) price = p; });
-  SA.tag.textContent = '₪' + price;
+  SA.tag.textContent = CUR + price;
   const bump = Math.max(...BIDS.map(([b]) => Math.sin(prog(lt, b, b + 0.2) * Math.PI)));
   put(SA.tag, { x: VIS.x, y: ty - th / 2 - 5 * U, fs: (LAND ? 6 : 7.5) * U, s: eBack(prog(lt, 0.3, 0.6)) * (1 + 0.18 * bump), r: 4, o: lt > 0.3 ? o : 0 });
   // bidders on a row under the tile
   const by = ty + th / 2 + (LAND ? 12 : 14) * U, bx = [1, 0, -1].map((i) => VIS.x + i * (LAND ? 15 : 22) * U), d = (LAND ? 11 : 14) * U;
   SA.bidders.forEach((b, i) => { const k = eBack(prog(lt, 0.25 + i * 0.1, 0.6 + i * 0.1)); const jump = Math.max(...BIDS.filter(([, w]) => w === i).map(([b0]) => Math.sin(prog(lt, b0, b0 + 0.25) * Math.PI))); put(b, { x: bx[i], y: by - jump * 3 * U, w: d, h: d, fs: d * 0.6, s: k, o: k > 0 ? o : 0 }); });
-  SA.bubbles.forEach((bb, i) => { const [b0, w, p] = BIDS[i]; const k = prog(lt, b0, b0 + 0.25), out = 1 - prog(lt, b0 + 0.5, b0 + 0.7); bb.textContent = '₪' + p; put(bb, { x: bx[w], y: by - d * 0.95, fs: (LAND ? 3.4 : 4.2) * U, s: eBack(k), o: k > 0 ? out * o : 0 }); });
+  SA.bubbles.forEach((bb, i) => { const [b0, w, p] = BIDS[i]; const k = prog(lt, b0, b0 + 0.25), out = 1 - prog(lt, b0 + 0.5, b0 + 0.7); bb.textContent = CUR + p; put(bb, { x: bx[w], y: by - d * 0.95, fs: (LAND ? 3.4 : 4.2) * U, s: eBack(k), o: k > 0 ? out * o : 0 }); });
   // gavel swings down and hits at 2.2s
   const swing = lt < 2.2 ? -35 + Math.sin(lt * 3) * 6 : lerp(30, 0, eOut(prog(lt, 2.2, 2.5)));
   const gk = eBack(prog(lt, 1.7, 2.0));
@@ -431,12 +440,12 @@ function sceneAuction(t) {
 
 // ---------- scene: trade ----------
 const ST = { p1: el('c', stage, '<div class="tok" style="position:relative;width:100%;height:100%;font-size:inherit;box-shadow:0 0 0 .1em #FF8A00,0 .08em .2em rgba(0,0,0,.45)">🐈</div>'), p2: el('c', stage, '<div class="tok" style="position:relative;width:100%;height:100%;font-size:inherit;box-shadow:0 0 0 .1em #D90429,0 .08em .2em rgba(0,0,0,.45)">🏎️</div>') };
-ST.n1 = el('url c', stage, 'דנה'); ST.n2 = el('url c', stage, 'הנרי');
-ST.card = el('tile c', stage, `<div class="hd" style="background:#E0218A"></div><div class="nm">שד' רגר</div><div class="pr">₪150</div>`);
-ST.card2 = el('tile c', stage, `<div class="hd" style="background:#E0218A"></div><div class="nm">רח' קק"ל</div><div class="pr">₪130</div>`);
-ST.cash = el('counter c', stage, '₪200'); ST.shake = el('c', stage, '🤝'); ST.deal = el('badge c', stage, 'עסקה! ✨');
+ST.n1 = el('url c', stage, L("דנה", "Dana")); ST.n2 = el('url c', stage, L("הנרי", "Henry"));
+ST.card = el('tile c', stage, `<div class="hd" style="background:#2e86de"></div><div class="nm">${L("שד' רגר", "Wacker Drive")}</div><div class="pr">${CUR}150</div>`);
+ST.card2 = el('tile c', stage, `<div class="hd" style="background:#2e86de"></div><div class="nm">${L("רח' קק\"ל", "State Street")}</div><div class="pr">${CUR}130</div>`);
+ST.cash = el('counter c', stage, CUR + '200'); ST.shake = el('c', stage, '🤝'); ST.deal = el('badge c', stage, L("עסקה! ✨", "Deal! \u2728"));
 ST.sp = []; { const R = rng(31); for (let i = 0; i < 12; i++) ST.sp.push({ e: el('spark', stage, '✦'), a: R() * Math.PI * 2, r: 0.5 + R() * 0.7 }); }
-ST.h = headline('עסקאות והחלפות'); ST.s = el('sub', stage, 'מציעים, מתמקחים וסוגרים');
+ST.h = headline(L("עסקאות והחלפות", "Deals & trades")); ST.s = el('sub', stage, L("מציעים, מתמקחים וסוגרים", "Offer, haggle and close"));
 function sceneTrade(t) {
   const V = vis(t, T.trade); const all = [ST.p1, ST.p2, ST.n1, ST.n2, ST.card, ST.card2, ST.cash, ST.shake, ST.deal, ...ST.sp.map((s) => s.e), ST.h, ST.s];
   if (!V.v) return all.forEach(hide);
@@ -465,12 +474,12 @@ function sceneTrade(t) {
 // ---------- scene: jail + no-fee parking ----------
 const SJ = { tok: tokEl('🐈', '#FF8A00') };
 SJ.bars = el('c', stage, `<svg viewBox="0 0 100 110" width="100%" height="100%"><rect x="2" y="2" width="96" height="10" rx="3" fill="#37474f" stroke="#111" stroke-width="2"/><rect x="2" y="98" width="96" height="10" rx="3" fill="#37474f" stroke="#111" stroke-width="2"/>${[12, 30, 48, 66, 84].map((x) => `<rect x="${x}" y="10" width="7" height="90" rx="3" fill="url(#bg)" stroke="#111" stroke-width="1.5"/>`).join('')}<defs><linearGradient id="bg" x1="0" x2="1"><stop offset="0" stop-color="#90a4ae"/><stop offset=".5" stop-color="#eceff1"/><stop offset="1" stop-color="#607d8b"/></linearGradient></defs></svg>`);
-SJ.siren = el('stamp c', stage, '🚔 לכלא!');
-SJ.card = el('card face c', stage, `<div style="font-size:2em">🔑</div><div style="font-weight:900;margin-top:.2em">צא מהכלא</div><div style="font-weight:900;color:#1b7a2f">חינם!</div>`);
+SJ.siren = el('stamp c', stage, L("🚔 לכלא!", "\ud83d\ude94 To jail!"));
+SJ.card = el('card face c', stage, `<div style="font-size:2em">🔑</div><div style="font-weight:900;margin-top:.2em">${L("צא מהכלא", "Get out of jail")}</div><div style="font-weight:900;color:#1b7a2f">${L("חינם!", "free!")}</div>`);
 SJ.road = el(''); SJ.road.style.background = 'repeating-linear-gradient(90deg,#fff 0 6%,transparent 6% 12%) center/100% 8% no-repeat, #3b3f45'; SJ.road.style.borderRadius = '1em'; SJ.road.style.boxShadow = '0 .4em 1em rgba(0,0,0,.35)';
 SJ.car = el('c', stage, CAR_SVG); SJ.sign = el('c', stage, '<div style="width:100%;height:100%;border-radius:18%;background:#1E5BD6;border:.12em solid #fff;color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:1em;box-shadow:0 .1em .3em rgba(0,0,0,.4)">P</div>');
-SJ.h1 = headline('נתקעת בכלא?'); SJ.s1 = el('sub', stage, 'יש קלף יציאה 🔑');
-SJ.h2 = headline('חניה חינם'); SJ.s2 = el('sub', stage, 'והכסף בקופה מחכה לך 💰');
+SJ.h1 = headline(L("נתקעת בכלא?", "Stuck in jail?")); SJ.s1 = el('sub', stage, L("יש קלף יציאה 🔑", "There\u2019s a card for that \ud83d\udd11"));
+SJ.h2 = headline(L("חניה חינם", "No-Fee Parking")); SJ.s2 = el('sub', stage, L("והכסף בקופה מחכה לך 💰", "and the pot is waiting for you \ud83d\udcb0"));
 function sceneJail(t) {
   const V = vis(t, T.jail); const all = [SJ.tok, SJ.bars, SJ.siren, SJ.card, SJ.road, SJ.car, SJ.sign, SJ.h1, SJ.s1, SJ.h2, SJ.s2];
   if (!V.v) return all.forEach(hide);

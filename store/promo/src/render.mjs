@@ -5,7 +5,7 @@ const [w, h, out, ffmpeg, wav] = process.argv.slice(2);
 const FPS = 30;
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
 const p = await b.newPage({ viewport: { width: +w, height: +h } });
-await p.goto(`http://localhost:8765/promo.html?w=${w}&h=${h}`);
+await p.goto(`http://localhost:8765/promo.html?w=${w}&h=${h}&lang=${process.env.PLANG || 'he'}`);
 await p.evaluate(() => window.ready); await p.waitForTimeout(300);
 const dur = await p.evaluate(() => window.DURATION);
 // with no soundtrack, render a silent video; tracks are muxed in afterwards with -c:v copy
