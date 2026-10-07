@@ -66,7 +66,7 @@ describe('languages', () => {
     ];
     const cases = [
       ['fr', 'Champs-Élysées', '200 €', 'A achète Vieux-Port pour 90 €'],
-      ['ru', 'Красная площадь', '200 ₽', 'A купил ул. Ленина за 90 ₽'],
+      ['ru', 'Красная площадь', '200 ₽', 'A купил ул. Алеутская за 90 ₽'],
       ['ja', '銀座', '¥200', 'Aが平和大通りを¥90で買った'],
     ] as const;
     for (const [lang, street, cash, line] of cases) {
@@ -126,5 +126,20 @@ describe('languages', () => {
         expect(CLASSIC.test(text), `${lang}: ${text}`).toBe(false);
     }
     applyEdition('he');
+  });
+
+  it('every color group is its own city, and no street repeats', () => {
+    const groups = new Map<string, number[]>();
+    for (const sp of BOARD) if (sp.kind === 'property') groups.set(sp.group!, [...(groups.get(sp.group!) ?? []), sp.id]);
+    for (const [lang, e] of Object.entries(EDITIONS)) {
+      const cities = [...groups.values()].map((ids) => {
+        const set = new Set(ids.map((id) => e.cities[id]));
+        expect(set.size, `${lang}: one city per group`).toBe(1);
+        return [...set][0];
+      });
+      expect(new Set(cities).size, `${lang}: ${cities.join(', ')}`).toBe(cities.length);
+      const streets = BOARD.filter((sp) => sp.kind === 'property').map((sp) => e.names[sp.id]);
+      expect(new Set(streets).size, `${lang}: streets`).toBe(streets.length);
+    }
   });
 });
