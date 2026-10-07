@@ -2,7 +2,7 @@
 type P = Record<string, string | number>;
 
 export const he = {
-  appName: 'ביג דיל',
+  appName: 'דיל סיטי',
   letsGo: 'יוצאים לדרך!',
   back: 'חזרה',
   cancel: 'ביטול',
@@ -47,7 +47,7 @@ export const he = {
     `🎉 ${p.n === 1 ? 'חבר הצטרף' : `${p.n} חברים הצטרפו`} מהקישור שלך! +${p.coins} 🪙`,
   shareFriend: 'שתף לחבר',
   shareGet: 'וקבל 🪙{n}',
-  shareText: 'בוא לשחק איתי ביג דיל! 🎩🎲',
+  shareText: 'בוא לשחק איתי דיל סיטי! 🏙️🎲',
   shareThanks: 'תודה ששיתפת!',
   shareWillGet: 'כשחבר חדש יפתח את הקישור שלך תקבל {n} מטבעות!',
   soundOn: 'צלילים: פועלים',

@@ -22,7 +22,7 @@ const card = (effect: CardEffect): Card => ({ text: '', effect });
 
 export const CHANCE: Card[] = [
   card({ type: 'move', to: 0 }), // taxi to the start
-  card({ type: 'move', to: 24 }), // weekend trip
+  card({ type: 'move', to: 25 }), // weekend trip
   card({ type: 'move', to: 11 }), // a concert in town
   card({ type: 'nearest', kind: 'utility' }), // a visit to the utility office
   card({ type: 'nearest', kind: 'railroad' }), // catch a train
@@ -32,8 +32,8 @@ export const CHANCE: Card[] = [
   card({ type: 'gotojail' }), // caught crossing on red
   card({ type: 'repairs', house: 30, hotel: 110 }), // the roof leaks
   card({ type: 'money', amount: -20 }), // a parking ticket
-  card({ type: 'move', to: 15 }), // a train trip
-  card({ type: 'move', to: 39 }), // shopping on the top street
+  card({ type: 'move', to: 17 }), // a train trip
+  card({ type: 'move', to: 38 }), // shopping on the top street
   card({ type: 'payEach', amount: 40 }), // you threw a party
   card({ type: 'money', amount: 120 }), // your app went viral
   card({ type: 'collectEach', amount: 15 }), // crowdfunding

@@ -19,7 +19,7 @@ export const rewardsOn = () =>
   !!config.db && typeof location !== 'undefined' && !location.hostname.endsWith('claude.ai') && !location.hostname.endsWith('claudeusercontent.com');
 
 // v= changes when the preview card changes, so WhatsApp fetches a fresh one
-export const shareLink = () => `${APP_URL}?ref=${getWallet().refCode}&v=2`;
+export const shareLink = () => `${APP_URL}?ref=${getWallet().refCode}&v=3`;
 
 
 /** Open the phone's share sheet; fall back to WhatsApp. */

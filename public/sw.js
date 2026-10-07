@@ -1,5 +1,5 @@
 // Network first, so updates arrive right away; the cache lets the game open offline.
-const CACHE = 'big-deal-v2';
+const CACHE = 'deal-city-v3';
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) =>

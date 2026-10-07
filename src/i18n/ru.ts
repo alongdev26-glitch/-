@@ -13,7 +13,7 @@ const pl = (n: unknown, one: string, few: string, many: string) => {
 const rounds = (n: unknown) => `${n} ${pl(n, 'раунд', 'раунда', 'раундов')}`;
 
 export const ru: Dict = {
-  appName: 'Биг Дил',
+  appName: 'Дил Сити',
   letsGo: 'Поехали!',
   back: 'Назад',
   cancel: 'Отмена',
@@ -56,7 +56,7 @@ export const ru: Dict = {
     `🎉 ${p.n === 1 ? 'Друг присоединился' : `Присоединились друзья: ${p.n}`} по твоей ссылке! +${p.coins} 🪙`,
   shareFriend: 'Поделиться с другом',
   shareGet: 'и получи 🪙{n}',
-  shareText: 'Давай сыграем в Биг Дил! 🎩🎲',
+  shareText: 'Давай сыграем в Дил Сити! 🏙️🎲',
   shareThanks: 'Спасибо, что поделился!',
   shareWillGet: 'Когда новый друг откроет твою ссылку, ты получишь {n} монет!',
   soundOn: 'Звуки: вкл',

@@ -2,7 +2,7 @@ import type { Dict } from './index';
 type P = Record<string, string | number>;
 
 export const ja: Dict = {
-  appName: 'ビッグディール',
+  appName: 'ディールシティ',
   letsGo: 'さあ行こう！',
   back: '戻る',
   cancel: 'キャンセル',
@@ -44,7 +44,7 @@ export const ja: Dict = {
   friendJoined: (p: P) => `🎉 あなたのリンクから友だちが${p.n}人参加しました！ +${p.coins} 🪙`,
   shareFriend: '友だちにシェア',
   shareGet: '🪙{n}もらえる',
-  shareText: 'いっしょにビッグディールで遊ぼう！ 🎩🎲',
+  shareText: 'いっしょにディールシティで遊ぼう！ 🏙️🎲',
   shareThanks: 'シェアありがとう！',
   shareWillGet: '新しい友だちがあなたのリンクを開くと{n}コインもらえます！',
   soundOn: 'サウンド：オン',

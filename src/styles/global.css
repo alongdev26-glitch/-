@@ -92,14 +92,14 @@ button {
 }
 
 :root {
-  --g-brown: #8b3a2b;
-  --g-lightblue: #1e9bd7;
-  --g-pink: #e0218a;
-  --g-orange: #f28c1e;
-  --g-red: #e3001b;
-  --g-yellow: #f7d117;
-  --g-green: #1fa24a;
-  --g-darkblue: #1c4fa0;
+  --g-brown: #0fa3a3;
+  --g-lightblue: #6fae12;
+  --g-pink: #2e86de;
+  --g-orange: #8e44ad;
+  --g-red: #f08a00;
+  --g-yellow: #e2337f;
+  --g-green: #c0392b;
+  --g-darkblue: #c99a06;
 }
 .link {
   background: none;

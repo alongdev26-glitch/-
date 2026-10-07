@@ -4,7 +4,7 @@ type P = Record<string, string | number>;
 const s = (n: unknown, one: string, many: string) => (Number(n) === 1 ? one : many);
 
 export const en: Dict = {
-  appName: 'Big Deal',
+  appName: 'Deal City',
   letsGo: "Let's go!",
   back: 'Back',
   cancel: 'Cancel',
@@ -47,7 +47,7 @@ export const en: Dict = {
     `🎉 ${p.n === 1 ? 'A friend joined' : `${p.n} friends joined`} from your link! +${p.coins} 🪙`,
   shareFriend: 'Share with a friend',
   shareGet: 'and get 🪙{n}',
-  shareText: 'Come play Big Deal with me! 🎩🎲',
+  shareText: 'Come play Deal City with me! 🏙️🎲',
   shareThanks: 'Thanks for sharing!',
   shareWillGet: 'When a new friend opens your link you get {n} coins!',
   soundOn: 'Sounds: on',

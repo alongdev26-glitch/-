@@ -221,7 +221,7 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
               {money(game.pot)}
             </b>
           </div>
-          <i className="mascot">🎩</i>
+          <i className="mascot">🏙️</i>
         </div>
         {/* the two card decks, as real-looking stacks */}
         <div className="deck deck-chest">

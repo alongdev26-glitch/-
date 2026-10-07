@@ -75,7 +75,7 @@ export function Menu({
         <RibbonBanner text={t('letsGo')} />
       </div>
       <div className="menu-logo">
-        <img className="menu-logo-img" src={logo} alt="Big Deal" />
+        <img className="menu-logo-img" src={logo} alt="Deal City" />
         <div className="menu-plaque">{t('appName')}</div>
         <p>{EDITIONS[getLang()].tagline}</p>
       </div>

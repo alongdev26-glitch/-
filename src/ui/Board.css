@@ -337,7 +337,7 @@
   white-space: nowrap;
   text-shadow: 0 0.4cqw 0 #c7c7c7, 0 0.8cqw 0 #8e8e8e, 0 1.2cqw 1.5cqw rgba(0, 0, 0, 0.5);
 }
-/* the wide Japanese name (ビッグディール) still fits the sign */
+/* the wide Japanese name (ディールシティ) still fits the sign */
 .plaque span.long {
   font-size: 4.3cqw;
 }
@@ -523,7 +523,7 @@
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45), 0 0 2px rgba(0, 0, 0, 0.35);
   letter-spacing: 0.01em;
 }
-.strip.g-yellow {
+.strip.g-unused {
   color: #3a2a00;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }

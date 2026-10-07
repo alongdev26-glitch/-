@@ -2,7 +2,7 @@ import type { Dict } from './index';
 type P = Record<string, string | number>;
 
 export const ar: Dict = {
-  appName: 'بيغ ديل',
+  appName: 'ديل سيتي',
   letsGo: 'هيا ننطلق!',
   back: 'رجوع',
   cancel: 'إلغاء',
@@ -45,7 +45,7 @@ export const ar: Dict = {
     `🎉 ${p.n === 1 ? 'انضم صديق' : `انضم ${p.n} أصدقاء`} من رابطك! +${p.coins} 🪙`,
   shareFriend: 'شارك مع صديق',
   shareGet: 'واحصل على 🪙{n}',
-  shareText: 'تعال العب معي بيغ ديل! 🎩🎲',
+  shareText: 'تعال العب معي ديل سيتي! 🏙️🎲',
   shareThanks: 'شكرًا على المشاركة!',
   shareWillGet: 'عندما يفتح صديق جديد رابطك ستحصل على {n} عملة!',
   soundOn: 'الأصوات: تعمل',

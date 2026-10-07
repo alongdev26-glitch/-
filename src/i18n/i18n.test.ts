@@ -50,10 +50,10 @@ describe('languages', () => {
     ];
     let s = newGame(players, () => 0.5, { mortgage: true }, 'en');
     expect(s.lang).toBe('en');
-    expect(BOARD[39].name).toBe('Fifth Avenue');
+    expect(BOARD[38].name).toBe('Fifth Avenue');
     expect(money(200)).toBe('$200');
     for (const p of s.players) p.lapped = true;
-    s = reduce(s, { type: 'ROLL', dice: [2, 4] });
+    s = reduce(s, { type: 'ROLL', dice: [2, 3] });
     s = reduce(s, { type: 'BUY' });
     expect(s.log[0]).toBe('Ann bought Broadway for $90');
     expect(s.log.some((l) => HEBREW.test(l))).toBe(false);
@@ -65,16 +65,16 @@ describe('languages', () => {
       { name: 'B', token: 'car' as const, isBot: false },
     ];
     const cases = [
-      ['fr', 'Champs-Élysées', '200 €', 'A achète Vieux-Port pour 90 €'],
-      ['ru', 'Красная площадь', '200 ₽', 'A купил ул. Алеутская за 90 ₽'],
-      ['ja', '銀座', '¥200', 'Aが平和大通りを¥90で買った'],
+      ['fr', 'Champs-Élysées', '200 €', 'A achète La Canebière pour 90 €'],
+      ['ru', 'Красная площадь', '200 ₽', 'A купил ул. Светланская за 90 ₽'],
+      ['ja', '銀座', '¥200', 'Aが本通りを¥90で買った'],
     ] as const;
     for (const [lang, street, cash, line] of cases) {
       let s = newGame(players, () => 0.5, { mortgage: true }, lang);
-      expect(BOARD[39].name).toBe(street);
+      expect(BOARD[38].name).toBe(street);
       expect(money(200)).toBe(cash);
       for (const p of s.players) p.lapped = true;
-      s = reduce(s, { type: 'ROLL', dice: [4, 4] });
+      s = reduce(s, { type: 'ROLL', dice: [2, 3] });
       s = reduce(s, { type: 'BUY' });
       expect(s.log[0]).toBe(line);
     }
@@ -114,7 +114,7 @@ describe('languages', () => {
   });
 
   it('the board has our own prices and rents', () => {
-    expect(BOARD[39].price).toBe(380);
+    expect(BOARD[38].price).toBe(380);
     for (const sp of BOARD) if (sp.kind === 'property') expect(sp.rent).toEqual(rents(sp.price!));
   });
 
