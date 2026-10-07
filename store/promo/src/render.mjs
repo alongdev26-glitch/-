@@ -8,9 +8,11 @@ const p = await b.newPage({ viewport: { width: +w, height: +h } });
 await p.goto(`http://localhost:8765/promo.html?w=${w}&h=${h}`);
 await p.evaluate(() => window.ready); await p.waitForTimeout(300);
 const dur = await p.evaluate(() => window.DURATION);
-const ff = spawn(ffmpeg, ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-', '-i', wav,
-  '-c:v', 'libx264', '-preset', 'slow', '-crf', '20', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-c:a', 'aac', '-b:a', '160k',
-  '-shortest', '-movflags', '+faststart', out], { stdio: ['pipe', 'inherit', 'inherit'] });
+// with no soundtrack, render a silent video; tracks are muxed in afterwards with -c:v copy
+const audio = wav && wav !== 'none' ? ['-i', wav, '-c:a', 'aac', '-b:a', '160k', '-shortest'] : ['-an'];
+const ff = spawn(ffmpeg, ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-', ...audio.slice(0, 2),
+  '-c:v', 'libx264', '-preset', 'slow', '-crf', process.env.CRF || '22', '-pix_fmt', 'yuv420p', '-profile:v', 'high', ...audio.slice(2),
+  '-movflags', '+faststart', out], { stdio: ['pipe', 'inherit', 'inherit'] });
 const frames = Math.round(dur * FPS);
 for (let i = 0; i < frames; i++) {
   await p.evaluate((t) => render(t), i / FPS);

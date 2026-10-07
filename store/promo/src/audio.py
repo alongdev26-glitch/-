@@ -2,7 +2,10 @@
 import math, random, struct, wave, sys
 
 SR = 44100
-DUR = 26.0
+import json
+TL = json.load(open('timeline.json'))
+STYLE = sys.argv[2] if len(sys.argv) > 2 else 'pop'
+DUR = TL['end'][1]
 N = int(SR * DUR)
 L = [0.0] * N
 R = [0.0] * N
@@ -104,34 +107,117 @@ def riser(t0, dur, g=0.12):
         out.append(low * k * k)
     add(t0, out, g)
 
-# ---------------- music: starts on the logo slam ----------------
-T0 = 1.25
-BEAT = 0.5
-CHORDS = [(60, 64, 67), (55, 59, 62), (57, 60, 64), (53, 57, 60)]  # C G Am F
-ROOTS = [36, 31, 33, 29]
-HOOK = [76, 79, 81, 79, 76, 74, 72, 74, 76, 79, 84, 81, 79, None, 76, None]  # 8ths over 2 bars
-END = 22.0
-bar_count = int((END - T0) / (4 * BEAT)) + 1
-for b in range(bar_count):
-    bt = T0 + b * 4 * BEAT
-    ch = CHORDS[b % 4]; root = ROOTS[b % 4]
-    for beat in range(4):
-        t = bt + beat * BEAT
-        if t >= END - 0.01: break
+# ---------------- extra instruments ----------------
+def pluck(t, m, g=0.2, dur=0.9, pan=0.0, bright=0.5):
+    """Karplus-Strong plucked string (oud-like)"""
+    f = midi(m); n = int(dur * SR); p = max(2, int(SR / f))
+    buf = [rnd.uniform(-1, 1) for _ in range(p)]
+    out = []
+    for j in range(n):
+        v = buf[j % p]
+        nxt = buf[(j + 1) % p]
+        buf[j % p] = 0.996 * (bright * v + (1 - bright) * nxt) if bright < 1 else 0.996 * 0.5 * (v + nxt)
+        out.append(v)
+    add(t, out, g, pan)
+def saw(t, m, dur, g=0.08, pan=0.0, decay=0.25, detune=0.006):
+    f = midi(m); n = int(dur * SR); d = decay * SR; out = []
+    for j in range(n):
+        tt = j / SR; e = min(1, j / 200) * math.exp(-j / d)
+        v = 0
+        for det in (1 - detune, 1 + detune):
+            v += sum(math.sin(TAU * f * det * tt * h) / h for h in range(1, 7))
+        out.append(v * e * 0.5)
+    add(t, out, g, pan)
+def dum(t, g=0.75): add(t, sweep(160, 70, 0.35, 0.12), g); add(t, noise(0.05, 0.01, lp=0.3), 0.15 * g)
+def tek(t, g=0.35, pan=0.15): add(t, noise(0.06, 0.012, hp=0.92, lp=0.8), g, pan); add(t, tone(720, 0.05, 0.012), 0.2 * g, pan)
+def ohat(t, g=0.1, pan=0.0): add(t, noise(0.18, 0.05, hp=0.98, lp=0.95), g, pan)
+def clang(t, g=0.35):
+    for f, a in ((523, 1), (1187, 0.6), (1663, 0.45), (2437, 0.3)): add(t, tone(f, 1.2, 0.35), g * a)
+    click(t, 0.4)
+def siren(t, dur=0.9, g=0.12):
+    n = int(dur * SR); ph = 0; out = []
+    for j in range(n):
+        k = j / SR; f = 700 if int(k * 6) % 2 == 0 else 950
+        ph += TAU * f / SR; out.append((1 if math.sin(ph) > 0 else -1) * 0.5 * math.sin(math.pi * j / n))
+    add(t, out, g)
+def horn(t, g=0.16):
+    for f in (392, 494):
+        n = int(0.32 * SR); ph = 0; out = []
+        for j in range(n):
+            ph += TAU * f / SR; out.append((1 if math.sin(ph) > 0 else -1) * min(1, j / 300) * min(1, (n - j) / 600))
+        add(t, out, g * 0.5)
+def engine(t, dur=0.9, g=0.25):
+    n = int(dur * SR); ph = 0; out = []
+    for j in range(n):
+        k = j / n; f = 55 + 70 * math.sin(math.pi * k * 0.9)
+        ph += TAU * f / SR; v = sum(math.sin(ph * h) / h for h in range(1, 6))
+        out.append(v * math.sin(math.pi * k) * 0.6)
+    add(t, out, g)
+
+# ---------------- music ----------------
+T0 = 1.25                      # the beat drops on the logo slam
+END = TL['end'][0]             # the end card gets a final chord
+def grid(bpm):
+    beat = 60 / bpm; t = T0; i = 0
+    while t < END - 0.02:
+        yield i, t, beat
+        i += 1; t = T0 + i * beat
+
+if STYLE == 'pop':             # bright pop, G major
+    CH = [(67, 71, 74), (62, 66, 69), (64, 67, 71), (60, 64, 67)]; RT = [43, 38, 40, 36]
+    HOOK = [79, 81, 83, 86, 83, 81, 79, None, 78, 79, 81, 83, 81, None, 79, 74]
+    for i, t, b in grid(124):
+        bar = i // 4; beat = i % 4; c = CH[bar % 4]; r = RT[bar % 4]
         kick(t)
         if beat in (1, 3): clap(t)
-        hat(t + BEAT / 2, pan=0.3 if beat % 2 else -0.3)
-        bass(t, root); bass(t + BEAT / 2, root + (12 if beat % 2 else 0), g=0.22)
-        stab(t + BEAT / 2, ch, pan=0.0)
-    if b >= 1:  # hook after the first bar
-        half = (b - 1) % 2
-        for k in range(8):
-            m = HOOK[half * 8 + k]
-            t = bt + k * BEAT / 2
-            if m and t < END - 0.05: bell(t, m, pan=-0.15 if k % 2 else 0.15)
+        hat(t + b / 2, pan=0.3 if beat % 2 else -0.3); hat(t + b / 4, g=0.05); hat(t + 3 * b / 4, g=0.05)
+        bass(t, r); bass(t + b / 2, r + 12, g=0.2)
+        stab(t + b / 2, c, g=0.1)
+        if bar >= 1:
+            for k in (0, 1):
+                m = HOOK[(bar % 2) * 8 + beat * 2 + k]
+                if m: bell(t + k * b / 2, m, 0.15, pan=0.15 if k else -0.15)
+    FINAL = (55, 67, 71, 74, 79)
+elif STYLE == 'party':         # electronic / EDM, A minor
+    CH = [(57, 60, 64), (53, 57, 60), (60, 64, 67), (55, 59, 62)]; RT = [33, 29, 36, 31]
+    ARP = [0, 1, 2, 1, 0, 2, 1, 2]
+    for i, t, b in grid(128):
+        bar = i // 4; beat = i % 4; c = CH[bar % 4]; r = RT[bar % 4]
+        kick(t, 1.0)
+        if beat in (1, 3): clap(t, 0.3)
+        ohat(t + b / 2, 0.12, 0.2 if beat % 2 else -0.2)
+        bass(t + b / 2, r + 12, dur=0.2, g=0.3); bass(t + 3 * b / 4, r + 12, dur=0.12, g=0.18)
+        # pumping pad: chord swells after each kick
+        for m in c: add(t + 0.06, tone(midi(m), b - 0.06, b * 0.9, ((1, 1), (2, 0.3), (3, 0.15)), attack=b * 0.6), 0.035)
+        if bar >= 2:
+            for k in range(2):
+                m = c[ARP[(beat * 2 + k) % 8]] + 12
+                saw(t + k * b / 2, m, b / 2, g=0.05, pan=0.25 if k else -0.25, decay=0.12)
+    FINAL = (45, 57, 60, 64, 69)
+else:                          # 'med': Mediterranean, D Hijaz, darbuka maqsum
+    SC = [62, 63, 66, 67, 69, 70, 72, 74]
+    CH = [(62, 66, 69), (60, 63, 67), (55, 58, 62), (62, 66, 69)]; RT = [38, 36, 31, 38]
+    MEL = [7, 6, 5, 4, 5, 4, 2, 1, 2, 3, 4, None, 2, 1, 0, None]
+    MAQSUM = {0: 'D', 1: 'T', 3: 'T', 4: 'D', 6: 'T'}   # in 8ths over one bar
+    for i, t, b in grid(110):
+        bar = i // 4; beat = i % 4; c = CH[bar % 4]; r = RT[bar % 4]
+        for k in (0, 1):
+            pos = beat * 2 + k; hit = MAQSUM.get(pos)
+            tt = t + k * b / 2
+            if hit == 'D': dum(tt)
+            elif hit == 'T': tek(tt, pan=0.2 if pos % 3 else -0.2)
+        tek(t + b / 4, 0.1, -0.3); tek(t + 3 * b / 4, 0.1, 0.3)
+        bass(t, r, dur=0.4, g=0.3)
+        if beat == 0: pad(t, (c[0] - 12, c[0] - 5), 4 * b, 0.035)
+        if bar >= 1:
+            for k in (0, 1):
+                n = MEL[(bar % 2) * 8 + beat * 2 + k]
+                if n is not None: pluck(t + k * b / 2, SC[n], 0.32, dur=0.7, pan=-0.1 if k else 0.1)
+            if beat == 3: pluck(t + b / 2 + b / 4, SC[(bar * 3) % 8] - 12, 0.18, dur=0.4)
+    FINAL = (50, 62, 66, 69, 74)
 
-# ---------------- scene effects ----------------
-# scene 1: dice bounces, slam, coins, shine
+# ---------------- scene effects (relative to each scene's start) ----------------
+S = {k: v[0] for k, v in TL.items()}
 riser(0.0, 1.25, 0.18)
 for delay, pan in ((0.0, -0.5), (0.12, 0.5)):
     for k in (0.364, 0.727, 0.909, 1.0):
@@ -141,41 +227,57 @@ for delay, pan in ((0.0, -0.5), (0.12, 0.5)):
 boom(1.25)
 for j in range(9): ching(1.3 + j * 0.06 + rnd.random() * 0.03, 0.09, rnd.uniform(-0.6, 0.6))
 bell(1.7, 96, 0.12); bell(1.78, 100, 0.09)
-# cuts
-for c in (3, 7, 10, 13, 16, 19, 22): whoosh(c)
-# scene 2: token hops, buy stamp
-for i, h in enumerate((4.0, 4.45, 4.9)): pop(h + 0.33, 500 + i * 120, 0.32)
-thud(5.47, 0.7); register(5.52)
-# scene 3: houses and hotel, coins to the counter
-for i in range(4): pop(7 + 0.55 + i * 0.22 + 0.3, 700 + i * 90, 0.28); click(7 + 0.55 + i * 0.22 + 0.32, 0.25)
-thud(8.95, 0.9); boom(8.97, 0.35)
-for j in range(10): ching(8.65 + j * 0.08, 0.08, rnd.uniform(-0.5, 0.5))
-register(9.7)
-# scene 4: cards fan and flip
-for j in range(6): click(10.45 + j * 0.05, 0.18)
-swish(10.95); bell(11.35, 88, 0.12)
-swish(11.55); bell(11.95, 91, 0.12)
-# scene 5: flags land, highlight ticks
-for i in range(6): pop(13 + 0.1 + i * 0.11 + 0.42, 400 + i * 60, 0.22, (i % 2 - 0.5))
-for i in range(6): bell(14.2 + i * 0.28, 84 + [0, 2, 4, 7, 9, 12][i], 0.07)
-# scene 6: characters pop in
-for i in range(12): pop(16.3 + i * 0.06 + 0.3, 600 + i * 70, 0.16, math.sin(i))
-for j in range(5): bell(16.9 + j * 0.4, 96 + (j % 2) * 3, 0.05, (j % 2 - 0.5))
-# scene 7: friends connect, +150 badge
-for i in range(4): pop(19 + 0.75 + i * 0.12 + 0.2, 450 + i * 110, 0.25, (-0.5, 0.5, -0.5, 0.5)[i])
-register(20.62)
-for j in range(10): ching(20.7 + j * 0.06, 0.08, rnd.uniform(-0.6, 0.6))
-# scene 8: end card
-boom(22.08, 0.8)
-pad(22.0, (48, 60, 64, 67, 72), 4.0, 0.06)
-for k, m in enumerate((72, 76, 79, 84)): bell(22.1 + k * 0.09, m, 0.14)
-pop(22.95, 700, 0.3); ching(23.0, 0.12)
-for k, m in enumerate((79, 84)): bell(23.5 + k * 0.5, m, 0.08)
-
+for k, (a, b) in TL.items():
+    if a > 0: whoosh(a)
+b0 = S['board']
+for j in range(8): click(b0 + 0.5 + j * 0.05, 0.2, rnd.uniform(-0.4, 0.4))
+for i, h in enumerate((1.0, 1.45, 1.9)): pop(b0 + h + 0.33, 500 + i * 120, 0.32)
+thud(b0 + 2.47, 0.7); register(b0 + 2.52)
+b0 = S['build']
+for i in range(4): pop(b0 + 0.55 + i * 0.22 + 0.3, 700 + i * 90, 0.28); click(b0 + 0.55 + i * 0.22 + 0.32, 0.25)
+thud(b0 + 1.95, 0.9); boom(b0 + 1.97, 0.35)
+for j in range(10): ching(b0 + 1.65 + j * 0.08, 0.08, rnd.uniform(-0.5, 0.5))
+register(b0 + 2.55)
+b0 = S['auction']
+for i, bt in enumerate((0.75, 1.1, 1.45, 1.8)): pop(b0 + bt, 600 + i * 150, 0.28, (-0.4, 0, 0.4, -0.4)[i])
+thud(b0 + 2.2, 1.0); click(b0 + 2.2, 0.6); boom(b0 + 2.22, 0.3); register(b0 + 2.3)
+for j in range(8): ching(b0 + 2.3 + j * 0.06, 0.07, rnd.uniform(-0.6, 0.6))
+b0 = S['trade']
+for i in range(2): pop(b0 + 0.35 + i * 0.1, 500, 0.2, (-0.5, 0.5)[i])
+swish(b0 + 0.8, 0.3); swish(b0 + 1.0, 0.25)
+pop(b0 + 1.65, 400, 0.35); ching(b0 + 1.85, 0.16)
+for j in range(5): bell(b0 + 1.9 + j * 0.07, 88 + j * 2, 0.06)
+b0 = S['cards']
+for j in range(6): click(b0 + 0.45 + j * 0.05, 0.18)
+swish(b0 + 0.95); bell(b0 + 1.35, 88, 0.12)
+swish(b0 + 1.55); bell(b0 + 1.95, 91, 0.12)
+b0 = S['jail']
+siren(b0 + 0.25, 1.0); clang(b0 + 0.62)
+swish(b0 + 1.0, 0.25); ching(b0 + 1.25, 0.14); ching(b0 + 1.32, 0.1)   # key card
+clang(b0 + 1.35, 0.2); pop(b0 + 1.5, 700, 0.25)
+engine(b0 + 1.95, 0.9); horn(b0 + 2.8); pop(b0 + 2.75, 500, 0.2)
+b0 = S['langs']
+for i in range(6): pop(b0 + 0.1 + i * 0.11 + 0.42, 400 + i * 60, 0.22, (i % 2 - 0.5))
+for i in range(6): bell(b0 + 1.2 + i * 0.28, 84 + [0, 2, 4, 7, 9, 12][i], 0.07)
+b0 = S['shop']
+for i in range(12): pop(b0 + 0.3 + i * 0.06 + 0.3, 600 + i * 70, 0.16, math.sin(i))
+pop(b0 + 0.75, 900, 0.25)
+for j in range(5): bell(b0 + 0.9 + j * 0.4, 96 + (j % 2) * 3, 0.05, (j % 2 - 0.5))
+b0 = S['friends']
+pop(b0 + 0.45, 650, 0.2)
+for i in range(4): pop(b0 + 0.75 + i * 0.12 + 0.2, 450 + i * 110, 0.25, (-0.5, 0.5, -0.5, 0.5)[i])
+register(b0 + 1.62)
+for j in range(10): ching(b0 + 1.7 + j * 0.06, 0.08, rnd.uniform(-0.6, 0.6))
+b0 = S['end']
+boom(b0 + 0.08, 0.8)
+pad(b0, FINAL, 4.5, 0.06)
+for k, m in enumerate(FINAL[1:]): bell(b0 + 0.1 + k * 0.09, m + 12 if m < 72 else m, 0.13)
+pop(b0 + 0.95, 700, 0.3); ching(b0 + 1.0, 0.12)
+for i in range(3): pop(b0 + 1.75 + i * 0.25, 800 + i * 100, 0.15)
 # ---------------- master: soft clip, fade out, write ----------------
 peak = max(max(abs(v) for v in L), max(abs(v) for v in R))
 g = 0.9 / peak * 1.6
-fade0 = 24.6
+fade0 = DUR - 1.6
 with wave.open(sys.argv[1] if len(sys.argv) > 1 else 'promo.wav', 'wb') as w:
     w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
     frames = bytearray()

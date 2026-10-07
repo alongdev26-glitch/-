@@ -88,8 +88,8 @@ function put(e, { x = 0, y = 0, w, h, s = 1, r = 0, o = 1, ry = 0, rx = 0, fs } 
 const hide = (e) => { e.style.opacity = 0; e.style.display = 'none'; };
 
 // ---------- scenes timeline ----------
-const T = { logo: [0, 3], board: [3, 7], build: [7, 10], cards: [10, 13], langs: [13, 16], shop: [16, 19], friends: [19, 22], end: [22, 26] };
-const DURATION = 26;
+const T = (() => { const x = new XMLHttpRequest(); x.open('GET', 'timeline.json', false); x.send(); return JSON.parse(x.responseText); })();
+const DURATION = T.end[1];
 // scene visibility: in over 0.35s, out over 0.3s (the last scene stays)
 function vis(t, [a, b], last) {
   const i = eOut(prog(t, a, a + 0.35)); const o = last ? 1 : 1 - eIn(prog(t, b - 0.3, b));
@@ -178,10 +178,11 @@ const S2 = { phone: makePhone('he-2-board.png') }; S2.scr = S2.phone.querySelect
 S2.tok = el('tok', S2.scr, '🐈'); S2.tok.style.boxShadow = '0 0 0 .12em #FF8A00, 0 .1em .2em rgba(0,0,0,.5)';
 S2.stamp = el('stamp', S2.scr, 'נקנה! 🏠');
 S2.h = headline('קונים רחובות'); S2.s = el('sub', stage, 'בערים אמיתיות');
+S2.dice = el('counter c'); S2.dice.style.direction = 'ltr'; S2.chips = el('url c', stage, '<span style="background:rgba(0,0,0,.28);border-radius:1em;padding:.2em .7em">40 משבצות · 22 רחובות · 4 רכבות</span>'); S2.chips.style.direction = 'rtl';
 // squares in the 1080×1920 screenshot: GO bottom-left, then up the left column
 const PATH = [[95, 1515], [95, 1405], [95, 1321], [95, 1237], [95, 1153]];
 function scene2(t) {
-  const V = vis(t, T.board); if (!V.v) return [S2.phone, S2.h, S2.s].forEach(hide);
+  const V = vis(t, T.board); if (!V.v) return [S2.phone, S2.h, S2.s, S2.dice, S2.chips].forEach(hide);
   const lt = t - T.board[0];
   const ik = eBack(prog(lt, 0, 0.6));
   const float = Math.sin(lt * 2.2) * 1.2 * U;
@@ -195,6 +196,10 @@ function scene2(t) {
   put(S2.tok, { x: pos[0] * k + 30 * k, y: (pos[1] - lift) * k, w: ts, h: ts, fs: ts * 0.62, s: 1 + 0.15 * Math.sin(land * Math.PI), o: eOut(prog(lt, 0.5, 0.8)) });
   const st = eElastic(prog(lt, 2.45, 3.1));
   put(S2.stamp, { x: 330 * k, y: 1110 * k, fs: 90 * k, s: st, r: -12, o: prog(lt, 2.45, 2.5) });
+  const dk = prog(lt, 0.55, 0.95), dn = dk < 1 ? 1 + Math.floor(lt * 20) % 6 : 1;
+  S2.dice.textContent = dk < 1 ? `🎲 ${dn} + ${1 + Math.floor(lt * 23 + 2) % 6}` : '🎲 1 + 2 = 3';
+  put(S2.dice, { x: VIS.x + PW * 0.28, y: VIS.y - PH * 0.42 + float, fs: (LAND ? 4.2 : 5) * U, s: eBack(prog(lt, 0.45, 0.7)) * (1 + 0.1 * Math.sin(prog(lt, 0.95, 1.15) * Math.PI)), r: 5, o: lt > 0.45 ? V.o * (1 - prog(lt, 2.4, 2.6)) : 0 });
+  put(S2.chips, { x: TXT.x, y: TXT.subY + (LAND ? 7.5 : 5.5) * U, fs: (LAND ? 3 : 3.6) * U, o: eOut(prog(lt, 1.1, 1.5)) * V.o });
   animHeadline(S2.h, t, T.board[0] + 0.25, TXT.y, TXT.fs, TXT.x, V.o);
   put(S2.s, { x: TXT.x, y: TXT.subY, fs: TXT.subFs, o: eOut(prog(lt, 0.7, 1.1)) * V.o, s: lerp(0.6, 1, eBack(prog(lt, 0.7, 1.1))) });
 }
@@ -208,10 +213,10 @@ const S3 = { tiles: [], houses: [], coins: [] };
 });
 for (let i = 0; i < 6; i++) S3.houses.push(el('', stage, HOUSE));
 S3.hotel = el('', stage, HOTEL); S3.puff = el('', stage, '💥');
-S3.counter = el('counter'); S3.h = headline('בונים בתים ומלונות'); S3.s = el('sub', stage, 'וגובים שכר דירה');
+S3.rent = el('badge c', stage, '<span dir="ltr" style="unicode-bidi:isolate">+₪240</span> שכר דירה'); S3.counter = el('counter'); S3.h = headline('בונים בתים ומלונות'); S3.s = el('sub', stage, 'וגובים שכר דירה');
 { const R = rng(23); for (let i = 0; i < 14; i++) S3.coins.push({ e: el('coin', stage, '₪'), d: R() * 0.5, sx: R(), off: (R() - 0.5) }); }
 function scene3(t) {
-  const V = vis(t, T.build); const all = [...S3.tiles, ...S3.houses, S3.hotel, S3.puff, S3.counter, S3.h, S3.s, ...S3.coins.map((c) => c.e)];
+  const V = vis(t, T.build); const all = [...S3.tiles, ...S3.houses, S3.hotel, S3.puff, S3.counter, S3.rent, S3.h, S3.s, ...S3.coins.map((c) => c.e)];
   if (!V.v) return all.forEach(hide);
   const lt = t - T.build[0], o = V.o;
   const tw = (LAND ? 21 : 26) * U, th = tw * 1.45, gap = tw * 0.12, ty = LAND ? VIS.y + 6 * U : VIS.y + 4 * U;
@@ -236,7 +241,9 @@ function scene3(t) {
     const sx = xs[i % 3], sy = ty - th * 0.1, d = 4 * U;
     put(c.e, { x: lerp(sx, VIS.x, eInOut(k)) + Math.sin(k * Math.PI) * c.off * 20 * U, y: lerp(sy, cy, eIn(k)) - Math.sin(k * Math.PI) * 14 * U, w: d, h: d, fs: d * 0.55, r: k * 540, o });
   });
-  const money = Math.round(lerp(1500, 2350, eOut(prog(lt, 1.8, 2.8))) / 10) * 10;
+  const rk = prog(lt, 2.5, 2.8);
+  put(S3.rent, { x: xs[2], y: ty - th / 2 - tw * 0.95 - rk * 4 * U, fs: (LAND ? 3.6 : 4.6) * U, s: eBack(rk), r: -6, o: rk > 0 ? o * (1 - prog(lt, 3.3, 3.5)) : 0 });
+  const money = Math.round(lerp(1500, 2590, eOut(prog(lt, 1.8, 3.0))) / 10) * 10;
   S3.counter.textContent = '💰 ₪' + money.toLocaleString('en-US');
   put(S3.counter, { x: VIS.x, y: cy, fs: (LAND ? 5.6 : 7) * U, s: eBack(prog(lt, 0.3, 0.7)) * (1 + 0.06 * Math.sin(prog(lt, 2.75, 2.95) * Math.PI)), o });
   animHeadline(S3.h, t, T.build[0] + 0.2, TXT.y, TXT.fs * (LAND ? 0.82 : 0.86), TXT.x, o);
@@ -304,9 +311,10 @@ const PARADE = [['🦄', '#E040FB', 'L'], ['🐉', '#2E7D32', 'L'], ['👑', '#F
 const RARE = { L: '#FFD23F', E: '#C77DFF', R: '#4FC3FF', C: '#ffffff' };
 const S6 = { phone: (() => { const p = makePhone('he-4-shop.png'); p.style.zIndex = 2; return p; })(), toks: PARADE.map(([e, c]) => { const t = el('tok c', stage, e); t.style.boxShadow = `0 0 0 .1em ${c}, 0 .08em .2em rgba(0,0,0,.4)`; return t; }) };
 S6.sparks = []; { const R = rng(41); for (let i = 0; i < 16; i++) S6.sparks.push({ e: el('spark', stage, '✦'), a: R() * Math.PI * 2, r: 0.6 + R() * 0.6, ph: R() }); }
+S6.rar = el('url c', stage, '<span style="color:#FFD23F">★ אגדי</span> · <span style="color:#E2B6FF">★ אפי</span> · <span style="color:#9BE3FF">★ נדיר</span>'); S6.rar.style.direction = 'rtl'; S6.rib = el('stamp c', stage, 'חדש!'); S6.rib.style.zIndex = 6;
 S6.h = headline('דמויות וסקינים'); S6.s = el('sub', stage, '🛍️ חדשים בחנות כל 3 ימים');
 function scene6(t) {
-  const V = vis(t, T.shop); if (!V.v) return [S6.phone, ...S6.toks, ...S6.sparks.map((s) => s.e), S6.h, S6.s].forEach(hide);
+  const V = vis(t, T.shop); if (!V.v) return [S6.phone, S6.rar, S6.rib, ...S6.toks, ...S6.sparks.map((s) => s.e), S6.h, S6.s].forEach(hide);
   const lt = t - T.shop[0], o = V.o;
   const ph = PH * (LAND ? 0.95 : 0.78), pw = ph * 0.5625 * 1.07, ik = eBack(prog(lt, 0, 0.55));
   const py = LAND ? VIS.y : VIS.y - 6 * U;
@@ -322,20 +330,23 @@ function scene6(t) {
     const rr = PARADE[i][2]; tk.style.background = rr === 'C' ? '' : `radial-gradient(circle at 35% 30%, #fff, ${RARE[rr]}55 60%, ${RARE[rr]})`;
   });
   S6.sparks.forEach((s) => { const ph2 = (lt * 1.3 + s.ph) % 1; put(s.e, { x: VIS.x + Math.cos(s.a) * rx * s.r, y: py + Math.sin(s.a) * ry * s.r, fs: 5 * U, s: Math.sin(ph2 * Math.PI) * 1.2, r: ph2 * 90, o: o * prog(lt, 0.6, 0.9) }); });
+  put(S6.rar, { x: TXT.x, y: TXT.subY + (LAND ? 7.5 : 5.5) * U, fs: (LAND ? 3.4 : 4) * U, o: eOut(prog(lt, 1.0, 1.4)) * o });
+  put(S6.rib, { x: VIS.x + pw * 0.42, y: py - ph * 0.46, fs: (LAND ? 4 : 5) * U, s: eElastic(prog(lt, 0.7, 1.3)), r: 14, o: lt > 0.7 ? o : 0 });
   animHeadline(S6.h, t, T.shop[0] + 0.2, TXT.y, TXT.fs, TXT.x, o);
   put(S6.s, { x: TXT.x, y: TXT.subY, fs: TXT.subFs, o: eOut(prog(lt, 0.7, 1.1)) * o, s: lerp(0.6, 1, eBack(prog(lt, 0.7, 1.1))) });
 }
 
 // ---------- scene 7: friends ----------
 const S7 = { phone: makePhone('he-1-menu.png') };
-const FR = [['🐈', '#FF8A00'], ['🏎️', '#D90429'], ['🦖', '#16A34A'], ['🐕', '#8B5A2B']];
+const FR = [['🐈', '#FF8A00'], ['🏎️', '#D90429'], ['🦖', '#16A34A'], ['🤖', '#546E7A']];
 S7.lines = el(''); S7.lines.innerHTML = `<svg width="100%" height="100%" style="overflow:visible"></svg>`; S7.svg = S7.lines.firstChild;
 S7.av = FR.map(([e, c]) => { const a = el('av c', stage, e); a.style.boxShadow = `0 0 0 .1em ${c}, 0 .1em .25em rgba(0,0,0,.45)`; return a; });
 S7.badge = el('badge c', stage, '<span dir="ltr" style="unicode-bidi:isolate">🎁 +150 🪙</span>'); S7.badge.style.zIndex = 4; S7.badgeSub = el('sub', stage, 'על כל חבר שמצטרף');
 S7.coins = []; { const R = rng(77); for (let i = 0; i < 16; i++) S7.coins.push({ e: el('coin', stage, '₪'), a: R() * Math.PI * 2, v: (25 + R() * 30) * U }); }
+S7.room = el('counter c', stage, '🔗 חדר: <b dir="ltr">4821</b>'); S7.room.style.zIndex = 4;
 S7.h = headline('שחקו עם חברים'); S7.s = el('sub', stage, 'אונליין, על אותו טלפון, או נגד בוטים 🤖');
 function scene7(t) {
-  const V = vis(t, T.friends); const all = [S7.phone, S7.lines, ...S7.av, S7.badge, S7.badgeSub, ...S7.coins.map((c) => c.e), S7.h, S7.s];
+  const V = vis(t, T.friends); const all = [S7.phone, S7.room, S7.lines, ...S7.av, S7.badge, S7.badgeSub, ...S7.coins.map((c) => c.e), S7.h, S7.s];
   if (!V.v) return all.forEach(hide);
   const lt = t - T.friends[0], o = V.o;
   const ph = PH * (LAND ? 0.8 : 0.62), pw = ph * 0.5625 * 1.07, ik = eBack(prog(lt, 0, 0.5));
@@ -349,6 +360,7 @@ function scene7(t) {
   put(S7.badge, { x: VIS.x, y: by, fs: (LAND ? 6.5 : 8) * U, s: bk * (1 + 0.04 * Math.sin(lt * 9)), r: -4, o: bk > 0 ? o : 0 });
   put(S7.badgeSub, { x: VIS.x, y: by + (LAND ? 7.5 : 9) * U, fs: (LAND ? 3.6 : 4.6) * U, o: eOut(prog(lt, 1.9, 2.2)) * o });
   S7.coins.forEach((c) => { const bt = lt - 1.7; if (bt < 0) return hide(c.e); const d = 4 * U; put(c.e, { x: VIS.x + Math.cos(c.a) * c.v * bt, y: by + Math.sin(c.a) * c.v * bt + 70 * U * bt * bt, w: d, h: d, fs: d * 0.55, r: bt * 600, o: clamp(1.4 - bt) * o }); });
+  put(S7.room, { x: VIS.x, y: py - ph / 2 - (LAND ? 0 : 4) * U, fs: (LAND ? 3.4 : 4.2) * U, s: eBack(prog(lt, 0.4, 0.75)), o: lt > 0.4 ? o : 0 });
   animHeadline(S7.h, t, T.friends[0] + 0.2, TXT.y, TXT.fs, TXT.x, o);
   put(S7.s, { x: TXT.x, y: TXT.subY, fs: TXT.subFs * 0.82, o: eOut(prog(lt, 0.7, 1.1)) * o, s: lerp(0.6, 1, eBack(prog(lt, 0.7, 1.1))) });
 }
@@ -357,9 +369,10 @@ function scene7(t) {
 const S8 = { logo: el('c z3', stage, `<img src="icon.png" style="width:100%;height:100%;border-radius:22%;box-shadow:0 1.2em 2.4em rgba(0,0,0,.45)">`) };
 S8.title = headline('ביג דיל'); S8.title.style.zIndex = 3; S8.cta = el('cta c', stage, 'שחקו עכשיו – בחינם!');
 S8.soon = el('sub', stage, '📲 בקרוב בחנות <bdi dir="ltr">Google Play</bdi>'); S8.url = el('url', stage, 'alongdev26-glitch.github.io/-1');
+S8.checks = ['✔ בלי פרסומות', '✔ בלי הרשמה', '✔ עובד גם בלי אינטרנט'].map((c) => el('url c', stage, `<span dir="rtl" style="display:inline-block;direction:rtl;background:rgba(0,0,0,.25);border-radius:1em;padding:.15em .6em">${c}</span>`));
 S8.rain = []; { const R = rng(99); for (let i = 0; i < 24; i++) S8.rain.push({ e: el('coin', stage, '₪'), x: R() * W, sp: (35 + R() * 40) * U, d: (3 + R() * 3) * U, ph: R() * 3, rot: (R() - 0.5) * 400 }); }
 function scene8(t) {
-  const V = vis(t, T.end, true); const all = [S8.logo, S8.title, S8.cta, S8.soon, S8.url, ...S8.rain.map((r) => r.e)];
+  const V = vis(t, T.end, true); const all = [S8.logo, S8.title, S8.cta, S8.soon, S8.url, ...S8.checks, ...S8.rain.map((r) => r.e)];
   if (!V.v) return all.forEach(hide);
   const lt = t - T.end[0];
   S8.rain.forEach((r) => { const y = -r.d + ((lt + r.ph) * r.sp) % (H + 2 * r.d); put(r.e, { x: r.x, y, w: r.d, h: r.d, fs: r.d * 0.55, r: lt * r.rot, o: 0.85 * prog(lt, 0.3, 0.8) }); r.e.style.zIndex = 0; });
@@ -372,13 +385,127 @@ function scene8(t) {
   const cy = ty + (LAND ? 12 : 16) * U;
   put(S8.cta, { x: CX, y: cy, fs: (LAND ? 5.5 : 7) * U, s: ck * pulse, o: ck > 0 ? 1 : 0 });
   put(S8.soon, { x: CX, y: cy + (LAND ? 10 : 13) * U, fs: (LAND ? 4 : 5.2) * U, o: eOut(prog(lt, 1.35, 1.7)) });
-  put(S8.url, { x: CX, y: cy + (LAND ? 16 : 21) * U, fs: (LAND ? 3 : 3.8) * U, o: eOut(prog(lt, 1.6, 2.0)) });
+  const chY = cy + (LAND ? 17 : 22) * U;
+  S8.checks.forEach((c, i) => { const k = eBack(prog(lt, 1.7 + i * 0.25, 2.05 + i * 0.25)); c.style.direction = 'rtl';
+    put(c, LAND ? { x: CX + (1 - i) * 30 * U, y: chY, fs: 3.2 * U, s: k, o: k > 0 ? 1 : 0 } : { x: CX, y: chY + i * 7 * U, fs: 4.2 * U, s: k, o: k > 0 ? 1 : 0 }); });
+  put(S8.url, { x: CX, y: chY + (LAND ? 7 : 23) * U, fs: (LAND ? 3 : 3.8) * U, o: eOut(prog(lt, 2.6, 3.0)) });
+}
+
+// ---------- scene: auction ----------
+const CAR_SVG = `<svg viewBox="0 0 120 70" width="100%" height="100%"><path d="M104 30h12M106 37h10" stroke="#e3001b" stroke-width="3" stroke-linecap="round"/><path d="M10 44c0-8 4-12 12-13l14-2 12-14c2-2 4-3 7-3h24c3 0 5 1 7 3l11 14 8 1c6 1 9 5 9 11v6c0 2-2 4-4 4H14c-2 0-4-2-4-4z" fill="#e3001b" stroke="#3a0008" stroke-width="3" stroke-linejoin="round"/><path d="M52 17h12v13H41z" fill="#bfe8ff" stroke="#3a0008" stroke-width="2.5" stroke-linejoin="round"/><path d="M69 17h10c2 0 3 1 4 2l9 11H69z" fill="#bfe8ff" stroke="#3a0008" stroke-width="2.5" stroke-linejoin="round"/><path d="M66 31v18" stroke="#3a0008" stroke-width="2"/><rect x="10" y="37" width="7" height="7" rx="3" fill="#ffd23f" stroke="#3a0008" stroke-width="2"/><rect x="105" y="41" width="5" height="6" rx="1.5" fill="#fff" stroke="#3a0008" stroke-width="2"/><g class="wh"><circle cx="33" cy="52" r="10" fill="#1b1b1b"/><circle cx="33" cy="52" r="6" fill="#fff"/><circle cx="29" cy="52" r="2.6" fill="#e3001b"/></g><g class="wh"><circle cx="89" cy="52" r="10" fill="#1b1b1b"/><circle cx="89" cy="52" r="6" fill="#fff"/><circle cx="85" cy="52" r="2.6" fill="#e3001b"/></g></svg>`;
+function tokEl(emoji, color, parent = stage) { const t = el('tok c', parent, emoji); t.style.boxShadow = `0 0 0 .1em ${color}, 0 .08em .2em rgba(0,0,0,.45)`; return t; }
+const SA = { tile: el('tile c', stage, `<div class="hd" style="background:#1F4E9E"></div><div class="nm">רח' דיזנגוף</div><div class="pr">תל-אביב</div>`) };
+SA.tag = el('badge c'); SA.gavel = el('c', stage, '🔨'); SA.sold = el('stamp c', stage, 'נמכר! ✔');
+SA.bidders = [['🐈', '#FF8A00'], ['🏎️', '#D90429'], ['🦖', '#16A34A']].map(([e, c]) => tokEl(e, c));
+SA.bubbles = [0, 1, 2, 3].map(() => el('counter c'));
+SA.coins = []; { const R = rng(55); for (let i = 0; i < 14; i++) SA.coins.push({ e: el('coin', stage, '₪'), a: R() * Math.PI * 2, v: (25 + R() * 30) * U }); }
+SA.h = headline('מכירות פומביות'); SA.s = el('sub', stage, 'מי ייתן יותר? 🔥');
+const BIDS = [[0.75, 0, 220], [1.1, 1, 260], [1.45, 2, 300], [1.8, 0, 340]];
+function sceneAuction(t) {
+  const V = vis(t, T.auction); const all = [SA.tile, SA.tag, SA.gavel, SA.sold, ...SA.bidders, ...SA.bubbles, ...SA.coins.map((c) => c.e), SA.h, SA.s];
+  if (!V.v) return all.forEach(hide);
+  const lt = t - T.auction[0], o = V.o;
+  const tw = (LAND ? 22 : 30) * U, th = tw * 1.4, ty = VIS.y - (LAND ? 8 : 8) * U;
+  SA.tile.querySelector('.nm').style.fontSize = tw * 0.14 + 'px'; SA.tile.querySelector('.pr').style.fontSize = tw * 0.11 + 'px';
+  const tk = eBack(prog(lt, 0, 0.45)), hit = prog(lt, 2.2, 2.45);
+  put(SA.tile, { x: VIS.x, y: ty + (1 - tk) * H * 0.5 + Math.sin(hit * Math.PI) * 1.5 * U, w: tw, h: th, r: -3 + Math.sin(lt * 2) * 1.5, o });
+  // price tag climbs with each bid
+  let price = 180; BIDS.forEach(([b, , p]) => { if (lt >= b) price = p; });
+  SA.tag.textContent = '₪' + price;
+  const bump = Math.max(...BIDS.map(([b]) => Math.sin(prog(lt, b, b + 0.2) * Math.PI)));
+  put(SA.tag, { x: VIS.x, y: ty - th / 2 - 5 * U, fs: (LAND ? 6 : 7.5) * U, s: eBack(prog(lt, 0.3, 0.6)) * (1 + 0.18 * bump), r: 4, o: lt > 0.3 ? o : 0 });
+  // bidders on a row under the tile
+  const by = ty + th / 2 + (LAND ? 12 : 14) * U, bx = [1, 0, -1].map((i) => VIS.x + i * (LAND ? 15 : 22) * U), d = (LAND ? 11 : 14) * U;
+  SA.bidders.forEach((b, i) => { const k = eBack(prog(lt, 0.25 + i * 0.1, 0.6 + i * 0.1)); const jump = Math.max(...BIDS.filter(([, w]) => w === i).map(([b0]) => Math.sin(prog(lt, b0, b0 + 0.25) * Math.PI))); put(b, { x: bx[i], y: by - jump * 3 * U, w: d, h: d, fs: d * 0.6, s: k, o: k > 0 ? o : 0 }); });
+  SA.bubbles.forEach((bb, i) => { const [b0, w, p] = BIDS[i]; const k = prog(lt, b0, b0 + 0.25), out = 1 - prog(lt, b0 + 0.5, b0 + 0.7); bb.textContent = '₪' + p; put(bb, { x: bx[w], y: by - d * 0.95, fs: (LAND ? 3.4 : 4.2) * U, s: eBack(k), o: k > 0 ? out * o : 0 }); });
+  // gavel swings down and hits at 2.2s
+  const swing = lt < 2.2 ? -35 + Math.sin(lt * 3) * 6 : lerp(30, 0, eOut(prog(lt, 2.2, 2.5)));
+  const gk = eBack(prog(lt, 1.7, 2.0));
+  put(SA.gavel, { x: VIS.x + tw * 0.62, y: ty - th * 0.28, fs: (LAND ? 16 : 22) * U, r: lt < 2.05 ? swing : lt < 2.2 ? lerp(-35, 40, prog(lt, 2.05, 2.2)) : swing, s: gk, o: gk > 0 ? o : 0 });
+  const sk = eElastic(prog(lt, 2.2, 2.8));
+  put(SA.sold, { x: VIS.x, y: ty, fs: (LAND ? 6 : 8) * U, s: sk, r: -10, o: lt > 2.2 ? o : 0 });
+  SA.coins.forEach((c) => { const bt = lt - 2.25; if (bt < 0) return hide(c.e); const dd = 4 * U; put(c.e, { x: VIS.x + Math.cos(c.a) * c.v * bt, y: ty + Math.sin(c.a) * c.v * bt + 80 * U * bt * bt, w: dd, h: dd, fs: dd * 0.55, r: bt * 500, o: clamp(1.3 - bt) * o }); });
+  animHeadline(SA.h, t, T.auction[0] + 0.2, TXT.y, TXT.fs, TXT.x, o);
+  put(SA.s, { x: TXT.x, y: TXT.subY, fs: TXT.subFs, o: eOut(prog(lt, 0.6, 1.0)) * o, s: lerp(0.6, 1, eBack(prog(lt, 0.6, 1.0))) });
+}
+
+// ---------- scene: trade ----------
+const ST = { p1: el('c', stage, '<div class="tok" style="position:relative;width:100%;height:100%;font-size:inherit;box-shadow:0 0 0 .1em #FF8A00,0 .08em .2em rgba(0,0,0,.45)">🐈</div>'), p2: el('c', stage, '<div class="tok" style="position:relative;width:100%;height:100%;font-size:inherit;box-shadow:0 0 0 .1em #D90429,0 .08em .2em rgba(0,0,0,.45)">🏎️</div>') };
+ST.n1 = el('url c', stage, 'דנה'); ST.n2 = el('url c', stage, 'הנרי');
+ST.card = el('tile c', stage, `<div class="hd" style="background:#E0218A"></div><div class="nm">שד' רגר</div><div class="pr">₪150</div>`);
+ST.card2 = el('tile c', stage, `<div class="hd" style="background:#E0218A"></div><div class="nm">רח' קק"ל</div><div class="pr">₪130</div>`);
+ST.cash = el('counter c', stage, '₪200'); ST.shake = el('c', stage, '🤝'); ST.deal = el('badge c', stage, 'עסקה! ✨');
+ST.sp = []; { const R = rng(31); for (let i = 0; i < 12; i++) ST.sp.push({ e: el('spark', stage, '✦'), a: R() * Math.PI * 2, r: 0.5 + R() * 0.7 }); }
+ST.h = headline('עסקאות והחלפות'); ST.s = el('sub', stage, 'מציעים, מתמקחים וסוגרים');
+function sceneTrade(t) {
+  const V = vis(t, T.trade); const all = [ST.p1, ST.p2, ST.n1, ST.n2, ST.card, ST.card2, ST.cash, ST.shake, ST.deal, ...ST.sp.map((s) => s.e), ST.h, ST.s];
+  if (!V.v) return all.forEach(hide);
+  const lt = t - T.trade[0], o = V.o;
+  const sep = (LAND ? 25 : 30) * U, d = (LAND ? 15 : 19) * U, py = VIS.y - (LAND ? 12 : 16) * U;
+  const xR = VIS.x + sep, xL = VIS.x - sep;
+  [[ST.p1, ST.n1, xR, 0], [ST.p2, ST.n2, xL, 0.1]].forEach(([p, n, x, dl]) => { const k = eBack(prog(lt, dl, dl + 0.45)); put(p, { x, y: py + Math.sin(lt * 3 + dl * 9) * U, w: d, h: d, fs: d * 0.6, s: k, o: k > 0 ? o : 0 }); put(n, { x, y: py + d * 0.75, fs: 4 * U, o: eOut(prog(lt, 0.3, 0.6)) * o }); });
+  // the cat gives a street, the car gives a street + ₪200; they cross in the middle
+  const cw = (LAND ? 13 : 17) * U, ch = cw * 1.4, cy = py + d + ch * 0.75;
+  const mk = eInOut(prog(lt, 0.8, 1.6));
+  [[ST.card, xR, xL, 0], [ST.card2, xL, xR, 1]].forEach(([c, a, b, i]) => {
+    c.querySelector('.nm').style.fontSize = cw * 0.15 + 'px'; c.querySelector('.pr').style.fontSize = cw * 0.13 + 'px';
+    const k = eBack(prog(lt, 0.35 + i * 0.1, 0.7 + i * 0.1));
+    put(c, { x: lerp(a, b, mk), y: cy - Math.sin(mk * Math.PI) * (i ? -6 : 6) * U, w: cw, h: ch, r: lerp(i ? 8 : -8, i ? -8 : 8, mk), s: k, o: k > 0 ? o : 0 });
+  });
+  const ck = eBack(prog(lt, 0.55, 0.85));
+  put(ST.cash, { x: lerp(xL, xR, mk), y: cy + ch * 0.62 + Math.sin(mk * Math.PI) * 5 * U, fs: (LAND ? 4.5 : 5.5) * U, s: ck, o: ck > 0 ? o : 0 });
+  const hk = eElastic(prog(lt, 1.65, 2.3));
+  put(ST.shake, { x: VIS.x, y: py, fs: (LAND ? 15 : 20) * U, s: hk, r: Math.sin(lt * 14) * 6 * prog(lt, 1.7, 2.6), o: lt > 1.65 ? o : 0 });
+  put(ST.deal, { x: VIS.x, y: py - (LAND ? 13 : 16) * U, fs: (LAND ? 5 : 6.5) * U, s: eBack(prog(lt, 1.85, 2.2)), r: -5, o: lt > 1.85 ? o : 0 });
+  ST.sp.forEach((s) => { const k = prog(lt, 1.7, 2.6); put(s.e, { x: VIS.x + Math.cos(s.a) * 22 * U * s.r * eOut(k), y: py + Math.sin(s.a) * 22 * U * s.r * eOut(k), fs: 5 * U, s: Math.sin(k * Math.PI) * 1.3, o: k > 0 && k < 1 ? o : 0 }); });
+  animHeadline(ST.h, t, T.trade[0] + 0.2, TXT.y, TXT.fs * 0.92, TXT.x, o);
+  put(ST.s, { x: TXT.x, y: TXT.subY, fs: TXT.subFs, o: eOut(prog(lt, 0.6, 1.0)) * o, s: lerp(0.6, 1, eBack(prog(lt, 0.6, 1.0))) });
+}
+
+// ---------- scene: jail + no-fee parking ----------
+const SJ = { tok: tokEl('🐈', '#FF8A00') };
+SJ.bars = el('c', stage, `<svg viewBox="0 0 100 110" width="100%" height="100%"><rect x="2" y="2" width="96" height="10" rx="3" fill="#37474f" stroke="#111" stroke-width="2"/><rect x="2" y="98" width="96" height="10" rx="3" fill="#37474f" stroke="#111" stroke-width="2"/>${[12, 30, 48, 66, 84].map((x) => `<rect x="${x}" y="10" width="7" height="90" rx="3" fill="url(#bg)" stroke="#111" stroke-width="1.5"/>`).join('')}<defs><linearGradient id="bg" x1="0" x2="1"><stop offset="0" stop-color="#90a4ae"/><stop offset=".5" stop-color="#eceff1"/><stop offset="1" stop-color="#607d8b"/></linearGradient></defs></svg>`);
+SJ.siren = el('stamp c', stage, '🚔 לכלא!');
+SJ.card = el('card face c', stage, `<div style="font-size:2em">🔑</div><div style="font-weight:900;margin-top:.2em">צא מהכלא</div><div style="font-weight:900;color:#1b7a2f">חינם!</div>`);
+SJ.road = el(''); SJ.road.style.background = 'repeating-linear-gradient(90deg,#fff 0 6%,transparent 6% 12%) center/100% 8% no-repeat, #3b3f45'; SJ.road.style.borderRadius = '1em'; SJ.road.style.boxShadow = '0 .4em 1em rgba(0,0,0,.35)';
+SJ.car = el('c', stage, CAR_SVG); SJ.sign = el('c', stage, '<div style="width:100%;height:100%;border-radius:18%;background:#1E5BD6;border:.12em solid #fff;color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:1em;box-shadow:0 .1em .3em rgba(0,0,0,.4)">P</div>');
+SJ.h1 = headline('נתקעת בכלא?'); SJ.s1 = el('sub', stage, 'יש קלף יציאה 🔑');
+SJ.h2 = headline('חניה חינם'); SJ.s2 = el('sub', stage, 'והכסף בקופה מחכה לך 💰');
+function sceneJail(t) {
+  const V = vis(t, T.jail); const all = [SJ.tok, SJ.bars, SJ.siren, SJ.card, SJ.road, SJ.car, SJ.sign, SJ.h1, SJ.s1, SJ.h2, SJ.s2];
+  if (!V.v) return all.forEach(hide);
+  const lt = t - T.jail[0], o = V.o;
+  const partA = 1 - prog(lt, 1.75, 1.95), partB = prog(lt, 1.85, 2.05);
+  const y = VIS.y - (LAND ? 0 : 4) * U, d = (LAND ? 18 : 24) * U, bw = d * 1.9;
+  // token escapes at 1.45s and runs off
+  const run = eIn(prog(lt, 1.45, 1.85));
+  put(SJ.tok, { x: VIS.x - run * W * 0.6, y: y - Math.abs(Math.sin(lt * 14)) * 2 * U * (lt > 1.45 ? 1 : 0), w: d, h: d, fs: d * 0.6, s: eBack(prog(lt, 0, 0.35)), r: lt > 1.45 ? -12 : Math.sin(lt * 18) * 4 * prog(lt, 0.45, 0.6) * (1 - prog(lt, 0.6, 1)), o: o * partA });
+  // bars slam down, then lift
+  const down = eBounce(prog(lt, 0.3, 0.75)), up = eIn(prog(lt, 1.3, 1.55));
+  put(SJ.bars, { x: VIS.x, y: lerp(y - H * 0.7, y, down) - up * H * 0.7, w: bw, h: bw * 1.1, o: lt > 0.3 ? o * partA : 0 });
+  put(SJ.siren, { x: VIS.x, y: y - bw * 0.72, fs: (LAND ? 5 : 6.5) * U, s: eElastic(prog(lt, 0.6, 1.1)), r: -6 + Math.sin(lt * 20) * 2, o: lt > 0.6 ? o * partA * (1 - up) : 0 });
+  const ck = eBack(prog(lt, 0.95, 1.3)), cw = (LAND ? 15 : 20) * U;
+  SJ.card.style.fontSize = cw * 0.13 + 'px';
+  put(SJ.card, { x: lerp(VIS.x + W * 0.5, VIS.x + bw * 0.62, ck), y: y + bw * 0.25, w: cw, h: cw * 1.35, r: lerp(40, 10, ck), s: 1 + 0.1 * Math.sin(prog(lt, 1.3, 1.5) * Math.PI), o: ck > 0 ? o * partA : 0 });
+  // part B: the red car drives in and parks by the P sign
+  const rw = LAND ? W * 0.5 : W * 0.9, ry = y + (LAND ? 10 : 8) * U;
+  put(SJ.road, { x: VIS.x, y: ry, w: rw, h: (LAND ? 9 : 11) * U, o: o * partB });
+  const dk = eOut(prog(lt, 2.0, 2.75)), cwid = (LAND ? 34 : 50) * U;
+  const brake = Math.sin(prog(lt, 2.7, 2.95) * Math.PI) * 4;
+  SJ.car.querySelectorAll('.wh').forEach((g, i) => g.setAttribute('transform', `rotate(${-dk * 1400} ${i ? 89 : 33} 52)`));
+  put(SJ.car, { x: lerp(VIS.x + W * 0.8, VIS.x - (LAND ? 2 : 4) * U, dk), y: ry - cwid * 0.24, w: cwid, h: cwid * 0.583, r: brake, o: o * partB });
+  const sk = eBack(prog(lt, 2.6, 2.95)), ss = (LAND ? 10 : 13) * U;
+  put(SJ.sign, { x: VIS.x - rw * 0.36, y: ry - ss * 1.3, w: ss, h: ss, fs: ss * 0.7, s: sk, o: sk > 0 ? o * partB : 0 });
+  animHeadline(SJ.h1, t, T.jail[0] + 0.2, TXT.y, TXT.fs, TXT.x, o * partA);
+  put(SJ.s1, { x: TXT.x, y: TXT.subY, fs: TXT.subFs, o: eOut(prog(lt, 0.9, 1.2)) * o * partA });
+  animHeadline(SJ.h2, t, T.jail[0] + 1.95, TXT.y, TXT.fs, TXT.x, o * partB);
+  put(SJ.s2, { x: TXT.x, y: TXT.subY, fs: TXT.subFs, o: eOut(prog(lt, 2.4, 2.7)) * o * partB });
 }
 
 // ---------- background, bands, transitions ----------
 function background(t) {
   // hue drifts per scene
-  const hues = [[46, 155, 255, 13, 79, 163], [255, 120, 70, 200, 30, 40], [70, 200, 110, 15, 110, 50], [130, 90, 255, 60, 25, 150], [46, 155, 255, 13, 79, 163], [255, 90, 170, 140, 20, 90], [255, 170, 40, 200, 80, 10], [46, 155, 255, 13, 79, 163]];
+  const hues = [[46, 155, 255, 13, 79, 163], [255, 120, 70, 200, 30, 40], [70, 200, 110, 15, 110, 50], [40, 190, 200, 10, 90, 110], [255, 120, 160, 150, 20, 80], [130, 90, 255, 60, 25, 150], [90, 110, 130, 30, 40, 60], [46, 155, 255, 13, 79, 163], [255, 90, 170, 140, 20, 90], [255, 170, 40, 200, 80, 10], [46, 155, 255, 13, 79, 163]];
   const keys = Object.values(T); let i = keys.findIndex(([a, b]) => t >= a && t < b); if (i < 0) i = keys.length - 1;
   const k = eInOut(prog(t, keys[i][0] - 0.25, keys[i][0] + 0.35)), p = hues[Math.max(0, i - 1)], c = hues[i];
   const m = (j) => Math.round(lerp(i === 0 ? c[j] : p[j], c[j], k));
@@ -400,7 +527,7 @@ function background(t) {
 
 window.render = (t) => {
   const shake = background(t);
-  scene1(t); scene2(t); scene3(t); scene4(t); scene5(t); scene6(t); scene7(t); scene8(t);
+  scene1(t); scene2(t); scene3(t); sceneAuction(t); sceneTrade(t); scene4(t); sceneJail(t); scene5(t); scene6(t); scene7(t); scene8(t);
   stage.style.transform = shake;
 };
 window.DURATION = DURATION;
