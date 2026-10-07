@@ -397,7 +397,7 @@ function scene8(t) {
   const chY = cy + (LAND ? 17 : 22) * U;
   S8.checks.forEach((c, i) => { const k = eBack(prog(lt, 1.7 + i * 0.25, 2.05 + i * 0.25)); c.style.direction = EN ? 'ltr' : 'rtl';
     put(c, LAND ? { x: CX + (EN ? i - 1 : 1 - i) * 30 * U, y: chY, fs: 3.2 * U, s: k, o: k > 0 ? 1 : 0 } : { x: CX, y: chY + i * 7 * U, fs: 4.2 * U, s: k, o: k > 0 ? 1 : 0 }); });
-  put(S8.url, { x: CX, y: chY + (LAND ? 7 : 23) * U, fs: (LAND ? 3 : 3.8) * U, o: eOut(prog(lt, 2.6, 3.0)) });
+  hide(S8.url); // no web address on the end card
 }
 
 // ---------- scene: auction ----------

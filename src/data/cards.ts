@@ -37,6 +37,12 @@ export const CHANCE: Card[] = [
   card({ type: 'payEach', amount: 40 }), // you threw a party
   card({ type: 'money', amount: 120 }), // your app went viral
   card({ type: 'collectEach', amount: 15 }), // crowdfunding
+  card({ type: 'money', amount: 50 }), // returned a lost wallet
+  card({ type: 'move', to: 31 }), // visiting a friend
+  card({ type: 'back', steps: 3 }), // a wrong turn
+  card({ type: 'money', amount: -50 }), // a speeding ticket
+  card({ type: 'collectEach', amount: 10 }), // sold cookies
+  card({ type: 'move', to: 5 }), // breakfast in town
 ];
 
 export const CHEST: Card[] = [
@@ -56,6 +62,12 @@ export const CHEST: Card[] = [
   card({ type: 'repairs', house: 35, hotel: 100 }), // home renovation
   card({ type: 'money', amount: 15 }), // won a raffle
   card({ type: 'money', amount: 80 }), // a gift from grandma
+  card({ type: 'money', amount: 100 }), // an inheritance
+  card({ type: 'money', amount: -30 }), // the vet
+  card({ type: 'money', amount: 20 }), // bottle deposit
+  card({ type: 'payEach', amount: 10 }), // pizza for everyone
+  card({ type: 'money', amount: -70 }), // a cracked phone screen
+  card({ type: 'money', amount: 60 }), // sold a painting
 ];
 
 export const DECKS: Record<Deck, Card[]> = { chance: CHANCE, chest: CHEST };

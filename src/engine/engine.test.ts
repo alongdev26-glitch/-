@@ -38,9 +38,9 @@ describe('board', () => {
     expect(count('chest')).toBe(3);
     BOARD.forEach((s, i) => expect(s.id).toBe(i));
   });
-  it('has 16 cards per deck', () => {
-    expect(CHANCE).toHaveLength(16);
-    expect(CHEST).toHaveLength(16);
+  it('has 22 cards per deck', () => {
+    expect(CHANCE).toHaveLength(22);
+    expect(CHEST).toHaveLength(22);
   });
 });
 
@@ -190,7 +190,7 @@ describe('bots', () => {
         const decks = s.decks.chance.length + s.decks.chest.length;
         const held = s.players.reduce((n, p) => n + p.jailCards.length, 0);
         const drawn = s.phase.t === 'card' ? 1 : 0;
-        expect(decks + held + drawn).toBe(32);
+        expect(decks + held + drawn).toBe(44);
         expect(actor(s)).toBeGreaterThanOrEqual(0);
       }
       if (s.phase.t === 'gameover') finished++;

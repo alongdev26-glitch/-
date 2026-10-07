@@ -45,11 +45,11 @@ export interface Space {
 
 export const GROUP_COLORS: Record<Group, string> = {
   brown: '#0fa3a3',
-  lightblue: '#6fae12',
+  lightblue: '#e2337f',
   pink: '#2e86de',
   orange: '#8e44ad',
   red: '#f08a00',
-  yellow: '#e2337f',
+  yellow: '#6fae12',
   green: '#c0392b',
   darkblue: '#c99a06',
 };
