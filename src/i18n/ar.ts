@@ -50,6 +50,10 @@ export const ar: Dict = {
   shareWillGet: 'عندما يفتح صديق جديد رابطك ستحصل على {n} عملة!',
   soundOn: 'الأصوات: تعمل',
   soundOff: 'الأصوات: متوقفة',
+  smoothMode: "الوضع السلس",
+  smoothOn: "الوضع السلس: مفعّل",
+  smoothOff: "الوضع السلس: متوقف",
+  smoothNote: "يوقف الظلال والحركات الثقيلة لتعمل اللعبة بسلاسة على هاتفك",
   soundTurnOn: 'شغّل الأصوات',
   soundTurnOff: 'أوقف الأصوات',
 

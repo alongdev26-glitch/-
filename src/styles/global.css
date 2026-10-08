@@ -180,3 +180,14 @@ button {
   --burgundy: #7a1c24;
   --felt: #0f3d2e;
 }
+
+/* ---------- smooth mode (Settings): lighter effects for slower phones ---------- */
+html.smooth *,
+html.smooth *::before,
+html.smooth *::after {
+  /* looping animations play once and stop */
+  animation-iteration-count: 1 !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  text-shadow: none !important;
+}

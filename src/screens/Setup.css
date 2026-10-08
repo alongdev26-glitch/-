@@ -416,3 +416,10 @@
   font-size: 12px;
   opacity: 0.8;
 }
+
+.settings-note {
+  margin: 8px 0 0;
+  font-size: 13px;
+  opacity: 0.85;
+  text-align: center;
+}

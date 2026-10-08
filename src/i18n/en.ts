@@ -52,6 +52,10 @@ export const en: Dict = {
   shareWillGet: 'When a new friend opens your link you get {n} coins!',
   soundOn: 'Sounds: on',
   soundOff: 'Sounds: off',
+  smoothMode: "Smooth mode",
+  smoothOn: "Smooth mode: on",
+  smoothOff: "Smooth mode: off",
+  smoothNote: "Turns off heavy shadows and animations so the game runs smoothly on your phone",
   soundTurnOn: 'Turn sounds on',
   soundTurnOff: 'Turn sounds off',
 

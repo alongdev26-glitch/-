@@ -49,6 +49,10 @@ export const ja: Dict = {
   shareWillGet: '新しい友だちがあなたのリンクを開くと{n}コインもらえます！',
   soundOn: 'サウンド：オン',
   soundOff: 'サウンド：オフ',
+  smoothMode: "なめらかモード",
+  smoothOn: "なめらかモード：オン",
+  smoothOff: "なめらかモード：オフ",
+  smoothNote: "重い影やアニメーションをオフにして、スマホでなめらかに動かします",
   soundTurnOn: 'サウンドをオン',
   soundTurnOff: 'サウンドをオフ',
 

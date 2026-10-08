@@ -52,6 +52,10 @@ export const he = {
   shareWillGet: 'כשחבר חדש יפתח את הקישור שלך תקבל {n} מטבעות!',
   soundOn: 'צלילים: פועלים',
   soundOff: 'צלילים: כבויים',
+  smoothMode: "מצב חלק",
+  smoothOn: "מצב חלק: פועל",
+  smoothOff: "מצב חלק: כבוי",
+  smoothNote: "מכבה צללים ואנימציות כבדות, כדי שהמשחק ירוץ חלק בטלפון",
   soundTurnOn: 'הפעל צלילים',
   soundTurnOff: 'כבה צלילים',
 

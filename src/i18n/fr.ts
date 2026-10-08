@@ -52,6 +52,10 @@ export const fr: Dict = {
   shareWillGet: 'Quand un nouvel ami ouvre ton lien, tu gagnes {n} pièces !',
   soundOn: 'Sons : activés',
   soundOff: 'Sons : coupés',
+  smoothMode: "Mode fluide",
+  smoothOn: "Mode fluide : activé",
+  smoothOff: "Mode fluide : désactivé",
+  smoothNote: "Désactive les ombres et animations lourdes pour un jeu fluide sur votre téléphone",
   soundTurnOn: 'Activer les sons',
   soundTurnOff: 'Couper les sons',
 
