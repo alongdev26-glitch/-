@@ -152,31 +152,29 @@
   gap: 6px;
   padding-top: 18px;
 }
+/* police lights: soft gradients pulsing in turn (no blur filter, so phones keep up) */
 .jf-lights i {
   position: absolute;
   top: -30%;
   width: 70%;
   height: 90%;
   border-radius: 50%;
-  filter: blur(18px);
   opacity: 0;
+  will-change: opacity;
 }
 .jf-red {
   left: -20%;
-  background: #ff1f3d;
-  animation: jf-flash 0.5s steps(1) infinite;
+  background: radial-gradient(closest-side, rgba(255, 31, 61, 0.9), rgba(255, 31, 61, 0));
+  animation: jf-flash 0.5s ease-in-out infinite;
 }
 .jf-blue {
   right: -20%;
-  background: #1f6bff;
-  animation: jf-flash 0.5s steps(1) 0.25s infinite;
+  background: radial-gradient(closest-side, rgba(31, 107, 255, 0.9), rgba(31, 107, 255, 0));
+  animation: jf-flash 0.5s ease-in-out 0.25s infinite;
 }
 @keyframes jf-flash {
-  0% {
-    opacity: 0.85;
-  }
   50% {
-    opacity: 0;
+    opacity: 0.9;
   }
 }
 .jf-sirens {
@@ -209,7 +207,7 @@
   background: #2a2e36;
   box-shadow: inset 0 0 0 3px #555b66;
   overflow: hidden;
-  animation: jf-shake 0.35s ease 0.75s;
+  animation: jf-shake 0.3s ease-out 0.72s;
 }
 .jf-token {
   animation: jf-scared 0.6s ease-in-out 0.2s 2;
@@ -226,7 +224,8 @@
   justify-content: space-evenly;
   border-top: 8px solid #6b7280;
   border-bottom: 8px solid #6b7280;
-  animation: jf-drop 0.45s cubic-bezier(0.5, 0, 0.75, 0) 0.35s both;
+  animation: jf-drop 0.55s ease-in 0.35s both;
+  will-change: transform;
 }
 .jf-bars i {
   width: 7px;
@@ -236,8 +235,19 @@
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
 }
 @keyframes jf-drop {
-  from {
+  0% {
     transform: translateY(-110%);
+  }
+  65% {
+    transform: translateY(0);
+    animation-timing-function: ease-out;
+  }
+  82% {
+    transform: translateY(-9%);
+    animation-timing-function: ease-in;
+  }
+  100% {
+    transform: translateY(0);
   }
 }
 @keyframes jf-shake {
@@ -255,7 +265,7 @@
   font-size: 34px;
   font-weight: 900;
   color: #ffd23f;
-  text-shadow: 0 3px 0 #7a2e00, 0 0 18px rgba(255, 210, 63, 0.5);
+  text-shadow: 0 3px 0 #7a2e00;
   animation: bf-bounce 0.6s ease 0.8s;
 }
 .jf-name {
