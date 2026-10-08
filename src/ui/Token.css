@@ -11,10 +11,9 @@
 .token-glyph {
   font-size: 1em;
   line-height: 1;
-  text-shadow: 0 0.05em 0.05em rgba(0, 0, 0, 0.35);
+  filter: drop-shadow(0 0.05em 0.05em rgba(0, 0, 0, 0.35));
 }
 .token-active {
-  will-change: transform;
   animation: bob 0.9s ease-in-out infinite;
 }
 @keyframes bob {

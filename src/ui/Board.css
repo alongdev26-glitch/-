@@ -16,8 +16,6 @@
 
 .space {
   position: relative;
-  /* a change inside one square doesn't relayout or repaint the whole board */
-  contain: layout paint;
   border: 0.5px solid var(--board-line);
   background: var(--board);
   padding: 0;
@@ -350,6 +348,7 @@
   transform: translateX(-50%) rotate(-10deg);
   font-size: 7cqw;
   font-style: normal;
+  filter: drop-shadow(0 0.5cqw 0.5cqw rgba(0, 0, 0, 0.4));
 }
 .deck {
   position: absolute;
@@ -404,6 +403,7 @@
 .deck-art {
   width: 62%;
   line-height: 0;
+  filter: drop-shadow(0 0.4cqw 0.4cqw rgba(0, 0, 0, 0.35));
 }
 .deck-art svg {
   width: 100%;
@@ -548,6 +548,7 @@
 }
 /* the chest is drawn, not an emoji: keep its own colors */
 .sp-icon.sp-chest {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
   opacity: 1;
   width: 58cqi;
   line-height: 0;

@@ -158,16 +158,17 @@
   width: 70%;
   height: 90%;
   border-radius: 50%;
+  filter: blur(18px);
   opacity: 0;
 }
 .jf-red {
   left: -20%;
-  background: radial-gradient(closest-side, rgba(255, 31, 61, 0.9), rgba(255, 31, 61, 0));
+  background: #ff1f3d;
   animation: jf-flash 0.5s steps(1) infinite;
 }
 .jf-blue {
   right: -20%;
-  background: radial-gradient(closest-side, rgba(31, 107, 255, 0.9), rgba(31, 107, 255, 0));
+  background: #1f6bff;
   animation: jf-flash 0.5s steps(1) 0.25s infinite;
 }
 @keyframes jf-flash {
