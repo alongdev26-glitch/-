@@ -1,3 +1,4 @@
+import { peerLink } from './peer';
 import type { GameState } from '../engine/types';
 import { connect, newCode, roomRef, type Net, type Room, type Seat } from './net';
 import { TOKENS } from '../ui/Token';
@@ -123,10 +124,6 @@ export async function openLink(): Promise<RoomLink | null> {
   const net = await connect();
   if (net) return claudeLink(net);
   if (typeof RTCPeerConnection === 'undefined') return null;
-  try {
-    const { peerLink } = await import('./peer');
-    return peerLink();
-  } catch {
-    return null;
-  }
+  // bundled with the game (not a separate file), so an update can't leave an open page without it
+  return peerLink();
 }
