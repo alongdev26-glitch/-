@@ -259,6 +259,26 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
               {money(game.pot)}
             </b>
           </div>
+          <i className="mascot">🏙️</i>
+        </div>
+        {/* the two card decks, as real-looking stacks */}
+        <div className="deck deck-chest">
+          <i className="deck-under" />
+          <i className="deck-under" />
+          <div className="deck-card">
+            <span className="deck-art">
+              <ChestIcon />
+            </span>
+            <span className="deck-label">{edition().chestName}</span>
+          </div>
+        </div>
+        <div className="deck deck-chance">
+          <i className="deck-under" />
+          <i className="deck-under" />
+          <div className="deck-card">
+            <span className="deck-q">?</span>
+            <span className="deck-label">{edition().chanceName}</span>
+          </div>
         </div>
         {center}
       </div>

@@ -307,32 +307,32 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  width: 66%;
+  height: 16%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: linear-gradient(180deg, #ff2a3d 0%, var(--red) 55%, var(--red-dark) 100%);
+  border-radius: 3cqw;
+  box-shadow: inset 0 0 0 0.6cqw #fff, inset 0 0 0 1cqw var(--red), 0 1.2cqw 2.5cqw rgba(0, 0, 0, 0.4);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.2cqw;
-}
-.plaque span {
-  font-weight: 900;
-  font-size: 6.4cqw;
-  line-height: 1;
-  color: var(--red);
-  white-space: nowrap;
-}
-/* the wide Japanese name (ディールシティ) still fits */
-.plaque span.long {
-  font-size: 4.3cqw;
+  justify-content: center;
 }
 .plaque-pot {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, -18%);
   display: flex;
   align-items: center;
   gap: 1.4cqw;
   padding: 0.7cqw 2.6cqw;
   border-radius: 999px;
-  background: #ffd23f;
-  border: 0.4cqw solid #b86e00;
+  background: linear-gradient(180deg, #fff3a8 0%, #ffd23f 45%, #e8a20c 100%);
+  border: 0.5cqw solid #fff;
+  box-shadow: 0 0 0 0.35cqw #b86e00, 0 0.8cqw 1.6cqw rgba(0, 0, 0, 0.45);
   white-space: nowrap;
+  z-index: 1;
 }
 .plaque-pot .pot-label {
   font-size: 2.3cqw;
@@ -345,6 +345,116 @@
   line-height: 1;
   color: #b30016;
   font-variant-numeric: tabular-nums;
+  text-shadow: 0 0.25cqw 0 #fff6c9;
+  animation: pot-pop 0.6s ease-out;
+}
+@keyframes pot-pop {
+  0% {
+    transform: scale(1.6);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.plaque span {
+  font-weight: 900;
+  font-style: italic;
+  font-size: 7.4cqw;
+  line-height: 1;
+  color: #fff;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-shadow: 0 0.4cqw 0 #c7c7c7, 0 0.8cqw 0 #8e8e8e, 0 1.2cqw 1.5cqw rgba(0, 0, 0, 0.5);
+}
+/* the wide Japanese name (ディールシティ) still fits the sign */
+.plaque span.long {
+  font-size: 4.3cqw;
+}
+.mascot {
+  position: absolute;
+  top: -55%;
+  left: 50%;
+  transform: translateX(-50%) rotate(-10deg);
+  font-size: 7cqw;
+  font-style: normal;
+  filter: drop-shadow(0 0.5cqw 0.5cqw rgba(0, 0, 0, 0.4));
+}
+.deck {
+  position: absolute;
+  width: 17%;
+  aspect-ratio: 0.72;
+  transform: rotate(45deg);
+}
+.deck-chest {
+  top: 10%;
+  right: 13%;
+  transform: rotate(-135deg);
+}
+.deck-chance {
+  bottom: 10%;
+  left: 13%;
+}
+/* cards underneath, peeking out: a stack */
+.deck-under,
+.deck-card {
+  position: absolute;
+  inset: 0;
+  border-radius: 1.4cqw;
+  border: 0.45cqw solid #fff;
+  box-shadow: 0 0.6cqw 1.2cqw rgba(0, 0, 0, 0.3);
+}
+.deck-under:nth-child(1) {
+  transform: translate(1.1cqw, 1.1cqw) rotate(4deg);
+}
+.deck-under:nth-child(2) {
+  transform: translate(0.55cqw, 0.55cqw) rotate(2deg);
+}
+.deck-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6cqw;
+  overflow: hidden;
+}
+.deck-chest .deck-under,
+.deck-chest .deck-card {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.35), transparent 55%),
+    linear-gradient(160deg, #4fc3ff, #1e88e5 55%, #0d4fa3);
+}
+.deck-chance .deck-under,
+.deck-chance .deck-card {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.35), transparent 55%),
+    linear-gradient(160deg, #ff6bb5, #e0218a 55%, #a3115f);
+}
+.deck-art {
+  width: 62%;
+  line-height: 0;
+  filter: drop-shadow(0 0.4cqw 0.4cqw rgba(0, 0, 0, 0.35));
+}
+.deck-art svg {
+  width: 100%;
+  height: auto;
+}
+.deck-q {
+  color: #fff;
+  font-weight: 900;
+  font-size: 8cqw;
+  line-height: 1;
+  text-shadow: 0 0.5cqw 0 rgba(0, 0, 0, 0.25);
+}
+.deck-label {
+  max-width: 92%;
+  padding: 0.3cqw 1cqw;
+  border-radius: 999px;
+  background: #ffd23f;
+  color: #5a2d00;
+  font-weight: 900;
+  font-size: 1.45cqw;
+  line-height: 1.1;
+  text-align: center;
 }
 
 /* ---------- the free-parking corner: a red car ---------- */
