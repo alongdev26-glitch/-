@@ -97,7 +97,23 @@
   place-items: center;
   text-align: center;
   padding: 4px;
+  position: relative;
+}
+/* the pulsing red glow, drawn once and faded in and out (opacity only), so the
+   phone's GPU animates it without redrawing the button every frame */
+.fab::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.2cqw rgba(227, 0, 27, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
   animation: pulse 1.4s ease-in-out infinite;
+}
+.fab-wait::after {
+  content: none;
 }
 .fab:active {
   transform: translateY(3px);
@@ -117,7 +133,7 @@
 }
 @keyframes pulse {
   50% {
-    box-shadow: 0 6px 0 #7a000f, 0 0 0 1.2cqw rgba(227, 0, 27, 0.25);
+    opacity: 1;
   }
 }
 
