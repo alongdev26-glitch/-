@@ -1,5 +1,5 @@
 import { House, Hotel } from './Building';
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { BOARD, GROUP_COLORS, gridPos, sideOf, type Space } from '../data/board';
 import type { GameState } from '../engine/types';
 import { Token } from './Token';
@@ -161,6 +161,46 @@ interface Props {
   highlight?: { space: number; tone: 'gain' | 'loss'; badge?: string } | null;
 }
 
+// The board's grid: corners are 1.55 wide, the other squares 1, 12.1 in all.
+const C = 1.55;
+const TOTAL = 2 * C + 9;
+/** the center of grid track 1..11, as a share of the board */
+const trackCenter = (n: number) => (n === 1 ? C / 2 : n === 11 ? TOTAL - C / 2 : C + n - 1.5) / TOTAL;
+
+/** The tokens ride on their own layer, so each step slides smoothly into the next square. */
+function TokenLayer({ game, shown, skinFor }: { game: GameState; shown: number[]; skinFor: (id: number) => string }) {
+  const last = useRef<number[]>(shown);
+  const prev = last.current;
+  last.current = shown;
+  const live = game.players.filter((p) => !p.bankrupt);
+  return (
+    <div className="token-layer" aria-hidden="true">
+      {live.map((p) => {
+        const at = shown[p.id];
+        const [row, col] = gridPos(at);
+        // players on the same square stand side by side
+        const mates = live.filter((q) => shown[q.id] === at);
+        const k = mates.indexOf(p);
+        const x = trackCenter(col) * 100 + (k - (mates.length - 1) / 2) * 1.6;
+        const y = trackCenter(row) * 100;
+        const from = prev[p.id] ?? at;
+        const far = at !== from && (at - from + 40) % 40 > 1;
+        return (
+          <div
+            key={p.id}
+            className={`token-ride${far ? ' far' : ''}`}
+            style={{ transform: `translate(${x}%, ${y}%)`, zIndex: p.id === game.current ? 2 : 1 }}
+          >
+            <span className="token-at">
+              <Token token={p.token} color={p.color} active={p.id === game.current} skin={skinFor(p.id)} />
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function Board({ game, shown, onSpace, center, highlight }: Props) {
   const { skinFor, board } = useCosmetics();
   // the squares speak the game's edition, whatever the menus' language
@@ -173,7 +213,6 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
         const side = sideOf(sp.id);
         const st = game.props[sp.id];
         const owner = st.owner !== null ? game.players[st.owner] : null;
-        const here = game.players.filter((p) => !p.bankrupt && shown[p.id] === sp.id);
         return (
           <button
             key={sp.id}
@@ -207,16 +246,10 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
                 {highlight.badge}
               </span>
             )}
-            {here.length > 0 && (
-              <div className="tokens">
-                {here.map((p) => (
-                  <Token key={p.id} token={p.token} color={p.color} active={p.id === game.current} skin={skinFor(p.id)} />
-                ))}
-              </div>
-            )}
           </button>
         );
       })}
+      <TokenLayer game={game} shown={shown} skinFor={skinFor} />
       <div className="board-center">
         <div className="plaque" dir={edDir}>
           <span className={edLang === 'ja' ? 'long' : undefined}>{t('appName', {}, edLang)}</span>

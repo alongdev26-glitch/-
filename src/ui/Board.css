@@ -267,6 +267,35 @@
   margin-inline-start: -0.45em;
 }
 
+/* ---------- tokens slide from square to square ---------- */
+.token-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+.token-ride {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.3s ease-in-out;
+  will-change: transform;
+}
+.token-ride.far {
+  transition-duration: 0.6s;
+}
+.token-at {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 3.3cqw;
+  transform: translate(-50%, -50%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .token-ride {
+    transition: none;
+  }
+}
+
 /* ---------- center ---------- */
 .board-center {
   grid-row: 2 / 11;
