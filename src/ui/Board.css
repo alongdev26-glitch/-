@@ -523,7 +523,7 @@
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45), 0 0 2px rgba(0, 0, 0, 0.35);
   letter-spacing: 0.01em;
 }
-.strip.g-unused {
+.strip.g-pink {
   color: #3a2a00;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
@@ -552,6 +552,9 @@
   opacity: 1;
   width: 58cqi;
   line-height: 0;
+}
+.sp-icon.sp-train {
+  width: 56cqi;
 }
 .sp-chest svg {
   width: 100%;

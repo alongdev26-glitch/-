@@ -53,7 +53,7 @@ describe('languages', () => {
     expect(BOARD[38].name).toBe('Fifth Avenue');
     expect(money(200)).toBe('$200');
     for (const p of s.players) p.lapped = true;
-    s = reduce(s, { type: 'ROLL', dice: [2, 3] });
+    s = reduce(s, { type: 'ROLL', dice: [1, 3] });
     s = reduce(s, { type: 'BUY' });
     expect(s.log[0]).toBe('Ann bought Broadway for $90');
     expect(s.log.some((l) => HEBREW.test(l))).toBe(false);
@@ -74,7 +74,7 @@ describe('languages', () => {
       expect(BOARD[38].name).toBe(street);
       expect(money(200)).toBe(cash);
       for (const p of s.players) p.lapped = true;
-      s = reduce(s, { type: 'ROLL', dice: [2, 3] });
+      s = reduce(s, { type: 'ROLL', dice: [1, 3] });
       s = reduce(s, { type: 'BUY' });
       expect(s.log[0]).toBe(line);
     }

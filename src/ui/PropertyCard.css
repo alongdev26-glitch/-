@@ -101,3 +101,8 @@
 .deed-icon {
   filter: grayscale(1) sepia(0.35) contrast(1.15);
 }
+.deed-icon svg {
+  width: 1.2em;
+  height: 1.2em;
+  vertical-align: middle;
+}

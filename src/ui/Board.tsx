@@ -7,6 +7,7 @@ import { useCosmetics } from './Cosmetics';
 import './Board.css';
 import { dir, t } from '../i18n';
 import { edition, editionLang, money } from '../data/editions';
+import { TrainIcon } from './TrainIcon';
 
 const ICONS: Record<NonNullable<Space['icon']>, string> = {
   train: '🚂',
@@ -96,6 +97,10 @@ function SpaceFace({ sp }: { sp: Space }) {
       {sp.icon === 'chest' ? (
         <div className="sp-icon sp-chest">
           <ChestIcon />
+        </div>
+      ) : sp.icon === 'train' ? (
+        <div className="sp-icon sp-chest sp-train">
+          <TrainIcon />
         </div>
       ) : (
         sp.icon && <div className="sp-icon">{ICONS[sp.icon]}</div>

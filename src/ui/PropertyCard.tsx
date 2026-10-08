@@ -1,5 +1,6 @@
 import { House, Hotel } from './Building';
 import { BOARD, GROUP_COLORS } from '../data/board';
+import { TrainIcon } from './TrainIcon';
 import './PropertyCard.css';
 import { t, type Key } from '../i18n';
 import { money } from '../data/editions';
@@ -18,7 +19,7 @@ export function PropertyCard({ id, ownerName }: { id: number; ownerName?: string
       </div>
     ) : (
       <div className="deed-head deed-plain">
-        <span className="deed-icon">{sp.kind === 'railroad' ? '🚂' : sp.icon === 'bulb' ? '💡' : '🚰'}</span>
+        <span className="deed-icon">{sp.kind === 'railroad' ? <TrainIcon /> : sp.icon === 'bulb' ? '💡' : '🚰'}</span>
         <b>{sp.name}</b>
       </div>
     );

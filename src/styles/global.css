@@ -94,12 +94,12 @@ button {
 :root {
   --g-brown: #0fa3a3;
   --g-lightblue: #e2337f;
-  --g-pink: #f08a00;
-  --g-orange: #2e86de;
+  --g-pink: #f5c400;
+  --g-orange: #f08a00;
   --g-red: #8e44ad;
   --g-yellow: #6fae12;
   --g-green: #c0392b;
-  --g-darkblue: #c99a06;
+  --g-darkblue: #7f8c8d;
 }
 .link {
   background: none;
