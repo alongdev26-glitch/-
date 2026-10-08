@@ -23,3 +23,21 @@ createRoot(document.getElementById('root')!).render(
 if ('serviceWorker' in navigator && location.hostname.endsWith('github.io')) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
+
+// An app opened from the home screen can keep an old version in memory for days. When it
+// comes back to the front, check whether a newer build was published and reload into it.
+if (location.hostname.endsWith('github.io')) {
+  const current = document.querySelector<HTMLScriptElement>('script[src*="assets/index-"]')?.src.match(/index-[\w-]+\.js/)?.[0];
+  const check = () =>
+    fetch('./', { cache: 'no-store' })
+      .then((r) => r.text())
+      .then((html) => {
+        const latest = html.match(/index-[\w-]+\.js/)?.[0];
+        if (current && latest && latest !== current) location.reload();
+      })
+      .catch(() => {});
+  check();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') check();
+  });
+}
