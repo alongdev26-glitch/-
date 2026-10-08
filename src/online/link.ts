@@ -1,4 +1,3 @@
-import { peerLink } from './peer';
 import type { GameState } from '../engine/types';
 import { connect, newCode, roomRef, type Net, type Room, type Seat } from './net';
 import { TOKENS } from '../ui/Token';
@@ -124,6 +123,19 @@ export async function openLink(): Promise<RoomLink | null> {
   const net = await connect();
   if (net) return claudeLink(net);
   if (typeof RTCPeerConnection === 'undefined') return null;
-  // bundled with the game (not a separate file), so an update can't leave an open page without it
-  return peerLink();
+  try {
+    const { peerLink } = await import('./peer');
+    return peerLink();
+  } catch {
+    // an old page after an update asked for a file that's gone: reload once to get the new version
+    try {
+      if (!sessionStorage.getItem('dc-reloaded')) {
+        sessionStorage.setItem('dc-reloaded', '1');
+        location.reload();
+      }
+    } catch {
+      /* storage off */
+    }
+    return null;
+  }
 }

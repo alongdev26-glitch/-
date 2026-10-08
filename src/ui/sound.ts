@@ -58,9 +58,6 @@ export function onSoundChange(f: (on: boolean) => void) {
   };
 }
 
-/** All sounds play this much slower than written, so they keep pace with the animations. */
-const TEMPO = 1.3;
-
 /** One shaped oscillator note. */
 function tone(
   freq: number,
@@ -70,8 +67,6 @@ function tone(
 ) {
   const a = audio();
   if (!a || !master) return;
-  start *= TEMPO;
-  dur *= TEMPO;
   const t = a.currentTime + start;
   const o = a.createOscillator();
   const g = a.createGain();
@@ -90,8 +85,6 @@ function tone(
 function noise(start: number, dur: number, { vol = 0.25, freq = 2000, q = 1 } = {}) {
   const a = audio();
   if (!a || !master) return;
-  start *= TEMPO;
-  dur *= TEMPO;
   const t = a.currentTime + start;
   const len = Math.max(1, Math.floor(a.sampleRate * dur));
   const buf = a.createBuffer(1, len, a.sampleRate);
