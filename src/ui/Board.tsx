@@ -161,6 +161,50 @@ interface Props {
   highlight?: { space: number; tone: 'gain' | 'loss'; badge?: string } | null;
 }
 
+// The board's grid: corners are 1.55 wide, the other squares 1, in 12.1 in all.
+const C = 1.55;
+const TOTAL = 2 * C + 9;
+/** the center of grid track 1..11, as a share of the board */
+const trackCenter = (n: number) => (n === 1 ? C / 2 : n === 11 ? TOTAL - C / 2 : C + n - 1.5) / TOTAL;
+
+/**
+ * The tokens ride on their own layer above the squares, so a step glides from one
+ * square to the next (transform only, done by the GPU) instead of jumping.
+ */
+function TokenLayer({ game, shown, skinFor }: { game: GameState; shown: number[]; skinFor: (id: number) => string }) {
+  const last = useRef<number[]>(shown);
+  const prev = last.current;
+  last.current = shown;
+  const live = game.players.filter((p) => !p.bankrupt);
+  return (
+    <div className="token-layer" aria-hidden="true">
+      {live.map((p) => {
+        const at = shown[p.id];
+        const [row, col] = gridPos(at);
+        // fan out players who share a square
+        const mates = live.filter((q) => shown[q.id] === at);
+        const k = mates.indexOf(p);
+        const spread = (k - (mates.length - 1) / 2) * 1.4;
+        const x = trackCenter(col) * 100 + spread;
+        const y = trackCenter(row) * 100 + (mates.length > 2 ? (k % 2 ? 1 : -1) : 0);
+        const from = prev[p.id] ?? at;
+        const far = ((at - from + 40) % 40) > 1 && at !== from;
+        return (
+          <div
+            key={p.id}
+            className={`token-ride${far ? ' far' : ''}`}
+            style={{ transform: `translate(${x}%, ${y}%)`, zIndex: p.id === game.current ? 2 : 1 }}
+          >
+            <span key={at} className="token-hop">
+              <Token token={p.token} color={p.color} active={p.id === game.current} skin={skinFor(p.id)} />
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 /** One square. Memoized: a token step only redraws the squares it leaves and enters. */
 const Square = memo(function Square({
   id,
@@ -172,7 +216,6 @@ const Square = memo(function Square({
   mortgaged,
   glow,
   badge,
-  toks,
   edLang,
   edDir,
   onSpace,
@@ -186,8 +229,6 @@ const Square = memo(function Square({
   mortgaged: boolean;
   glow?: 'gain' | 'loss';
   badge?: string;
-  /** the tokens standing here, as "token|color|active|skin;…" so the memo can compare */
-  toks: string;
   edLang: Lang;
   edDir: 'rtl' | 'ltr';
   onSpace: (id: number) => void;
@@ -226,14 +267,6 @@ const Square = memo(function Square({
         <span key={badge} dir="ltr" className={`space-badge ${glow}`}>
           {badge}
         </span>
-      )}
-      {toks && (
-        <div className="tokens">
-          {toks.split(';').map((tk, i) => {
-            const [token, color, active, skin] = tk.split('|');
-            return <Token key={i} token={token as TokenId} color={color} active={active === '1'} skin={skin} />;
-          })}
-        </div>
       )}
     </button>
   );
@@ -290,10 +323,6 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
       {BOARD.map((sp) => {
         const st = game.props[sp.id];
         const owner = st.owner !== null ? game.players[st.owner] : null;
-        const toks = game.players
-          .filter((p) => !p.bankrupt && shown[p.id] === sp.id)
-          .map((p) => `${p.token}|${p.color}|${p.id === game.current ? 1 : 0}|${skinFor(p.id)}`)
-          .join(';');
         const ownedBy = owner ? t('ownedBy', { name: owner.name }) : '';
         const lit = highlight?.space === sp.id ? highlight : null;
         return (
@@ -308,13 +337,13 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
             mortgaged={st.mortgaged}
             glow={lit?.tone}
             badge={lit?.badge}
-            toks={toks}
             edLang={edLang}
             edDir={edDir}
             onSpace={click}
           />
         );
       })}
+      <TokenLayer game={game} shown={shown} skinFor={skinFor} />
       <div className="board-center">
         <Center pot={game.pot} edLang={edLang} edDir={edDir} />
         {center}

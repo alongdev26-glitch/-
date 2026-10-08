@@ -269,6 +269,44 @@
   margin-inline-start: -0.45em;
 }
 
+/* ---------- the token layer: tokens glide between squares ---------- */
+.token-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+.token-ride {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.36s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+.token-ride.far {
+  transition-duration: 0.6s;
+}
+.token-hop {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 3.3cqw;
+  transform: translate(-50%, -50%);
+  animation: token-hop 0.36s ease-out;
+}
+@keyframes token-hop {
+  40% {
+    transform: translate(-50%, -95%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .token-ride {
+    transition: none;
+  }
+  .token-hop {
+    animation: none;
+  }
+}
+
 /* ---------- center ---------- */
 .board-center {
   grid-row: 2 / 11;

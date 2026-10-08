@@ -26,7 +26,7 @@ import { dir, t, type Key } from '../i18n';
 import { applyEdition, money } from '../data/editions';
 
 /** Time per board space while a token walks: slow enough to follow on a phone. */
-const STEP_MS = 260;
+const STEP_MS = 400;
 const SAVE_KEY = 'tycoon-save';
 
 export function saveGame(g: GameState | null) {
@@ -284,7 +284,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
     const a = botAction(game);
     if (!a) return;
     // a drawn card stays up long enough for its opening animation and text to be read
-    const delay = game.phase.t === 'card' ? 2200 : game.phase.t === 'auction' ? 500 : 650;
+    const delay = game.phase.t === 'card' ? 2200 : game.phase.t === 'auction' ? 500 : 850;
     const t = setTimeout(() => act(a), delay);
     return () => clearTimeout(t);
   }, [game, busy, act, online]);
