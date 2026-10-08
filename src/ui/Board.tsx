@@ -1,11 +1,11 @@
 import { House, Hotel } from './Building';
-import type { ReactNode } from 'react';
+import { memo, useCallback, useRef, type ReactNode } from 'react';
 import { BOARD, GROUP_COLORS, gridPos, sideOf, type Space } from '../data/board';
-import type { GameState } from '../engine/types';
+import type { GameState, TokenId } from '../engine/types';
 import { Token } from './Token';
 import { useCosmetics } from './Cosmetics';
 import './Board.css';
-import { dir, t } from '../i18n';
+import { dir, t, type Lang } from '../i18n';
 import { edition, editionLang, money } from '../data/editions';
 import { TrainIcon } from './TrainIcon';
 
@@ -161,92 +161,162 @@ interface Props {
   highlight?: { space: number; tone: 'gain' | 'loss'; badge?: string } | null;
 }
 
+/** One square. Memoized: a token step only redraws the squares it leaves and enters. */
+const Square = memo(function Square({
+  id,
+  label,
+  ownerColor,
+  ownerToken,
+  ownerTitle,
+  houses,
+  mortgaged,
+  glow,
+  badge,
+  toks,
+  edLang,
+  edDir,
+  onSpace,
+}: {
+  id: number;
+  label: string;
+  ownerColor?: string;
+  ownerToken?: TokenId;
+  ownerTitle?: string;
+  houses: number;
+  mortgaged: boolean;
+  glow?: 'gain' | 'loss';
+  badge?: string;
+  /** the tokens standing here, as "token|color|active|skin;…" so the memo can compare */
+  toks: string;
+  edLang: Lang;
+  edDir: 'rtl' | 'ltr';
+  onSpace: (id: number) => void;
+}) {
+  const sp = BOARD[id];
+  const [row, col] = gridPos(id);
+  const side = sideOf(id);
+  return (
+    <button
+      className={`space side-${side}${id % 10 === 0 ? ` corner corner-${id}` : ''}${ownerColor ? ' owned' : ''}${
+        glow ? ` glow glow-${glow}` : ''
+      }`}
+      style={{ gridRow: row, gridColumn: col, ...(ownerColor ? { ['--owner' as string]: ownerColor } : {}) }}
+      onClick={() => onSpace(id)}
+      aria-label={label}
+    >
+      <div className={`face${mortgaged ? ' mortgaged' : ''}${houses > 0 ? ' has-bld' : ''}`} dir={edDir}>
+        {side === 'corner' ? <Corner sp={sp} /> : <SpaceFace sp={sp} />}
+        {houses > 0 && (
+          <div className="buildings">
+            {houses === 5 ? (
+              <Hotel key="hotel" className="pop" />
+            ) : (
+              Array.from({ length: houses }, (_, i) => <House key={i} className="pop" />)
+            )}
+          </div>
+        )}
+        {ownerToken && (
+          <span className="owner-badge" title={ownerTitle}>
+            <Token token={ownerToken} color="#fff" size="1em" />
+          </span>
+        )}
+        {mortgaged && <span className="mort-tag">{t('mortgaged', {}, edLang)}</span>}
+      </div>
+      {glow && badge && (
+        <span key={badge} dir="ltr" className={`space-badge ${glow}`}>
+          {badge}
+        </span>
+      )}
+      {toks && (
+        <div className="tokens">
+          {toks.split(';').map((tk, i) => {
+            const [token, color, active, skin] = tk.split('|');
+            return <Token key={i} token={token as TokenId} color={color} active={active === '1'} skin={skin} />;
+          })}
+        </div>
+      )}
+    </button>
+  );
+});
+
+/** The middle of the board: the name plaque, the pot and the two decks. */
+const Center = memo(function Center({ pot, edLang, edDir }: { pot: number; edLang: Lang; edDir: 'rtl' | 'ltr' }) {
+  return (
+    <>
+      <div className="plaque" dir={edDir}>
+        <span className={edLang === 'ja' ? 'long' : undefined}>{t('appName', {}, edLang)}</span>
+        <div className="plaque-pot">
+          <b className="pot-label">{t('lottoPotIcon', {}, edLang)}</b>
+          <b key={pot} className="pot-amount" dir="ltr">
+            {money(pot)}
+          </b>
+        </div>
+        <i className="mascot">🏙️</i>
+      </div>
+      {/* the two card decks, as real-looking stacks */}
+      <div className="deck deck-chest">
+        <i className="deck-under" />
+        <i className="deck-under" />
+        <div className="deck-card">
+          <span className="deck-art">
+            <ChestIcon />
+          </span>
+          <span className="deck-label">{edition().chestName}</span>
+        </div>
+      </div>
+      <div className="deck deck-chance">
+        <i className="deck-under" />
+        <i className="deck-under" />
+        <div className="deck-card">
+          <span className="deck-q">?</span>
+          <span className="deck-label">{edition().chanceName}</span>
+        </div>
+      </div>
+    </>
+  );
+});
+
 export function Board({ game, shown, onSpace, center, highlight }: Props) {
   const { skinFor, board } = useCosmetics();
   // the squares speak the game's edition, whatever the menus' language
   const edLang = editionLang();
   const edDir = dir(edLang);
+  // a stable click handler, so the memoized squares are not redrawn for it
+  const clickRef = useRef(onSpace);
+  clickRef.current = onSpace;
+  const click = useCallback((id: number) => clickRef.current(id), []);
   return (
     <div className={`board ${board}`} dir="ltr">
       {BOARD.map((sp) => {
-        const [row, col] = gridPos(sp.id);
-        const side = sideOf(sp.id);
         const st = game.props[sp.id];
         const owner = st.owner !== null ? game.players[st.owner] : null;
-        const here = game.players.filter((p) => !p.bankrupt && shown[p.id] === sp.id);
+        const toks = game.players
+          .filter((p) => !p.bankrupt && shown[p.id] === sp.id)
+          .map((p) => `${p.token}|${p.color}|${p.id === game.current ? 1 : 0}|${skinFor(p.id)}`)
+          .join(';');
+        const ownedBy = owner ? t('ownedBy', { name: owner.name }) : '';
+        const lit = highlight?.space === sp.id ? highlight : null;
         return (
-          <button
+          <Square
             key={sp.id}
-            className={`space side-${side}${sp.id % 10 === 0 ? ` corner corner-${sp.id}` : ''}${owner ? ' owned' : ''}${
-              highlight?.space === sp.id ? ` glow glow-${highlight.tone}` : ''
-            }`}
-            style={{ gridRow: row, gridColumn: col, ...(owner ? { ['--owner' as string]: owner.color } : {}) }}
-            onClick={() => onSpace(sp.id)}
-            aria-label={owner ? `${sp.name}, ${t('ownedBy', { name: owner.name })}` : sp.name}
-          >
-            <div className={`face${st.mortgaged ? ' mortgaged' : ''}${st.houses > 0 ? ' has-bld' : ''}`} dir={edDir}>
-              {side === 'corner' ? <Corner sp={sp} /> : <SpaceFace sp={sp} />}
-              {st.houses > 0 && (
-                <div className="buildings">
-                  {st.houses === 5 ? (
-                    <Hotel key="hotel" className="pop" />
-                  ) : (
-                    Array.from({ length: st.houses }, (_, i) => <House key={i} className="pop" />)
-                  )}
-                </div>
-              )}
-              {owner && (
-                <span className="owner-badge" title={t('ownedBy', { name: owner.name })}>
-                  <Token token={owner.token} color="#fff" size="1em" />
-                </span>
-              )}
-              {st.mortgaged && <span className="mort-tag">{t('mortgaged', {}, edLang)}</span>}
-            </div>
-            {highlight?.space === sp.id && highlight.badge && (
-              <span key={highlight.badge} dir="ltr" className={`space-badge ${highlight.tone}`}>
-                {highlight.badge}
-              </span>
-            )}
-            {here.length > 0 && (
-              <div className="tokens">
-                {here.map((p) => (
-                  <Token key={p.id} token={p.token} color={p.color} active={p.id === game.current} skin={skinFor(p.id)} />
-                ))}
-              </div>
-            )}
-          </button>
+            id={sp.id}
+            label={owner ? `${sp.name}, ${ownedBy}` : sp.name}
+            ownerColor={owner?.color}
+            ownerToken={owner?.token}
+            ownerTitle={owner ? ownedBy : undefined}
+            houses={st.houses}
+            mortgaged={st.mortgaged}
+            glow={lit?.tone}
+            badge={lit?.badge}
+            toks={toks}
+            edLang={edLang}
+            edDir={edDir}
+            onSpace={click}
+          />
         );
       })}
       <div className="board-center">
-        <div className="plaque" dir={edDir}>
-          <span className={edLang === 'ja' ? 'long' : undefined}>{t('appName', {}, edLang)}</span>
-          <div className="plaque-pot">
-            <b className="pot-label">{t('lottoPotIcon', {}, edLang)}</b>
-            <b key={game.pot} className="pot-amount" dir="ltr">
-              {money(game.pot)}
-            </b>
-          </div>
-          <i className="mascot">🏙️</i>
-        </div>
-        {/* the two card decks, as real-looking stacks */}
-        <div className="deck deck-chest">
-          <i className="deck-under" />
-          <i className="deck-under" />
-          <div className="deck-card">
-            <span className="deck-art">
-              <ChestIcon />
-            </span>
-            <span className="deck-label">{edition().chestName}</span>
-          </div>
-        </div>
-        <div className="deck deck-chance">
-          <i className="deck-under" />
-          <i className="deck-under" />
-          <div className="deck-card">
-            <span className="deck-q">?</span>
-            <span className="deck-label">{edition().chanceName}</span>
-          </div>
-        </div>
+        <Center pot={game.pot} edLang={edLang} edDir={edDir} />
         {center}
       </div>
     </div>

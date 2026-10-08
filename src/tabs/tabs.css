@@ -97,7 +97,22 @@
   place-items: center;
   text-align: center;
   padding: 4px;
-  animation: pulse 1.4s ease-in-out infinite;
+  position: relative;
+}
+/* the "roll" glow: a ring that grows and fades. Only transform and opacity
+   change, so the phone's GPU animates it without redrawing the button. */
+.fab::after {
+  content: '';
+  position: absolute;
+  inset: -0.6cqw;
+  border-radius: 50%;
+  border: 1.2cqw solid rgba(227, 0, 27, 0.45);
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: pulse 1.4s ease-out infinite;
+}
+.fab-wait::after {
+  content: none;
 }
 .fab:active {
   transform: translateY(3px);
@@ -116,8 +131,13 @@
   gap: 4px;
 }
 @keyframes pulse {
-  50% {
-    box-shadow: 0 6px 0 #7a000f, 0 0 0 1.2cqw rgba(227, 0, 27, 0.25);
+  from {
+    transform: scale(0.96);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.18);
+    opacity: 0;
   }
 }
 
