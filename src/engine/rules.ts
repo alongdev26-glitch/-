@@ -8,7 +8,8 @@ export const ownsGroup = (s: GameState, player: number, g: Group) =>
   groupMembers(g).every((id) => s.props[id].owner === player);
 
 /** A public auction needs at least two bidders besides the player who declined. */
-export const hasAuction = (s: GameState) => s.players.filter((p) => !p.bankrupt).length > 2;
+export const hasAuction = (s: GameState) =>
+  s.rules.auction !== false && s.players.filter((p) => !p.bankrupt).length > 2;
 
 export const ownedBy = (s: GameState, player: number) =>
   BOARD.filter((sp) => isOwnable(sp) && s.props[sp.id].owner === player).map((sp) => sp.id);

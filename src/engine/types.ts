@@ -117,10 +117,18 @@ export interface Payment {
 export interface GameRules {
   /** the mortgage system: the 7-round payment and voluntary mortgages */
   mortgage: boolean;
+  /** quick game: the richest player wins after this many rounds (0 / missing = no limit) */
+  maxRounds?: number;
+  /** a declined property goes to a public auction (missing = yes) */
+  auction?: boolean;
+  /** landing exactly on "דרך צלחה" pays double (missing = yes) */
+  goDouble?: boolean;
 }
 
 export interface GameState {
   rules: GameRules;
+  /** set when a quick game ran out of rounds */
+  endedBy?: 'rounds';
   players: Player[];
   props: PropState[];
   current: number;

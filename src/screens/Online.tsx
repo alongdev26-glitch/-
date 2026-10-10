@@ -247,10 +247,10 @@ export function Online({ onBack }: { onBack: () => void }) {
               <div className="setup-field">
                 {t('mortgageQ')}
                 <div className="seg">
-                  <button className={room.rules.mortgage ? 'on' : ''} onClick={() => setRoomField({ rules: { mortgage: true } })}>
+                  <button className={room.rules.mortgage ? 'on' : ''} onClick={() => setRoomField({ rules: { ...room.rules, mortgage: true } })}>
                     {t('yes')}
                   </button>
-                  <button className={!room.rules.mortgage ? 'on' : ''} onClick={() => setRoomField({ rules: { mortgage: false } })}>
+                  <button className={!room.rules.mortgage ? 'on' : ''} onClick={() => setRoomField({ rules: { ...room.rules, mortgage: false } })}>
                     {t('no')}
                   </button>
                 </div>

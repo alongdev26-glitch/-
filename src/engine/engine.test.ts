@@ -3,7 +3,7 @@ import { BOARD, JAIL } from '../data/board';
 import { CHANCE, CHEST } from '../data/cards';
 import { botAction } from './bot';
 import { actor, newGame, reduce } from './reducer';
-import { canBuild, feeDue, rentFor } from './rules';
+import { canBuild, feeDue, netWorth, rentFor } from './rules';
 import type { Action, GameState } from './types';
 
 /** A fresh game where everyone already went around once (before that, buying is not allowed). */
@@ -728,5 +728,39 @@ describe('resigning (פשיטת רגל from the profile)', () => {
     s = run(s, { type: 'ROLL', dice: [1, 3] }, { type: 'DECLINE' });
     expect(s.phase.t).toBe('auction');
     expect(reduce(s, { type: 'RESIGN', player: 1 })).toBe(s);
+  });
+});
+
+describe('house rules', () => {
+  it('a quick game ends after its rounds and the richest player wins', () => {
+    const rng = seeded(3);
+    let s = newGame(
+      Array.from({ length: 3 }, (_, i) => ({ name: `B${i}`, token: 'car' as const, isBot: true })),
+      rng,
+      { mortgage: true, maxRounds: 3 },
+    );
+    for (let step = 0; step < 3000 && s.phase.t !== 'gameover'; step++) s = reduce(s, botAction(s, rng)!);
+    expect(s.phase.t).toBe('gameover');
+    expect(s.endedBy).toBe('rounds');
+    expect(s.round).toBe(3);
+    const w = s.phase.t === 'gameover' ? s.phase.winner : -1;
+    for (const p of s.players) if (!p.bankrupt) expect(netWorth(s, w)).toBeGreaterThanOrEqual(netWorth(s, p.id));
+  });
+
+  it('without auctions, declining just ends the move', () => {
+    const s = setup(3);
+    s.rules.auction = false;
+    const d = run(s, { type: 'ROLL', dice: [1, 3] }, { type: 'DECLINE' });
+    expect(d.phase.t).toBe('end');
+    expect(d.props[4].owner).toBe(null);
+  });
+
+  it('landing on GO pays the normal salary when the double rule is off', () => {
+    const s = setup();
+    s.rules.goDouble = false;
+    s.players[0].pos = 36;
+    const g = run(s, { type: 'ROLL', dice: [1, 3] });
+    expect(g.players[0].pos).toBe(0);
+    expect(g.players[0].money).toBe(1700);
   });
 });

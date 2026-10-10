@@ -51,6 +51,9 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
   const [botNames, setBotNames] = useState(botNamesNow);
   const [who, setWho] = useState(0);
   const [mortgage, setMortgage] = useState(true);
+  const [maxRounds, setMaxRounds] = useState(0);
+  const [auction, setAuction] = useState(true);
+  const [goDouble, setGoDouble] = useState(true);
   const wallet = useWallet();
   const myTokens = TOKENS.filter((t) => wallet.owned.includes(t.id));
 
@@ -84,7 +87,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
       isBot: true,
     }));
     rememberChar(chosen[0].token);
-    onStart([...chosen, ...bots], { mortgage });
+    onStart([...chosen, ...bots], { mortgage, maxRounds, auction, goDouble });
   };
 
   const back = () => {
@@ -247,6 +250,38 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
                 <span className="choice-icon">🚫</span>
                 <b>{t('no')}</b>
                 <small>{t('mortgageNo')}</small>
+              </button>
+            </div>
+          </div>
+          <div className="setup-field">
+            {t('gameLength')}
+            <div className="seg seg-wide">
+              {[0, 15, 20, 30].map((n) => (
+                <button key={n} className={maxRounds === n ? 'on' : ''} onClick={() => setMaxRounds(n)}>
+                  {n ? t('roundsN', { n }) : t('lengthNormal')}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="setup-field">
+            {t('auctionQ')}
+            <div className="seg seg-wide">
+              <button className={auction ? 'on' : ''} onClick={() => setAuction(true)}>
+                {t('yes')}
+              </button>
+              <button className={!auction ? 'on' : ''} onClick={() => setAuction(false)}>
+                {t('no')}
+              </button>
+            </div>
+          </div>
+          <div className="setup-field">
+            {t('goDoubleQ')}
+            <div className="seg seg-wide">
+              <button className={goDouble ? 'on' : ''} onClick={() => setGoDouble(true)}>
+                {t('yes')}
+              </button>
+              <button className={!goDouble ? 'on' : ''} onClick={() => setGoDouble(false)}>
+                {t('no')}
               </button>
             </div>
           </div>

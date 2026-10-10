@@ -5,6 +5,7 @@ import { RibbonBanner } from '../ui/RibbonBanner';
 import { getName, setName } from '../ui/profile';
 import { SoundToggle } from '../ui/SoundToggle';
 import { setSmooth, smoothOn } from '../ui/smooth';
+import { setVibrate, vibrateOn } from '../ui/haptic';
 import { LangPicker } from './LangPicker';
 import './Setup.css';
 
@@ -12,6 +13,7 @@ import './Setup.css';
 export function Settings({ onBack }: { onBack: () => void }) {
   const [name, setNameInput] = useState(getName);
   const [smooth, setSmoothState] = useState(smoothOn);
+  const [vibe, setVibe] = useState(vibrateOn);
   return (
     <div className="setup settings">
       <div className="color-band top" aria-hidden="true" />
@@ -57,6 +59,20 @@ export function Settings({ onBack }: { onBack: () => void }) {
           {smooth ? t('smoothOn') : t('smoothOff')}
         </button>
         <p className="settings-note">{t('smoothNote')}</p>
+      </div>
+
+      <div className="setup-panel">
+        <h2 className="welcome-q">📳 {t('vibration')}</h2>
+        <button
+          className="btn btn-white"
+          aria-pressed={vibe}
+          onClick={() => {
+            setVibrate(!vibe);
+            setVibe(!vibe);
+          }}
+        >
+          {vibe ? t('vibrateOn') : t('vibrateOff')}
+        </button>
       </div>
 
       <a className="settings-privacy" href={`${APP_URL}privacy.html`} target="_blank" rel="noopener">

@@ -18,6 +18,7 @@ import { CosmeticsProvider, useWallet } from '../ui/Cosmetics';
 import { award, GAME_REWARD } from '../ui/shop';
 import { sfx } from '../ui/sound';
 import { CardReveal } from '../ui/CardReveal';
+import { buzz } from '../ui/haptic';
 import { PropertyCard } from '../ui/PropertyCard';
 import { Token } from '../ui/Token';
 import { Winner } from './Winner';
@@ -199,12 +200,18 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
     if (!flash) return;
     const p = flash.payment;
     if (p.to === viewer) sfx.gain();
-    else if (p.from === viewer) sfx.loss();
+    else if (p.from === viewer) {
+      sfx.loss();
+      if (p.kind === 'rent') buzz(40);
+    }
     else sfx.coin();
   }, [flash?.key]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!banner) return;
     const k = banner.a.kind;
+    const mine = banner.a.player === viewer;
+    if ((k === 'buy' || k === 'auction') && mine) buzz(30);
+    else if (k === 'jail' && mine) buzz([60, 40, 60]);
     if (k === 'buy' || k === 'auction') sfx.buy();
     else if (k === 'house' || k === 'hotel') sfx.build(k === 'hotel');
     else if (k === 'trade') sfx.trade();
@@ -520,6 +527,9 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
           <div className="turn-pill" style={{ borderColor: cur.color }} title={t('turnOf', { name: cur.name })}>
             <Token token={cur.token} color={cur.color} size="18px" />
             <span>{cur.id === me.id ? (humans.length > 1 ? t('yourTurnName', { name: me.name }) : t('yourTurn')) : cur.name}</span>
+            {!!game.rules.maxRounds && (
+              <small className="round-of">{t('roundOf', { n: game.round, max: game.rules.maxRounds })}</small>
+            )}
           </div>
         {tab === 'board' && (
           <BoardTab game={game} shown={shown} rolling={rolling} busy={busy} myTurn={myTurn}
