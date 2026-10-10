@@ -51,9 +51,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
   const [botNames, setBotNames] = useState(botNamesNow);
   const [who, setWho] = useState(0);
   const [mortgage, setMortgage] = useState(true);
-  const [maxRounds, setMaxRounds] = useState(0);
   const [auction, setAuction] = useState(true);
-  const [goDouble, setGoDouble] = useState(true);
   const wallet = useWallet();
   const myTokens = TOKENS.filter((t) => wallet.owned.includes(t.id));
 
@@ -87,7 +85,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
       isBot: true,
     }));
     rememberChar(chosen[0].token);
-    onStart([...chosen, ...bots], { mortgage, maxRounds, auction, goDouble });
+    onStart([...chosen, ...bots], { mortgage, auction });
   };
 
   const back = () => {
@@ -104,7 +102,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
   };
 
   const total = humanCount + botCount;
-  const titles = [t('setupWho'), t('setupHowMany'), t('setupPick'), t('setupRules')];
+  const titles = [t('setupWho'), t('setupHowMany'), t('setupPick'), t('setupRules'), t('setupRules')];
 
   return (
     <div className="setup">
@@ -237,53 +235,53 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
       )}
 
       {step === 3 && (
-        <div className="setup-panel">
-          <div className="setup-field">
-            {t('mortgageQ')}
-            <div className="choices small">
-              <button className={`choice${mortgage ? ' on' : ''}`} onClick={() => setMortgage(true)}>
-                <span className="choice-icon">🏦</span>
-                <b>{t('yes')}</b>
-                <small>{t('mortgageYes', { n: FEE_ROUNDS })}</small>
-              </button>
-              <button className={`choice${!mortgage ? ' on' : ''}`} onClick={() => setMortgage(false)}>
-                <span className="choice-icon">🚫</span>
-                <b>{t('no')}</b>
-                <small>{t('mortgageNo')}</small>
-              </button>
-            </div>
+        <div className="quiz" key="q1">
+          <div className="quiz-count">{t('questionOf', { n: 1, total: 2 })}</div>
+          <div className="quiz-badge">🏦</div>
+          <h2 className="quiz-q">{t('mortgageQ')}</h2>
+          <div className="choices small">
+            <button
+              className={`choice${mortgage ? ' on' : ''}`}
+              onClick={() => {
+                setMortgage(true);
+                setStep(4);
+              }}
+            >
+              <span className="choice-icon">✅</span>
+              <b>{t('yes')}</b>
+              <small>{t('mortgageYes', { n: FEE_ROUNDS })}</small>
+            </button>
+            <button
+              className={`choice${!mortgage ? ' on' : ''}`}
+              onClick={() => {
+                setMortgage(false);
+                setStep(4);
+              }}
+            >
+              <span className="choice-icon">🚫</span>
+              <b>{t('no')}</b>
+              <small>{t('mortgageNo')}</small>
+            </button>
           </div>
-          <div className="setup-field">
-            {t('gameLength')}
-            <div className="seg seg-wide">
-              {[0, 15, 20, 30].map((n) => (
-                <button key={n} className={maxRounds === n ? 'on' : ''} onClick={() => setMaxRounds(n)}>
-                  {n ? t('roundsN', { n }) : t('lengthNormal')}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="setup-field">
-            {t('auctionQ')}
-            <div className="seg seg-wide">
-              <button className={auction ? 'on' : ''} onClick={() => setAuction(true)}>
-                {t('yes')}
-              </button>
-              <button className={!auction ? 'on' : ''} onClick={() => setAuction(false)}>
-                {t('no')}
-              </button>
-            </div>
-          </div>
-          <div className="setup-field">
-            {t('goDoubleQ')}
-            <div className="seg seg-wide">
-              <button className={goDouble ? 'on' : ''} onClick={() => setGoDouble(true)}>
-                {t('yes')}
-              </button>
-              <button className={!goDouble ? 'on' : ''} onClick={() => setGoDouble(false)}>
-                {t('no')}
-              </button>
-            </div>
+        </div>
+      )}
+
+      {step === 4 && (
+        <div className="quiz" key="q2">
+          <div className="quiz-count">{t('questionOf', { n: 2, total: 2 })}</div>
+          <div className="quiz-badge">🔨</div>
+          <h2 className="quiz-q">{t('auctionQ')}</h2>
+          <div className="choices small">
+            <button className={`choice${auction ? ' on' : ''}`} onClick={() => setAuction(true)}>
+              <span className="choice-icon">✅</span>
+              <b>{t('yes')}</b>
+              <small>{t('auctionYes')}</small>
+            </button>
+            <button className={`choice${!auction ? ' on' : ''}`} onClick={() => setAuction(false)}>
+              <span className="choice-icon">🚫</span>
+              <b>{t('no')}</b>
+              <small>{t('auctionNo')}</small>
+            </button>
           </div>
           <div className="lineup">
             {humans.slice(0, humanCount).map((h, i) => (
@@ -300,7 +298,7 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
       )}
 
       <div className="setup-nav">
-        {step === 3 ? (
+        {step === 4 ? (
           <button className="btn btn-red" onClick={start}>
             {t('letsGo')}
           </button>

@@ -16,12 +16,6 @@
   border-radius: 18px 18px 0 0;
   z-index: 5;
 }
-.round-of {
-  font-size: 12px;
-  font-weight: 800;
-  opacity: 0.7;
-  white-space: nowrap;
-}
 .turn-pill {
   position: absolute;
   top: 8px;

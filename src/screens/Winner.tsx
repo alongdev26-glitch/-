@@ -27,7 +27,6 @@ export function Winner({
         <Token token={w.token} color={w.color} size="clamp(40px, 7vw, 90px)" />
       </div>
       <div className="win-band">{t('winnerIs', { name: w.name })}</div>
-      {game.endedBy === 'rounds' && <div className="win-worth">{t('winByRounds', { n: game.rules.maxRounds ?? 0 })}</div>}
       <div className="win-worth">{t('finalWorth', { worth: money(netWorth(game, w.id)) })}</div>
       {earned > 0 && <div className="win-coins">{t('gotCoins', { n: earned })}</div>}
       <div className="bills">

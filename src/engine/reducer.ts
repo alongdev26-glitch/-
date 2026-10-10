@@ -190,8 +190,8 @@ function sendToJail(s: GameState, reason: string) {
 function moveTo(s: GameState, target: number, passGo = true) {
   const p = cur(s);
   if (passGo && target < p.pos) {
-    // landing exactly on "דרך צלחה" pays double
-    const pay = target === 0 && s.rules.goDouble !== false ? GO_SALARY * 2 : GO_SALARY;
+    // landing exactly on "התחלה" pays double
+    const pay = target === 0 ? GO_SALARY * 2 : GO_SALARY;
     p.money += pay;
     p.lapped = true;
     moneyEvent(s, { kind: target === 0 ? 'go-land' : 'go', from: null, to: p.id, amount: pay, space: 0 });
@@ -208,7 +208,7 @@ function land(s: GameState, mod?: RentMod) {
   if (isOwnable(sp)) {
     const st = s.props[sp.id];
     if (st.owner === null) {
-      // the first lap is free: a player may buy only after passing "דרך צלחה" once
+      // the first lap is free: a player may buy only after passing "התחלה" once
       if (!p.lapped) {
         log(s, tr(s, 'log.notLapped', { name: p.name, space: sp.name }));
         return finishMove(s);
@@ -417,19 +417,6 @@ function nextTurn(s: GameState) {
   s.phase = { t: 'roll' };
   if (i <= prev) {
     s.round++;
-    const max = s.rules.maxRounds ?? 0;
-    if (max && s.round > max) {
-      // quick game: time is up, the richest player wins
-      const left = alive(s);
-      const best = left.reduce((b, o) => (netWorth(s, o.id) > netWorth(s, b.id) ? o : b));
-      s.round = max;
-      s.endedBy = 'rounds';
-      s.phase = { t: 'gameover', winner: best.id };
-      log(s, tr(s, 'log.timeUp', { n: max }));
-      log(s, tr(s, 'log.won', { name: best.name }));
-      return;
-    }
-    if (max && s.round === max) log(s, tr(s, 'log.lastRound', {}));
     if (s.blocks) s.blocks = s.blocks.filter((b) => b.until > s.round);
     if (s.rules.mortgage && s.feeStart !== null && (s.round - s.feeStart) % FEE_ROUNDS === 0) {
       log(s, tr(s, 'log.feeRound', { n: s.round }));

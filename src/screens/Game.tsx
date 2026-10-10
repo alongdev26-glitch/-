@@ -527,9 +527,6 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
           <div className="turn-pill" style={{ borderColor: cur.color }} title={t('turnOf', { name: cur.name })}>
             <Token token={cur.token} color={cur.color} size="18px" />
             <span>{cur.id === me.id ? (humans.length > 1 ? t('yourTurnName', { name: me.name }) : t('yourTurn')) : cur.name}</span>
-            {!!game.rules.maxRounds && (
-              <small className="round-of">{t('roundOf', { n: game.round, max: game.rules.maxRounds })}</small>
-            )}
           </div>
         {tab === 'board' && (
           <BoardTab game={game} shown={shown} rolling={rolling} busy={busy} myTurn={myTurn}

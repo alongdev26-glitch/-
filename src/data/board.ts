@@ -1,5 +1,5 @@
 // The 40 spaces, 1:1 with the classic Hebrew board.
-// Index 0 is "דרך צלחה" (bottom-left); play goes up the left column,
+// Index 0 is "התחלה" (bottom-left); play goes up the left column,
 // across the top, down the right column and back along the bottom.
 
 export type Group =
@@ -80,7 +80,7 @@ export function rents(price: number): number[] {
 }
 
 export const BOARD: Space[] = [
-  { id: 0, kind: 'go', name: 'דרך צלחה' },
+  { id: 0, kind: 'go', name: 'התחלה' },
   // Left column, bottom → top
   prop(1, 'brown', 'אילת', "שד' התמרים", 50, rents(50), 40),
   { id: 2, kind: 'chance', name: 'הפתעה', qColor: '#e0218a' },

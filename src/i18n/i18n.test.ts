@@ -91,7 +91,7 @@ describe('languages', () => {
     expect(BOARD[0].name).toBe('انطلق');
     const s = newGame([{ name: 'א', token: 'cat', isBot: false }, { name: 'ב', token: 'car', isBot: false }]);
     expect(s.lang).toBe('he');
-    expect(BOARD[0].name).toBe('דרך צלחה');
+    expect(BOARD[0].name).toBe('התחלה');
     expect(money(50)).toBe('ש"ח 50');
   });
 
