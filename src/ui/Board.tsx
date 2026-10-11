@@ -1,3 +1,4 @@
+import { PoliceIcon } from './PoliceIcon';
 import { House, Hotel } from './Building';
 import { useRef, type ReactNode } from 'react';
 import { BOARD, GROUP_COLORS, gridPos, sideOf, type Space } from '../data/board';
@@ -144,7 +145,9 @@ function Corner({ sp }: { sp: Space }) {
       return (
         <div className="corner-inner">
           <b>{edition().corners.toJail1}</b>
-          <span className="corner-icon">👮</span>
+          <span className="corner-icon corner-cop">
+            <PoliceIcon />
+          </span>
           {edition().corners.toJail2 && <b>{edition().corners.toJail2}</b>}
         </div>
       );

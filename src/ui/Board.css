@@ -205,6 +205,14 @@
 .corner-icon {
   font-size: 34cqi;
 }
+.corner-cop {
+  width: 62cqi;
+  line-height: 0;
+}
+.corner-cop svg {
+  width: 100%;
+  height: auto;
+}
 .go b {
   font-size: 20cqi;
 }
