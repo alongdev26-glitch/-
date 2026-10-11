@@ -222,6 +222,8 @@
 }
 .go-arrow {
   display: block;
+  /* points the way play goes: from "התחלה" up the left column */
+  transform: scaleX(-1);
   width: 60cqi;
   height: 7cqi;
   background: var(--red);
