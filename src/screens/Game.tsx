@@ -161,7 +161,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
     const p = game.players[pid];
     const from = shownRef.current[pid];
     const steps = game.dice[0] + game.dice[1];
-    // a roll that moved the token, or one that landed on "גש לכלא" (walk there, then jail)
+    // a roll that moved the token, or one that landed on "מעצר" (walk there, then jail)
     const moved = !p.inJail && p.pos !== from;
     const toGoToJail = p.inJail && (from + steps) % 40 === 30;
     diceWalk.current = moved || toGoToJail ? { player: pid, left: steps } : null;
@@ -262,7 +262,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
   useEffect(() => {
     if (rolling || !moving) return;
     const walk = diceWalk.current;
-    // after the dice walk ends off target (landed on "גש לכלא"), pause on that square before the jump
+    // after the dice walk ends off target (landed on "מעצר"), pause on that square before the jump
     const pause = !!walk && walk.left === 0;
     const t = setTimeout(
       () => {

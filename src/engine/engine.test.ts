@@ -664,14 +664,14 @@ describe('trading while in debt', () => {
 });
 
 describe('go to jail announcement', () => {
-  it('announces landing on "גש לכלא"', () => {
+  it('announces landing on "מעצר"', () => {
     let s = setup();
     s.players[0].pos = 25;
     const seq = s.announceSeq;
     s = run(s, { type: 'ROLL', dice: [2, 3] });
     expect(s.players[0].inJail).toBe(true);
     expect(s.announceSeq).toBe(seq + 1);
-    expect(s.announce).toMatchObject({ kind: 'jail', player: 0, detail: 'נחת על "גש לכלא"' });
+    expect(s.announce).toMatchObject({ kind: 'jail', player: 0, detail: 'נחת על "מעצר"' });
   });
 
   it('announces three doubles in a row', () => {

@@ -145,7 +145,7 @@ function Corner({ sp }: { sp: Space }) {
         <div className="corner-inner">
           <b>{edition().corners.toJail1}</b>
           <span className="corner-icon">👮</span>
-          <b>{edition().corners.toJail2}</b>
+          {edition().corners.toJail2 && <b>{edition().corners.toJail2}</b>}
         </div>
       );
   }

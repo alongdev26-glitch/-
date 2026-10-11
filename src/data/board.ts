@@ -113,7 +113,7 @@ export const BOARD: Space[] = [
   { id: 27, kind: 'utility', name: 'חברת המים', price: 140, icon: 'tap' },
   prop(28, 'yellow', 'חיפה', "רח' החלוץ", 250, rents(250), 140),
   prop(29, 'yellow', 'חיפה', "שד' מוריה", 270, rents(270), 140),
-  { id: 30, kind: 'gotojail', name: 'גש לכלא' },
+  { id: 30, kind: 'gotojail', name: 'מעצר' },
   // Bottom row, right → left
   prop(31, 'green', 'ירושלים', "רח' יפו", 290, rents(290), 190),
   { id: 32, kind: 'chance', name: 'הפתעה', qColor: '#e3001b' },
