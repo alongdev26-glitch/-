@@ -1,0 +1,17 @@
+Deal City (דיל סיטי)
+Copyright (c) 2026 alongdev26-glitch. All rights reserved.
+
+The source code, game data (board, prices, card texts), artwork, logo,
+icons, sounds and promotional material in this repository are original
+works of the copyright holder. No part of them may be copied, modified,
+distributed or published without written permission.
+
+Third-party components, used under their own licenses:
+- React, React DOM (MIT) - https://github.com/facebook/react
+- PeerJS (MIT) - https://github.com/peers/peerjs
+- Rubik and Frank Ruhl Libre fonts (SIL Open Font License 1.1),
+  via @fontsource - https://fontsource.org
+- Emoji glyphs are drawn by the player's own device (system emoji font);
+  no emoji images are bundled with the app.
+
+See ASSETS.md for where every image, sound and font comes from.

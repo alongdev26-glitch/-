@@ -1,6 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
+import '@fontsource-variable/rubik/wght.css';
+import '@fontsource-variable/frank-ruhl-libre/wght.css';
 import './styles/global.css';
 import { captureRef } from './online/referral';
 import { applyDocLang } from './i18n';

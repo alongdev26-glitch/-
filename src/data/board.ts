@@ -1,4 +1,4 @@
-// The 40 spaces, 1:1 with the classic Hebrew board.
+// The 40 spaces of the Deal City board.
 // Index 0 is "התחלה" (bottom-left); play goes up the left column,
 // across the top, down the right column and back along the bottom.
 
@@ -128,8 +128,8 @@ export const BOARD: Space[] = [
 
 export const JAIL = 10;
 export const GO_SALARY = 200;
-export const JAIL_FINE = 50;
-export const START_MONEY = 1500;
+export const JAIL_FINE = 60;
+export const START_MONEY = 2000;
 /** Every this many rounds (counted from the first purchase) owners pay the mortgage price of each property. */
 export const FEE_ROUNDS = 7;
 

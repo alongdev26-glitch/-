@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BOARD, JAIL } from '../data/board';
+import { BOARD, JAIL, JAIL_FINE } from '../data/board';
 import { CHANCE, CHEST } from '../data/cards';
 import { botAction } from './bot';
 import { actor, newGame, reduce } from './reducer';
@@ -13,7 +13,11 @@ const setup = (n = 2) => {
     () => 0.5,
   );
   s.round = 2;
-  for (const p of s.players) p.lapped = true;
+  // the scenarios below are written for 1500 each, whatever the real start money is
+  for (const p of s.players) {
+    p.lapped = true;
+    p.money = 1500;
+  }
   return s;
 };
 
@@ -27,7 +31,7 @@ function seeded(seed: number) {
 }
 
 describe('board', () => {
-  it('has 40 spaces with the classic composition', () => {
+  it('has 40 spaces in the board composition', () => {
     expect(BOARD).toHaveLength(40);
     const count = (k: string) => BOARD.filter((s) => s.kind === k).length;
     expect(count('property')).toBe(22);
@@ -136,7 +140,7 @@ describe('jail', () => {
     s.players[0].inJail = true;
     s = run(s, { type: 'PAY_JAIL' });
     expect(s.players[0].inJail).toBe(false);
-    expect(s.players[0].money).toBe(1450);
+    expect(s.players[0].money).toBe(1500 - JAIL_FINE);
   });
 });
 
@@ -214,7 +218,7 @@ describe('lotto pot', () => {
     let s = setup();
     s.players[0].inJail = true;
     s = run(s, { type: 'PAY_JAIL' });
-    expect(s.pot).toBe(50);
+    expect(s.pot).toBe(JAIL_FINE);
   });
 });
 
