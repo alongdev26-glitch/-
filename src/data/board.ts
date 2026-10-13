@@ -91,7 +91,7 @@ export const BOARD: Space[] = [
   { id: 7, kind: 'chest', name: 'תיבת המזל', icon: 'chest' },
   prop(8, 'lightblue', 'טבריה', "רח' הבנים", 110, rents(110), 40),
   { id: 9, kind: 'tax', name: 'מס הכנסה', amount: 180 },
-  { id: 10, kind: 'jail', name: 'בכלא' },
+  { id: 10, kind: 'gotojail', name: 'מעצר' },
   // Top row, left → right
   prop(11, 'pink', 'באר-שבע', "שד' שזר", 130, rents(130), 90),
   prop(12, 'pink', 'באר-שבע', 'רח\' קק"ל', 130, rents(130), 90),
@@ -113,7 +113,7 @@ export const BOARD: Space[] = [
   { id: 27, kind: 'utility', name: 'חברת המים', price: 140, icon: 'tap' },
   prop(28, 'yellow', 'חיפה', "רח' החלוץ", 250, rents(250), 140),
   prop(29, 'yellow', 'חיפה', "שד' מוריה", 270, rents(270), 140),
-  { id: 30, kind: 'gotojail', name: 'מעצר' },
+  { id: 30, kind: 'jail', name: 'בכלא' },
   // Bottom row, right → left
   prop(31, 'green', 'ירושלים', "רח' יפו", 290, rents(290), 190),
   { id: 32, kind: 'chance', name: 'הפתעה', qColor: '#e3001b' },
@@ -126,7 +126,8 @@ export const BOARD: Space[] = [
   { id: 39, kind: 'tax', name: 'מס מותרות', amount: 90, icon: 'ring' },
 ];
 
-export const JAIL = 10;
+export const JAIL = 30;
+export const GO_TO_JAIL = 10;
 export const GO_SALARY = 200;
 export const JAIL_FINE = 60;
 export const START_MONEY = 2000;

@@ -46,11 +46,11 @@ const he: Edition = {
   symbol: '₪',
   names: [
     'התחלה', "שד' התמרים", 'הפתעה', 'דרך הערבה', "רח' הגליל", 'רכבת דרום',
-    "רח' הירדן", 'תיבת המזל', "רח' הבנים", 'מס הכנסה', 'בכלא', "שד' שזר",
+    "רח' הירדן", 'תיבת המזל', "רח' הבנים", 'מס הכנסה', 'מעצר', "שד' שזר",
     'רח\' קק"ל', 'הפתעה', "שד' רגר", 'רכבת מרכז', "שד' בנימין", 'חברת החשמל',
     "רח' הרצל", 'כיכר העצמאות', 'חניה חינם', 'תיבת המזל', 'דרך אבא הלל', "רח' ז'בוטינסקי",
     "רח' ביאליק", 'רכבת מזרח', 'דרך העצמאות', 'חברת המים', "רח' החלוץ", "שד' מוריה",
-    'מעצר', "רח' יפו", 'הפתעה', "רח' בן יהודה", "רח' המלך ג'ורג'", 'רכבת צפון',
+    'בכלא', "רח' יפו", 'הפתעה', "רח' בן יהודה", "רח' המלך ג'ורג'", 'רכבת צפון',
     "רח' אלנבי", 'תיבת המזל', "רח' דיזנגוף", 'מס מותרות',
   ],
   cities: {
@@ -148,11 +148,11 @@ const en: Edition = {
   symbol: '$',
   names: [
     'START', 'Bourbon Street', 'Surprise', 'Canal Street', 'Broadway', 'South Station',
-    'Music Row', 'Lucky Chest', 'Demonbreun Street', 'Income Tax', 'Jail', 'Michigan Avenue',
+    'Music Row', 'Lucky Chest', 'Demonbreun Street', 'Income Tax', 'Off to Jail', 'Michigan Avenue',
     'State Street', 'Surprise', 'Wacker Drive', 'Union Station', 'Ocean Drive', 'Electric Company',
     'Collins Avenue', 'Lincoln Road', 'No-Fee Parking', 'Lucky Chest', 'The Strip', 'Fremont Street',
     'Paradise Road', 'Penn Station', 'Sunset Boulevard', 'Water Works', 'Hollywood Boulevard', 'Rodeo Drive',
-    'Off to Jail', 'Lombard Street', 'Surprise', 'Market Street', 'Castro Street', 'Grand Central',
+    'Jail', 'Lombard Street', 'Surprise', 'Market Street', 'Castro Street', 'Grand Central',
     'Wall Street', 'Lucky Chest', 'Fifth Avenue', 'Luxury Tax',
   ],
   cities: {
@@ -250,11 +250,11 @@ const ar: Edition = {
   symbol: 'د.إ',
   names: [
     'انطلق', 'كورنيش أم القيوين', 'مفاجأة', 'السوق القديم', 'كورنيش الفجيرة', 'محطة الاتحاد',
-    'شارع حمد بن عبدالله', 'صندوق الحظ', 'شارع الشيخ زايد بن سلطان', 'ضريبة الدخل', 'السجن', 'كورنيش عجمان',
+    'شارع حمد بن عبدالله', 'صندوق الحظ', 'شارع الشيخ زايد بن سلطان', 'ضريبة الدخل', 'اذهب إلى السجن', 'كورنيش عجمان',
     'شارع الشيخ خليفة', 'مفاجأة', 'شارع الجرف', 'محطة برج خليفة', 'جزيرة المرجان', 'هيئة الكهرباء',
     'شارع النخيل', 'شارع الشيخ محمد بن سالم', 'موقف بلا رسوم', 'صندوق الحظ', 'القصباء', 'المجاز',
     'شارع الملك فيصل', 'محطة المطار', 'شارع خليفة', 'هيئة المياه', 'شارع زايد الأول', 'جبل حفيت',
-    'اذهب إلى السجن', 'كورنيش أبوظبي', 'مفاجأة', 'جزيرة ياس', 'جزيرة السعديات', 'محطة مول الإمارات',
+    'السجن', 'كورنيش أبوظبي', 'مفاجأة', 'جزيرة ياس', 'جزيرة السعديات', 'محطة مول الإمارات',
     'نخلة جميرا', 'صندوق الحظ', 'داون تاون دبي', 'ضريبة الرفاهية',
   ],
   cities: {
@@ -352,11 +352,11 @@ const fr: Edition = {
   symbol: '€',
   names: [
     'Départ', 'Rue de Béthune', 'Surprise', 'Grand-Place', 'La Canebière', 'Gare du Nord',
-    'Vieux-Port', 'Coffre chance', 'Corniche Kennedy', 'Impôts', 'Prison', "Cours de l'Intendance",
+    'Vieux-Port', 'Coffre chance', 'Corniche Kennedy', 'Impôts', 'Allez en prison', "Cours de l'Intendance",
     'Place de la Bourse', 'Surprise', 'Rue Sainte-Catherine', 'Gare de Lyon', 'Rue de la République', "Compagnie d'électricité",
     'Place Bellecour', 'Vieux Lyon', 'Parking sans frais', 'Coffre chance', 'Promenade des Anglais', 'Place Masséna',
     'Cours Saleya', "Gare de l'Est", 'La Croisette', 'Compagnie des eaux', "Rue d'Antibes", 'Le Suquet',
-    'Allez en prison', 'Avenue de l\'Impératrice', 'Surprise', 'Rue Mazagran', 'Avenue Édouard VII', 'Gare Montparnasse',
+    'Prison', 'Avenue de l\'Impératrice', 'Surprise', 'Rue Mazagran', 'Avenue Édouard VII', 'Gare Montparnasse',
     'Avenue Montaigne', 'Coffre chance', 'Champs-Élysées', 'Taxe de luxe',
   ],
   cities: {
@@ -454,11 +454,11 @@ const ru: Edition = {
   symbol: '₽',
   names: [
     'Старт', 'ул. Куйбышева', 'Сюрприз', 'Ленинградская ул.', 'ул. Светланская', 'Ленинградский вокзал',
-    'ул. Алеутская', 'Сундук удачи', 'Океанский проспект', 'Подоходный налог', 'Тюрьма', 'Красный проспект',
+    'ул. Алеутская', 'Сундук удачи', 'Океанский проспект', 'Подоходный налог', 'Иди в тюрьму', 'Красный проспект',
     'ул. Ленина', 'Сюрприз', 'площадь Ленина', 'Казанский вокзал', 'ул. Баумана', 'Электросеть',
     'Кремлёвская ул.', 'ул. Пушкина', 'Стоянка без оплаты', 'Сундук удачи', 'ул. Вайнера', 'проспект Ленина',
     'Плотинка', 'Курский вокзал', 'Курортный проспект', 'Водоканал', 'Морской порт', 'ул. Навагинская',
-    'Иди в тюрьму', 'Невский проспект', 'Сюрприз', 'Дворцовая площадь', 'Литейный проспект', 'Киевский вокзал',
+    'Тюрьма', 'Невский проспект', 'Сюрприз', 'Дворцовая площадь', 'Литейный проспект', 'Киевский вокзал',
     'Рублёвка', 'Сундук удачи', 'Красная площадь', 'Налог на роскошь',
   ],
   cities: {
@@ -556,11 +556,11 @@ const ja: Edition = {
   symbol: '¥',
   names: [
     'スタート', '大通公園', 'サプライズ', 'すすきの', '本通り', '東京駅',
-    '平和大通り', 'ラッキーボックス', '宮島口', '所得税', '刑務所', '天神',
+    '平和大通り', 'ラッキーボックス', '宮島口', '所得税', '刑務所へ', '天神',
     '中洲', 'サプライズ', '博多駅前', '新宿駅', '栄', '電力会社',
     '大須', '名駅', '休憩パーキング', 'ラッキーボックス', '道頓堀', '心斎橋',
     '梅田', '品川駅', '祇園', '水道局', '四条通', '嵐山',
-    '刑務所へ', 'みなとみらい', 'サプライズ', '元町', '山下公園', '上野駅',
+    '刑務所', 'みなとみらい', 'サプライズ', '元町', '山下公園', '上野駅',
     '六本木', 'ラッキーボックス', '銀座', 'ぜいたく税',
   ],
   cities: {

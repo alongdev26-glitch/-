@@ -1,4 +1,4 @@
-import { BOARD, FEE_ROUNDS, GO_SALARY, JAIL, JAIL_FINE, START_MONEY, isOwnable } from '../data/board';
+import { BOARD, FEE_ROUNDS, GO_SALARY, GO_TO_JAIL, JAIL, JAIL_FINE, START_MONEY, isOwnable } from '../data/board';
 import { DECKS, type Deck } from '../data/cards';
 import { tokenColor } from '../data/tokens';
 import {
@@ -241,7 +241,7 @@ function land(s: GameState, mod?: RentMod) {
       return;
     }
     case 'gotojail':
-      sendToJail(s, tr(s, 'jail.landed', { space: BOARD[30].name }));
+      sendToJail(s, tr(s, 'jail.landed', { space: BOARD[GO_TO_JAIL].name }));
       return finishMove(s);
     case 'parking':
       if (s.pot > 0) {
@@ -306,7 +306,7 @@ function applyCard(s: GameState, deck: Deck, cardIdx: number) {
       return charge(s, [{ to: null, amount: houses * effect.house + hotels * effect.hotel }]);
     }
     case 'gotojail':
-      sendToJail(s, tr(s, 'jail.card', { space: BOARD[30].name }));
+      sendToJail(s, tr(s, 'jail.card', { space: BOARD[GO_TO_JAIL].name }));
       return finishMove(s);
   }
 }

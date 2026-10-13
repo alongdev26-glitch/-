@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { BOARD } from '../data/board';
+import { BOARD, GO_TO_JAIL } from '../data/board';
 import { DECKS } from '../data/cards';
 import { tokenColor } from '../data/tokens';
 import { botAction } from '../engine/bot';
@@ -163,7 +163,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
     const steps = game.dice[0] + game.dice[1];
     // a roll that moved the token, or one that landed on "מעצר" (walk there, then jail)
     const moved = !p.inJail && p.pos !== from;
-    const toGoToJail = p.inJail && (from + steps) % 40 === 30;
+    const toGoToJail = p.inJail && (from + steps) % 40 === GO_TO_JAIL;
     diceWalk.current = moved || toGoToJail ? { player: pid, left: steps } : null;
     setRolling(true);
     sfx.dice();

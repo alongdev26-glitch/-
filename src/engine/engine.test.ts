@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BOARD, JAIL, JAIL_FINE } from '../data/board';
+import { BOARD, GO_TO_JAIL, JAIL, JAIL_FINE } from '../data/board';
 import { CHANCE, CHEST } from '../data/cards';
 import { botAction } from './bot';
 import { actor, newGame, reduce } from './reducer';
@@ -133,7 +133,7 @@ describe('jail', () => {
     s.players[0].jailTurns = 2;
     s = run(s, { type: 'ROLL', dice: [1, 2] });
     expect(s.players[0].inJail).toBe(false);
-    expect(s.players[0].pos).toBe(13);
+    expect(s.players[0].pos).toBe(JAIL + 3);
   });
   it('pays to leave jail', () => {
     let s = setup();
@@ -670,7 +670,7 @@ describe('trading while in debt', () => {
 describe('go to jail announcement', () => {
   it('announces landing on "מעצר"', () => {
     let s = setup();
-    s.players[0].pos = 25;
+    s.players[0].pos = GO_TO_JAIL - 5;
     const seq = s.announceSeq;
     s = run(s, { type: 'ROLL', dice: [2, 3] });
     expect(s.players[0].inJail).toBe(true);
