@@ -252,7 +252,7 @@ function scene3(t) {
   });
   const rk = prog(lt, 2.5, 2.8);
   put(S3.rent, { x: xs[2], y: ty - th / 2 - tw * 0.95 - rk * 4 * U, fs: (LAND ? 3.6 : 4.6) * U, s: eBack(rk), r: -6, o: rk > 0 ? o * (1 - prog(lt, 3.3, 3.5)) : 0 });
-  const money = Math.round(lerp(1500, 2590, eOut(prog(lt, 1.8, 3.0))) / 10) * 10;
+  const money = Math.round(lerp(2000, 3090, eOut(prog(lt, 1.8, 3.0))) / 10) * 10;
   S3.counter.textContent = '💰 ' + CUR + money.toLocaleString('en-US');
   put(S3.counter, { x: VIS.x, y: cy, fs: (LAND ? 5.6 : 7) * U, s: eBack(prog(lt, 0.3, 0.7)) * (1 + 0.06 * Math.sin(prog(lt, 2.75, 2.95) * Math.PI)), o });
   animHeadline(S3.h, t, T.build[0] + 0.2, TXT.y, TXT.fs * (LAND ? 0.82 : 0.86), TXT.x, o);
