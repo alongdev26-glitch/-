@@ -10,7 +10,17 @@ body { margin: 0; }
 .phone img { width: 100%; display: block; border-radius: 22px; }
 .title { position: absolute; color: #fff; font-weight: 900; line-height: .95; text-shadow: 0 6px 0 #7a0010, 0 12px 28px rgba(0,0,0,.45); letter-spacing: -.01em; }
 .title span { display: block; }
-.title .y { color: #FFD54A; }
+.title .y { background: linear-gradient(180deg, #fffbe0 0%, #ffe46b 35%, #ffc21a 55%, #ff9d00 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: none; filter: drop-shadow(0 6px 0 #7a0010) drop-shadow(0 0 22px rgba(255,214,80,.75)); }
+.title span:not(.y) { text-shadow: 0 6px 0 #7a0010, 0 0 26px rgba(255,255,255,.45), 0 12px 28px rgba(0,0,0,.45); }
+.glow { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(255,240,170,.85) 0%, rgba(255,200,80,.35) 35%, rgba(255,200,80,0) 70%); }
+.spark { position: absolute; width: 1px; height: 1px; }
+.spark::before, .spark::after { content: ''; position: absolute; left: 50%; top: 50%; background: radial-gradient(closest-side, #fff, rgba(255,255,255,.9) 30%, rgba(255,240,180,0)); transform: translate(-50%, -50%); }
+.spark::before { width: var(--s); height: calc(var(--s) / 7); }
+.spark::after { width: calc(var(--s) / 7); height: var(--s); }
+.spark i { position: absolute; left: 50%; top: 50%; width: calc(var(--s) / 3); height: calc(var(--s) / 3); border-radius: 50%; transform: translate(-50%, -50%); background: radial-gradient(circle, #fff, rgba(255,255,255,0) 70%); box-shadow: 0 0 calc(var(--s) / 4) rgba(255,230,140,.9); }
+.coin { position: absolute; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff8c8, #ffd23f 35%, #e0a526 70%, #a8740b); box-shadow: inset 0 0 0 .07em #c98a10, 0 .08em .2em rgba(0,0,0,.4), 0 0 .3em rgba(255,220,100,.6); display: flex; align-items: center; justify-content: center; color: #9a6400; font-weight: 900; }
+.tag { background: linear-gradient(180deg, #fff3a8 0%, #ffd54a 50%, #f5b400 100%) !important; box-shadow: 0 8px 18px rgba(0,0,0,.4), 0 0 30px rgba(255,214,80,.8) !important; }
 .tag { position: absolute; background: #FFD54A; color: #7a2e00; font-weight: 900; border-radius: 999px; box-shadow: 0 8px 18px rgba(0,0,0,.4); border: 5px solid #fff; white-space: nowrap; }
 .em { position: absolute; filter: drop-shadow(0 8px 12px rgba(0,0,0,.45)); line-height: 1; }
 </style></head><body><div id="c"></div>
@@ -37,5 +47,18 @@ c.innerHTML = band('top') + band('bottom') +
        <img class="logo" src="logo-full.png" style="width:290px;left:660px;top:390px;transform:rotate(-6deg)">
        <div class="em" style="font-size:110px;left:700px;top:40px;transform:rotate(-14deg)">🎲</div>
        <div class="em" style="font-size:96px;left:1150px;top:560px;transform:rotate(10deg)">💰</div>`);
+const spark = (x, y, sz) => `<div class="spark" style="left:${x}px;top:${y}px;--s:${sz}px;z-index:4"><i></i></div>`;
+const coin = (x, y, sz, r) => `<div class="coin" style="left:${x}px;top:${y}px;width:${sz}px;height:${sz}px;font-size:${sz * 0.55}px;transform:rotate(${r}deg);z-index:3">$</div>`;
+const glow = (x, y, r) => `<div class="glow" style="left:${x - r}px;top:${y - r}px;width:${2 * r}px;height:${2 * r}px"></div>`;
+const extra = V
+  ? glow(540, 340, 420) + glow(540, 1500, 480) +
+    [[230, 120, 90], [860, 160, 120], [820, 560, 80], [180, 600, 70], [960, 1000, 100], [120, 900, 80], [930, 1650, 90], [150, 1730, 70], [540, 640, 60]].map((a) => spark(...a)).join('') +
+    [[60, 420, 90, -20], [930, 430, 80, 25], [880, 1160, 70, 10], [40, 1080, 64, -10], [990, 1820, 60, 15]].map((a) => coin(...a)).join('')
+  : glow(800, 470, 330) + glow(1080, 330, 330) +
+    [[640, 140, 70], [1230, 60, 80], [600, 640, 60], [860, 340, 55], [1240, 470, 70], [480, 110, 50], [1000, 690, 50]].map((a) => spark(...a)).join('') +
+    [[590, 250, 70, -15], [1180, 290, 56, 20], [610, 470, 52, 10], [880, 630, 48, -12]].map((a) => coin(...a)).join('');
+c.insertAdjacentHTML('beforeend', extra);
+// glows sit under the art, sparkles and coins on top
+c.querySelectorAll('.glow').forEach((g) => c.insertBefore(g, c.querySelector('.rays').nextSibling));
 window.ready = document.fonts.ready;
 </script></body></html>
