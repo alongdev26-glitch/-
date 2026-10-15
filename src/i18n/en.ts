@@ -41,6 +41,7 @@ export const en: Dict = {
   edition_ja: 'Japan board · ¥',
 
   playNow: 'Play now',
+  chooseMode: "Game mode",
   resumeGame: 'Continue saved game',
   shop: 'Shop',
   friendJoined: (p: P) =>

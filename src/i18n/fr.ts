@@ -41,6 +41,7 @@ export const fr: Dict = {
   edition_ja: 'Plateau Japon · ¥',
 
   playNow: 'Jouer',
+  chooseMode: "Mode de jeu",
   resumeGame: 'Reprendre la partie',
   shop: 'Boutique',
   friendJoined: (p: P) =>

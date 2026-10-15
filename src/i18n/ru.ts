@@ -50,6 +50,7 @@ export const ru: Dict = {
   edition_ja: 'Поле Япония · ¥',
 
   playNow: 'Играть',
+  chooseMode: "Режим игры",
   resumeGame: 'Продолжить игру',
   shop: 'Магазин',
   friendJoined: (p: P) =>

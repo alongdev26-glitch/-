@@ -20,7 +20,7 @@ type Screen =
   | { s: 'welcome' }
   | { s: 'menu' }
   | { s: 'settings' }
-  | { s: 'setup' }
+  | { s: 'setup'; mode?: 'bots' | 'people' }
   | { s: 'online' }
   | { s: 'shop' }
   | { s: 'game'; game: GameState; key: number };
@@ -39,7 +39,7 @@ export function App() {
         {screen.s === 'settings' && <Settings onBack={() => setScreen({ s: 'menu' })} />}
         {screen.s === 'menu' && (
           <Menu
-            onPlay={() => setScreen({ s: 'setup' })}
+            onPlay={(mode) => setScreen(mode === 'online' ? { s: 'online' } : { s: 'setup', mode })}
             onShop={() => setScreen({ s: 'shop' })}
             onSettings={() => setScreen({ s: 'settings' })}
             onResume={saved ? () => setScreen({ s: 'game', game: saved, key: Date.now() }) : undefined}
@@ -47,6 +47,7 @@ export function App() {
         )}
         {screen.s === 'setup' && (
           <Setup
+            initialMode={screen.mode}
             onBack={() => setScreen({ s: 'menu' })}
             onOnline={() => setScreen({ s: 'online' })}
             onStart={(players, rules) => {
@@ -55,7 +56,7 @@ export function App() {
             }}
           />
         )}
-        {screen.s === 'online' && <Online onBack={() => setScreen({ s: 'setup' })} />}
+        {screen.s === 'online' && <Online onBack={() => setScreen({ s: 'menu' })} />}
         {screen.s === 'shop' && <Shop onBack={() => setScreen({ s: 'menu' })} />}
       </div>
       {screen.s === 'game' && (

@@ -41,6 +41,7 @@ export const he = {
 
   // ---------- menu ----------
   playNow: 'שחק עכשיו',
+  chooseMode: "בחר מצב משחק",
   resumeGame: 'המשך משחק שמור',
   shop: 'חנות',
   friendJoined: (p: P) =>

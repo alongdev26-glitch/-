@@ -346,6 +346,18 @@
     transform: scale(0.75);
     transform-origin: right top;
   }
+  /* continue and back side by side, so both fit on a sideways phone */
+  .setup-nav {
+    flex-direction: row;
+    align-items: center;
+  }
+  .setup-nav .btn-red {
+    flex: 1;
+    order: 2;
+  }
+  .setup-nav .btn-back {
+    order: 1;
+  }
 }
 
 /* ---------- first-time questionnaire & settings ---------- */
@@ -476,5 +488,21 @@
 @media (prefers-reduced-motion: reduce) {
   .quiz {
     animation: none;
+  }
+}
+
+/* sideways phone: the questionnaire after its base rules, so these win */
+@media (orientation: landscape) and (max-height: 560px) {
+  .quiz {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  /* only the question and the answers, so the start button stays on screen */
+  .quiz-badge,
+  .quiz .lineup {
+    display: none;
+  }
+  .quiz-q {
+    font-size: 21px;
   }
 }

@@ -763,3 +763,46 @@
   border-radius: 12px;
   padding: 8px 12px;
 }
+
+/* sideways phone (the installed app is locked to landscape):
+   the board fills the height on one side, the players and hints sit beside it */
+@media (orientation: landscape) and (min-aspect-ratio: 4/3) {
+  .tab-board,
+  .tab-board.r1 {
+    --board-size: calc(min(100cqw - 250px, 100cqh) - 14px);
+  }
+  .tab-board {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 1fr auto auto 1fr;
+    column-gap: 12px;
+    row-gap: 8px;
+    padding: 0 12px;
+    align-items: center;
+    justify-items: center;
+    background: linear-gradient(90deg, var(--sea) 0 4%, var(--sand) 4% 5.5%, transparent 5.5%);
+  }
+  .tab-board > .board {
+    grid-column: 2;
+    grid-row: 1 / 5;
+  }
+  .tab-board > .players-strip {
+    grid-column: 1;
+    grid-row: 3;
+    grid-template-columns: 1fr;
+    width: 100%;
+    max-width: 230px;
+  }
+  .tab-board > .round-one {
+    grid-column: 1;
+    grid-row: 2;
+    max-width: 230px;
+    text-align: center;
+    white-space: normal;
+  }
+  /* the sound button sits on the players' side, clear of the board */
+  .board-sound {
+    left: auto;
+    inset-inline-start: 8px;
+  }
+}

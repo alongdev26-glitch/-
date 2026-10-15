@@ -100,7 +100,8 @@
     max-height: 96px;
   }
   .turn-pill {
-    left: 8px;
+    left: auto;
+    inset-inline-start: 12px;
     transform: none;
   }
 }
