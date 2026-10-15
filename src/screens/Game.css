@@ -99,11 +99,9 @@
   .tab {
     max-height: 96px;
   }
-  /* inside the board's middle, clear of the corner squares */
   .turn-pill {
-    top: 15cqh;
     left: auto;
-    right: 15cqw;
+    inset-inline-start: 12px;
     transform: none;
   }
 }
