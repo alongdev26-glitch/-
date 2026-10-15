@@ -25,12 +25,13 @@ body { margin: 0; }
 .em { position: absolute; filter: drop-shadow(0 8px 12px rgba(0,0,0,.45)); line-height: 1; }
 </style></head><body><div id="c"></div>
 <script>
-const V = new URLSearchParams(location.search).get('v') === 'tall';
-const W = V ? 1080 : 1280, H = V ? 1920 : 720;
+const MODE = new URLSearchParams(location.search).get('v') || 'wide';
+const V = MODE === 'tall', B = MODE === 'banner';
+const W = V ? 1080 : B ? 1024 : 1280, H = V ? 1920 : B ? 500 : 720;
 const c = document.getElementById('c'); c.style.width = W + 'px'; c.style.height = H + 'px';
 const COLORS = ['#0fa3a3', '#e2337f', '#f5c400', '#f08a00', '#8e44ad', '#6fae12', '#c0392b', '#7f8c8d'];
 const band = (pos) => `<div class="band" style="${pos}:0">${COLORS.map((x) => `<i style="background:${x}"></i>`).join('')}</div>`;
-const R = V ? 2600 : 2000;
+const R = V ? 2600 : B ? 1600 : 2000;
 c.innerHTML = band('top') + band('bottom') +
   `<div class="rays" style="width:${R}px;height:${R}px;left:${(V ? W / 2 : W * 0.3) - R / 2}px;top:${(V ? H * 0.3 : H / 2) - R / 2}px"></div>` +
   (V
@@ -41,6 +42,13 @@ c.innerHTML = band('top') + band('bottom') +
        <div class="em" style="font-size:150px;left:70px;top:1230px;transform:rotate(-15deg)">🎲</div>
        <div class="em" style="font-size:130px;right:60px;top:1350px;transform:rotate(12deg)">💰</div>
        <div class="em" style="font-size:110px;left:90px;top:1500px">🏨</div>`
+    : B
+    ? `<div class="title" style="font-size:80px;left:48px;top:86px"><span>BUY.</span><span>BUILD.</span><span class="y">GET RICH!</span></div>
+       <div class="tag" style="font-size:30px;padding:8px 24px;left:48px;top:372px;transform:rotate(-3deg)">DEAL CITY · PLAY FREE 🎲</div>
+       <div class="phone" style="width:210px;left:780px;top:40px;transform:rotate(7deg)"><img src="thumb-board.png"></div>
+       <img class="logo" src="logo-full.png" style="width:250px;left:520px;top:200px;transform:rotate(-6deg)">
+       <div class="em" style="font-size:80px;left:560px;top:40px;transform:rotate(-14deg)">🎲</div>
+       <div class="em" style="font-size:70px;left:930px;top:390px;transform:rotate(10deg)">💰</div>`
     : `<div class="title" style="font-size:108px;left:56px;top:150px"><span>BUY.</span><span>BUILD.</span><span class="y">GET RICH!</span></div>
        <div class="tag" style="font-size:40px;padding:10px 30px;left:60px;top:560px;transform:rotate(-3deg)">DEAL CITY · PLAY FREE 🎲</div>
        <div class="phone" style="width:300px;left:900px;top:70px;transform:rotate(7deg)"><img src="thumb-board.png"></div>
@@ -50,7 +58,11 @@ c.innerHTML = band('top') + band('bottom') +
 const spark = (x, y, sz) => `<div class="spark" style="left:${x}px;top:${y}px;--s:${sz}px;z-index:4"><i></i></div>`;
 const coin = (x, y, sz, r) => `<div class="coin" style="left:${x}px;top:${y}px;width:${sz}px;height:${sz}px;font-size:${sz * 0.55}px;transform:rotate(${r}deg);z-index:3">$</div>`;
 const glow = (x, y, r) => `<div class="glow" style="left:${x - r}px;top:${y - r}px;width:${2 * r}px;height:${2 * r}px"></div>`;
-const extra = V
+const extra = B
+  ? glow(640, 360, 260) + glow(880, 250, 240) +
+    [[470, 90, 56], [990, 40, 60], [470, 440, 46], [700, 250, 44], [1000, 300, 54]].map((a) => spark(...a)).join('') +
+    [[460, 190, 52, -15], [960, 210, 44, 20], [500, 330, 40, 10]].map((a) => coin(...a)).join('')
+  : V
   ? glow(540, 340, 420) + glow(540, 1500, 480) +
     [[230, 120, 90], [860, 160, 120], [820, 560, 80], [180, 600, 70], [960, 1000, 100], [120, 900, 80], [930, 1650, 90], [150, 1730, 70], [540, 640, 60]].map((a) => spark(...a)).join('') +
     [[60, 420, 90, -20], [930, 430, 80, 25], [880, 1160, 70, 10], [40, 1080, 64, -10], [990, 1820, 60, 15]].map((a) => coin(...a)).join('')

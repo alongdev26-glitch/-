@@ -2,7 +2,7 @@
 
 הערכה כוללת:
 - `icon-512.png`: אייקון האפליקציה (512×512).
-- `feature-graphic-1024x500.png`: הבאנר שבראש דף החנות.
+- `feature-graphic-1024x500.png`: הבאנר שבראש דף החנות בעברית, ו-`feature-graphic-en-1024x500.png` לדף באנגלית.
 - `screenshots/`: צילומי טלפון בגודל 1080×1920, ארבעה בעברית (`he-*`) וארבעה באנגלית (`en-*`).
 
 מדיניות הפרטיות: https://alongdev26-glitch.github.io/-1/privacy.html
