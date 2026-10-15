@@ -1,6 +1,7 @@
 .board {
   --c: 1.55fr;
-  width: var(--board-size);
+  /* square by default; a sideways phone stretches it wide with --board-w */
+  width: var(--board-w, var(--board-size));
   height: var(--board-size);
   display: grid;
   grid-template-columns: var(--c) repeat(9, 1fr) var(--c);
@@ -297,7 +298,7 @@
   position: absolute;
   left: 0;
   top: 0;
-  font-size: 3.3cqw;
+  font-size: 3.3cqmin;
   transform: translate(-50%, -50%);
 }
 @media (prefers-reduced-motion: reduce) {
@@ -321,8 +322,8 @@
   height: 16%;
   transform: translate(-50%, -50%) rotate(45deg);
   background: linear-gradient(180deg, #ff2a3d 0%, var(--red) 55%, var(--red-dark) 100%);
-  border-radius: 3cqw;
-  box-shadow: inset 0 0 0 0.6cqw #fff, inset 0 0 0 1cqw var(--red), 0 1.2cqw 2.5cqw rgba(0, 0, 0, 0.4);
+  border-radius: 3cqmin;
+  box-shadow: inset 0 0 0 0.6cqmin #fff, inset 0 0 0 1cqmin var(--red), 0 1.2cqmin 2.5cqmin rgba(0, 0, 0, 0.4);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -335,27 +336,27 @@
   transform: translate(-50%, -18%);
   display: flex;
   align-items: center;
-  gap: 1.4cqw;
-  padding: 0.7cqw 2.6cqw;
+  gap: 1.4cqmin;
+  padding: 0.7cqmin 2.6cqmin;
   border-radius: 999px;
   background: linear-gradient(180deg, #fff3a8 0%, #ffd23f 45%, #e8a20c 100%);
-  border: 0.5cqw solid #fff;
-  box-shadow: 0 0 0 0.35cqw #b86e00, 0 0.8cqw 1.6cqw rgba(0, 0, 0, 0.45);
+  border: 0.5cqmin solid #fff;
+  box-shadow: 0 0 0 0.35cqmin #b86e00, 0 0.8cqmin 1.6cqmin rgba(0, 0, 0, 0.45);
   white-space: nowrap;
   z-index: 1;
 }
 .plaque-pot .pot-label {
-  font-size: 2.3cqw;
+  font-size: 2.3cqmin;
   font-weight: 800;
   color: #7a2e00;
 }
 .plaque-pot .pot-amount {
-  font-size: 4.2cqw;
+  font-size: 4.2cqmin;
   font-weight: 900;
   line-height: 1;
   color: #b30016;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0.25cqw 0 #fff6c9;
+  text-shadow: 0 0.25cqmin 0 #fff6c9;
   animation: pot-pop 0.6s ease-out;
 }
 @keyframes pot-pop {
@@ -369,16 +370,16 @@
 .plaque span {
   font-weight: 900;
   font-style: italic;
-  font-size: 7.4cqw;
+  font-size: 7.4cqmin;
   line-height: 1;
   color: #fff;
   letter-spacing: 0.02em;
   white-space: nowrap;
-  text-shadow: 0 0.4cqw 0 #c7c7c7, 0 0.8cqw 0 #8e8e8e, 0 1.2cqw 1.5cqw rgba(0, 0, 0, 0.5);
+  text-shadow: 0 0.4cqmin 0 #c7c7c7, 0 0.8cqmin 0 #8e8e8e, 0 1.2cqmin 1.5cqmin rgba(0, 0, 0, 0.5);
 }
 /* the wide Japanese name (ディールシティ) still fits the sign */
 .plaque span.long {
-  font-size: 4.3cqw;
+  font-size: 4.3cqmin;
 }
 /* ---------- the free-parking corner: a red car ---------- */
 .corner-inner.parking {
@@ -511,4 +512,73 @@
 .sp-chest svg {
   width: 100%;
   height: auto;
+}
+
+/* ---------- a wide board (sideways phone): squares on the left and right columns lie flat ---------- */
+@media (orientation: landscape) and (min-aspect-ratio: 4/3) {
+  .tab-board .side-left .face,
+  .tab-board .side-right .face {
+    width: 100cqw;
+    height: 100cqh;
+    transform: translate(-50%, -50%);
+    direction: ltr;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: stretch;
+    container-type: size;
+  }
+  .tab-board .side-left .face {
+    flex-direction: row-reverse;
+  }
+  .tab-board .side-left .strip,
+  .tab-board .side-right .strip {
+    width: 12%;
+    height: 100%;
+    color: transparent;
+    text-shadow: none;
+    border: 0;
+  }
+  .tab-board .side-left .face > :not(.strip),
+  .tab-board .side-right .face > :not(.strip) {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .tab-board .side-left .sp-name,
+  .tab-board .side-right .sp-name {
+    align-self: center;
+    font-size: min(28cqh, 10.5cqw);
+    padding: 0 3cqw;
+    unicode-bidi: plaintext;
+    overflow: hidden;
+  }
+  .tab-board .side-left .sp-price,
+  .tab-board .side-right .sp-price {
+    align-self: center;
+    flex: none;
+    font-size: min(26cqh, 11cqw);
+    padding: 0 3cqw;
+  }
+  .tab-board .side-left .sp-icon,
+  .tab-board .side-right .sp-icon,
+  .tab-board .side-left .sp-q,
+  .tab-board .side-right .sp-q {
+    flex: none;
+    align-self: center;
+    font-size: 70cqh;
+    padding: 0 2cqw;
+  }
+  .tab-board .side-left .sp-chest,
+  .tab-board .side-right .sp-chest {
+    width: 70cqh;
+  }
+  /* the sign keeps its square-board size instead of stretching across the wide middle */
+  .tab-board .plaque {
+    width: 49cqmin;
+    height: 12cqmin;
+  }
+  /* corners: a square the height of the cell, so the art keeps its shape */
+  .tab-board .corner .face {
+    width: 100cqh;
+    height: 100cqh;
+  }
 }

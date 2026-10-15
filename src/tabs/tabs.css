@@ -67,7 +67,7 @@
   position: absolute;
   top: 5%;
   left: 5%;
-  font-size: 6.5cqw;
+  font-size: 6.5cqmin;
   z-index: 4;
 }
 .board-fab {
@@ -81,16 +81,16 @@
   gap: 6px;
 }
 .fab {
-  width: 15cqw;
-  height: 15cqw;
+  width: 15cqmin;
+  height: 15cqmin;
   min-width: 64px;
   min-height: 64px;
   border-radius: 50%;
-  border: 0.6cqw solid #fff;
+  border: 0.6cqmin solid #fff;
   background: radial-gradient(circle at 35% 30%, var(--red-light) 0%, var(--red) 55%, var(--red-dark) 100%);
   color: #fff;
   font-weight: 900;
-  font-size: clamp(13px, 3cqw, 26px);
+  font-size: clamp(13px, 3cqmin, 26px);
   line-height: 1.05;
   box-shadow: 0 6px 0 #7a000f, 0 10px 22px rgba(0, 0, 0, 0.4);
   display: grid;
@@ -106,7 +106,7 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  box-shadow: 0 0 0 1.2cqw rgba(227, 0, 27, 0.25);
+  box-shadow: 0 0 0 1.2cqmin rgba(227, 0, 27, 0.25);
   opacity: 0;
   pointer-events: none;
   will-change: opacity;
@@ -123,7 +123,7 @@
   color: var(--ink);
   border-color: #ddd;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-  font-size: clamp(10px, 1.9cqw, 16px);
+  font-size: clamp(10px, 1.9cqmin, 16px);
   animation: none;
 }
 .fab-extra {
@@ -764,45 +764,35 @@
   padding: 8px 12px;
 }
 
-/* sideways phone (the installed app is locked to landscape):
-   the board fills the height on one side, the players and hints sit beside it */
+/* sideways phone (the installed app is locked to landscape): the board fills the whole page,
+   wider than tall; money is in the Profile tab, and the hints sit inside the board's middle */
 @media (orientation: landscape) and (min-aspect-ratio: 4/3) {
   .tab-board,
   .tab-board.r1 {
-    --board-size: calc(min(100cqw - 250px, 100cqh) - 14px);
+    --board-size: calc(100cqh - 14px);
+    --board-w: calc(100cqw - 16px);
   }
   .tab-board {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: 1fr auto auto 1fr;
-    column-gap: 12px;
-    row-gap: 8px;
-    padding: 0 12px;
-    align-items: center;
-    justify-items: center;
-    background: linear-gradient(90deg, var(--sea) 0 4%, var(--sand) 4% 5.5%, transparent 5.5%);
-  }
-  .tab-board > .board {
-    grid-column: 2;
-    grid-row: 1 / 5;
+    flex-direction: row;
+    gap: 0;
+    background: none;
   }
   .tab-board > .players-strip {
-    grid-column: 1;
-    grid-row: 3;
-    grid-template-columns: 1fr;
-    width: 100%;
-    max-width: 230px;
+    display: none;
   }
   .tab-board > .round-one {
-    grid-column: 1;
-    grid-row: 2;
-    max-width: 230px;
-    text-align: center;
-    white-space: normal;
+    position: absolute;
+    top: 15cqh;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 6;
+    margin: 0;
+    white-space: nowrap;
   }
-  /* the sound button sits on the players' side, clear of the board */
   .board-sound {
+    top: auto;
     left: auto;
-    inset-inline-start: 8px;
+    bottom: 16cqh;
+    left: 15cqw;
   }
 }
