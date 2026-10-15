@@ -1,7 +1,7 @@
 import base64, sys
 d = sys.argv[1]
 def uri(name, mime): return f'data:{mime};base64,' + base64.b64encode(open(f'{d}/{name}', 'rb').read()).decode()
-icon = uri('icon.png', 'image/png'); thumb = uri('thumb.jpg', 'image/jpeg')
+icon = uri('icon.png', 'image/png'); fgen = uri('fg-en.jpg', 'image/jpeg'); fghe = uri('fg-he.jpg', 'image/jpeg')
 shots = ''.join(f'<img class="shot" src="{uri(n + ".jpg", "image/jpeg")}" alt="">' for n in ['en-1-menu', 'en-2-board', 'en-3-game', 'en-4-shop'])
 html = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -90,7 +90,7 @@ No ads, no sign-up, and it works offline.`,
     safety: 'בטיחות נתונים', safe: [['🔗', 'לא משתפים נתונים עם צד שלישי'], ['🪪', 'אוסף מזהה מכשיר אקראי, רק להזמנת חברים'], ['🔒', 'הנתונים מוצפנים בזמן ההעברה'], ['🗑️', 'אפשר לבקש למחוק את הנתונים']],
     info: 'פרטי האפליקציה', meta: [['קטגוריה', 'לוח'], ['שפות', '6'], ['עובד בלי אינטרנט', 'כן'], ['פרסומות', 'אין']] }},
 }};
-const ICON = "{icon}", THUMB = "{thumb}", SHOTS = `{shots}`;
+const ICON = "{icon}", FG = {{ en: "{fgen}", he: "{fghe}" }}, SHOTS = `{shots}`;
 function draw(l) {{
   const t = T[l]; document.documentElement.dir = t.dir; document.documentElement.lang = l;
   document.getElementById('m').innerHTML = `
@@ -98,7 +98,7 @@ function draw(l) {{
   <div class="head"><img src="${{ICON}}" alt=""><div><h1>${{t.name}}</h1><div class="dev">${{t.dev}}</div><div class="sub">${{t.sub}}</div></div></div>
   <div class="stats">${{t.stats.map(([a, b]) => `<div><b>${{a}}</b>${{b}}</div>`).join('')}}</div>
   <button class="install">${{t.install}}</button>
-  <div class="media"><div class="video"><img src="${{THUMB}}" alt=""></div>${{SHOTS}}</div>
+  <div class="media"><div class="video"><img src="${{FG[l]}}" alt=""></div>${{SHOTS}}</div>
   <h2>${{t.about}} <span>${{t.dir === 'rtl' ? '←' : '→'}}</span></h2>
   <p><b>${{t.short}}</b></p><p class="full">${{t.full}}</p>
   <div class="chips">${{t.chips.map((c) => `<span>${{c}}</span>`).join('')}}</div>
