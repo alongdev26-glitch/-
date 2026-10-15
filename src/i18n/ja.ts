@@ -39,7 +39,6 @@ export const ja: Dict = {
   edition_ja: '日本版 · ¥',
 
   playNow: 'プレイ',
-  chooseMode: "ゲームモード",
   resumeGame: '続きから遊ぶ',
   shop: 'ショップ',
   friendJoined: (p: P) => `🎉 あなたのリンクから友だちが${p.n}人参加しました！ +${p.coins} 🪙`,

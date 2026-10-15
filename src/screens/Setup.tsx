@@ -16,7 +16,7 @@ import { tokenName } from '../data/tokens';
 const botNamesNow = () => EDITIONS[getLang()].bots;
 const MAX_PLAYERS = 4;
 
-export type Mode = 'bots' | 'people';
+type Mode = 'bots' | 'people';
 
 interface Human {
   name: string;
@@ -33,8 +33,6 @@ interface Props {
   onStart: (players: PlayerSetup[], rules: GameRules) => void;
   onOnline: () => void;
   onBack: () => void;
-  /** chosen on the home screen: skip the "who are you playing with" step */
-  initialMode?: Mode;
 }
 
 /**
@@ -44,11 +42,11 @@ interface Props {
  * 3. name + token for each real player
  * 4. rules (mortgage yes/no)
  */
-export function Setup({ onStart, onOnline, onBack, initialMode }: Props) {
-  const [step, setStep] = useState(initialMode ? 1 : 0);
-  const [mode, setMode] = useState<Mode>(initialMode ?? 'bots');
-  const [humanCount, setHumanCount] = useState(initialMode === 'people' ? 2 : 1);
-  const [botCount, setBotCount] = useState(initialMode === 'people' ? 0 : 3);
+export function Setup({ onStart, onOnline, onBack }: Props) {
+  const [step, setStep] = useState(0);
+  const [mode, setMode] = useState<Mode>('bots');
+  const [humanCount, setHumanCount] = useState(1);
+  const [botCount, setBotCount] = useState(3);
   const [humans, setHumans] = useState<Human[]>(defaultHumans);
   const [botNames, setBotNames] = useState(botNamesNow);
   const [who, setWho] = useState(0);
@@ -92,7 +90,7 @@ export function Setup({ onStart, onOnline, onBack, initialMode }: Props) {
 
   const back = () => {
     if (step === 2 && who > 0) return setWho(who - 1);
-    if (step === 0 || (step === 1 && initialMode)) return onBack();
+    if (step === 0) return onBack();
     if (step === 3) setWho(humanCount - 1);
     setStep(step - 1);
   };

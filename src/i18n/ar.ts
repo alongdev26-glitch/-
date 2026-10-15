@@ -39,7 +39,6 @@ export const ar: Dict = {
   edition_ja: 'لوحة اليابان · ¥',
 
   playNow: 'العب الآن',
-  chooseMode: "وضع اللعب",
   resumeGame: 'تابع اللعبة المحفوظة',
   shop: 'المتجر',
   friendJoined: (p: P) =>
