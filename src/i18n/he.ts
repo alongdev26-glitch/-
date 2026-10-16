@@ -41,6 +41,15 @@ export const he = {
 
   // ---------- menu ----------
   playNow: 'שחק עכשיו',
+  quickMatch: "1v1 אונליין",
+  quickMatchNote: "יריב אקראי, בלי קוד",
+  searching: "מחפש...",
+  searchingFor: "מחפש יריב... {n} שנ׳",
+  foundOpponent: "נמצא יריב!",
+  noOpponent: "אין כרגע שחקנים פנויים",
+  playBotInstead: "שחק נגד המחשב",
+  keepSearching: "להמשיך לחפש",
+  cancelSearch: "ביטול",
   resumeGame: 'המשך משחק שמור',
   shop: 'חנות',
   friendJoined: (p: P) =>

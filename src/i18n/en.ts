@@ -41,6 +41,15 @@ export const en: Dict = {
   edition_ja: 'Japan board · ¥',
 
   playNow: 'Play now',
+  quickMatch: "Online 1v1",
+  quickMatchNote: "A random opponent, no code",
+  searching: "Searching...",
+  searchingFor: "Looking for an opponent... {n}s",
+  foundOpponent: "Opponent found!",
+  noOpponent: "No players are free right now",
+  playBotInstead: "Play the computer",
+  keepSearching: "Keep searching",
+  cancelSearch: "Cancel",
   resumeGame: 'Continue saved game',
   shop: 'Shop',
   friendJoined: (p: P) =>

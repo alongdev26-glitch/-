@@ -33,12 +33,14 @@ export interface Seat {
 export interface Room {
   code: string;
   host: string;
-  status: 'lobby' | 'playing';
+  status: 'lobby' | 'playing' | 'closed';
   seats: Seat[];
   bots: number;
   rules: GameRules;
   state: GameState | null;
   createdAt: number;
+  /** quick-match rooms hold only this many seats (missing = MAX_SEATS) */
+  cap?: number;
 }
 
 export interface Net {

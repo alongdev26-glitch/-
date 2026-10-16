@@ -32,6 +32,8 @@ const defaultHumans = (): Human[] =>
 interface Props {
   onStart: (players: PlayerSetup[], rules: GameRules) => void;
   onOnline: () => void;
+  /** online 1v1 with a random player */
+  onQuick?: () => void;
   onBack: () => void;
 }
 
@@ -42,7 +44,7 @@ interface Props {
  * 3. name + token for each real player
  * 4. rules (mortgage yes/no)
  */
-export function Setup({ onStart, onOnline, onBack }: Props) {
+export function Setup({ onStart, onOnline, onQuick, onBack }: Props) {
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState<Mode>('bots');
   const [humanCount, setHumanCount] = useState(1);
@@ -133,6 +135,13 @@ export function Setup({ onStart, onOnline, onBack }: Props) {
             <b>{t('withCode')}</b>
             <small>{t('withCodeNote')}</small>
           </button>
+          {onQuick && (
+            <button className="choice quick-choice" onClick={onQuick}>
+              <span className="choice-icon">⚡</span>
+              <b>{t('quickMatch')}</b>
+              <small>{t('quickMatchNote')}</small>
+            </button>
+          )}
         </div>
       )}
 

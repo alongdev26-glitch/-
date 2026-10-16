@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { FEE_ROUNDS } from '../data/board';
 import { newGame } from '../engine/reducer';
 import type { GameState, TokenId } from '../engine/types';
@@ -13,13 +13,14 @@ import { getLang, t } from '../i18n';
 import { EDITIONS } from '../data/editions';
 import { tokenName } from '../data/tokens';
 import { getName } from '../ui/profile';
+import { findMatch } from '../online/match';
 
 const MAX = MAX_SEATS;
 
 type View = 'loading' | 'unavailable' | 'profile' | 'join' | 'lobby';
 
 /** Online play: pick a name and token, then create a room code or type a friend's code. */
-export function Online({ onBack }: { onBack: () => void }) {
+export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick?: boolean; onBotGame?: () => void }) {
   const [link, setLink] = useState<RoomLink | null>(null);
   const [resumable, setResumable] = useState<Room | null>(null);
   const [view, setView] = useState<View>('loading');
@@ -31,6 +32,7 @@ export function Online({ onBack }: { onBack: () => void }) {
   const [room, setRoom] = useState<Room | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [quickOn, setQuickOn] = useState(false);
 
   useEffect(() => {
     let live = true;
@@ -126,6 +128,12 @@ export function Online({ onBack }: { onBack: () => void }) {
     setRoomField({ status: 'playing', state });
   };
 
+  if (quick || quickOn) {
+    if (view === 'loading') return <QuickShell onBack={onBack} text={t('connectingServer')} />;
+    if (!link) return <QuickShell onBack={onBack} text={t('noOnline')} />;
+    return <QuickMatch link={link} onBack={quick ? onBack : () => setQuickOn(false)} onBotGame={onBotGame} />;
+  }
+
   // ---------- the game itself ----------
   if (link && code && room?.status === 'playing' && room.state && room.seats.some((s) => s.uid === link.uid)) {
     return <OnlineGame link={link} code={code} room={room} onExit={leave} />;
@@ -176,6 +184,13 @@ export function Online({ onBack }: { onBack: () => void }) {
           {view === 'profile' && resumable && (
             <button className="btn btn-gold" disabled={busy} onClick={resume}>
               {t('backToRoom', { code: resumable.code })}
+            </button>
+          )}
+          {view === 'profile' && (
+            <button className="choice quick-choice" disabled={busy} onClick={() => setQuickOn(true)}>
+              <span className="choice-icon">⚡</span>
+              <b>{t('quickMatch')}</b>
+              <small>{t('quickMatchNote')}</small>
             </button>
           )}
           {view === 'profile' ? (
@@ -329,5 +344,147 @@ function OnlineGame({ link, code, room, onExit }: { link: RoomLink; code: string
         </div>
       )}
     </>
+  );
+}
+
+function QuickShell({ onBack, text, children }: { onBack: () => void; text?: string; children?: ReactNode }) {
+  return (
+    <div className="setup">
+      <div className="color-band top" aria-hidden="true" />
+      <div className="setup-banner">
+        <RibbonBanner text={t('quickMatch')} />
+      </div>
+      {text && <div className="setup-summary">{text}</div>}
+      {children}
+      <div className="setup-nav">
+        <button className="btn-back" onClick={onBack}>
+          {t('cancelSearch')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const WAIT_S = 30;
+
+/** 1v1 with a random player: search the waiting spots, then play; after 30 seconds offer a bot. */
+function QuickMatch({ link, onBack, onBotGame }: { link: RoomLink; onBack: () => void; onBotGame?: () => void }) {
+  const wallet = useWallet();
+  const seat = useRef<Seat>({ uid: link.uid, name: getName() || t('player'), token: wallet.char });
+  const [code, setCode] = useState<string | null>(null);
+  const [room, setRoom] = useState<Room | null>(null);
+  const [error, setError] = useState('');
+  const [secs, setSecs] = useState(0);
+  const [limit, setLimit] = useState(WAIT_S);
+  const [attempt, setAttempt] = useState(0);
+  const ctl = useRef<AbortController | null>(null);
+
+  // search (again after an error)
+  useEffect(() => {
+    const c = new AbortController();
+    ctl.current = c;
+    findMatch(link, seat.current, c.signal)
+      .then((m) => setCode(m.code))
+      .catch((e) => {
+        if ((e as Error).name !== 'AbortError') setError(e instanceof Error ? e.message : t('somethingWrong'));
+      });
+    return () => c.abort();
+  }, [link, attempt]);
+
+  // the waiting clock
+  useEffect(() => {
+    const id = window.setInterval(() => setSecs((s) => s + 1), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    if (!code) return;
+    return link.subscribe(code, setRoom, () => {
+      // the other player left before the game began: look again
+      setRoom(null);
+      setCode(null);
+      setAttempt((a) => a + 1);
+    });
+  }, [link, code]);
+
+  // the host starts as soon as the second player sits down
+  const started = useRef(false);
+  useEffect(() => {
+    if (!room || !code || started.current) return;
+    if (room.host !== link.uid || room.status !== 'lobby' || room.seats.length < 2) return;
+    started.current = true;
+    const id = window.setTimeout(() => {
+      const state = newGame(
+        room.seats.map((s) => ({ uid: s.uid, name: s.name, token: s.token, isBot: false })),
+        Math.random,
+        room.rules,
+        getLang(),
+      );
+      link.patch(code, room, { status: 'playing', state });
+    }, 1200);
+    return () => window.clearTimeout(id);
+  }, [room, code, link]);
+
+  const quit = () => {
+    ctl.current?.abort();
+    if (code) link.leave(code, room);
+  };
+
+  if (code && room?.status === 'playing' && room.state && room.seats.some((s) => s.uid === link.uid)) {
+    return <OnlineGame link={link} code={code} room={room} onExit={() => { quit(); onBack(); }} />;
+  }
+
+  const found = !!room && room.seats.length >= 2;
+  const other = room?.seats.find((s) => s.uid !== link.uid);
+  const nobody = !found && secs >= limit;
+  return (
+    <QuickShell
+      onBack={() => {
+        quit();
+        onBack();
+      }}
+    >
+      <div className="quick-card">
+        <div className="quick-versus">
+          <span className="quick-me">
+            <Token token={seat.current.token} size="44px" skin={wallet.skin} />
+            <b>{seat.current.name}</b>
+          </span>
+          <span className="quick-vs">VS</span>
+          <span className={`quick-them${found ? '' : ' is-waiting'}`}>
+            {other ? <Token token={other.token} size="44px" /> : <span className="quick-q">?</span>}
+            <b>{other ? other.name : t('searching')}</b>
+          </span>
+        </div>
+        {found ? (
+          <div className="quick-status">{t('foundOpponent')} ⚔️</div>
+        ) : nobody ? (
+          <>
+            <div className="quick-status">{t('noOpponent')}</div>
+            <div className="quick-actions">
+              {onBotGame && (
+                <button
+                  className="btn btn-red"
+                  onClick={() => {
+                    quit();
+                    onBotGame();
+                  }}
+                >
+                  🤖 {t('playBotInstead')}
+                </button>
+              )}
+              <button className="btn btn-white" onClick={() => setLimit(secs + WAIT_S)}>
+                {t('keepSearching')}
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="quick-status">
+            <span className="quick-glass" aria-hidden="true">🔍</span> {t('searchingFor', { n: secs })}
+          </div>
+        )}
+      </div>
+      {error && <div className="setup-error">{error}</div>}
+    </QuickShell>
   );
 }

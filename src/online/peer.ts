@@ -234,18 +234,21 @@ export function peerLink(): RoomLink & { resume(room: Room): Promise<void> } {
   return {
     kind: 'peer',
     uid,
-    async create(seat) {
+    async create(seat, wanted, cap) {
       shutdown();
-      for (let i = 0; i < 5; i++) {
-        const code = newCode();
+      for (let i = 0; i < (wanted ? 1 : 5); i++) {
+        const code = wanted ?? newCode();
         try {
           peer = await openPeer(PREFIX + code);
         } catch (e) {
-          if ((e as { type?: string }).type === 'unavailable-id') continue;
+          if ((e as { type?: string }).type === 'unavailable-id') {
+            if (wanted) throw new Error(t('codeBusy'));
+            continue;
+          }
           throw new Error(NO_NET());
         }
         listenAsHost(peer);
-        hostUpdate(freshRoom(code, seat));
+        hostUpdate(freshRoom(code, seat, cap));
         return code;
       }
       throw new Error(NO_NET());

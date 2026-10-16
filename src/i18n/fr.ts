@@ -41,6 +41,15 @@ export const fr: Dict = {
   edition_ja: 'Plateau Japon · ¥',
 
   playNow: 'Jouer',
+  quickMatch: "1v1 en ligne",
+  quickMatchNote: "Un adversaire au hasard, sans code",
+  searching: "Recherche...",
+  searchingFor: "Recherche d’un adversaire... {n} s",
+  foundOpponent: "Adversaire trouvé !",
+  noOpponent: "Aucun joueur libre pour le moment",
+  playBotInstead: "Jouer contre l’ordinateur",
+  keepSearching: "Continuer à chercher",
+  cancelSearch: "Annuler",
   resumeGame: 'Reprendre la partie',
   shop: 'Boutique',
   friendJoined: (p: P) =>

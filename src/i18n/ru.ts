@@ -50,6 +50,15 @@ export const ru: Dict = {
   edition_ja: 'Поле Япония · ¥',
 
   playNow: 'Играть',
+  quickMatch: "Онлайн 1 на 1",
+  quickMatchNote: "Случайный соперник, без кода",
+  searching: "Поиск...",
+  searchingFor: "Ищем соперника... {n} с",
+  foundOpponent: "Соперник найден!",
+  noOpponent: "Сейчас нет свободных игроков",
+  playBotInstead: "Играть с компьютером",
+  keepSearching: "Искать дальше",
+  cancelSearch: "Отмена",
   resumeGame: 'Продолжить игру',
   shop: 'Магазин',
   friendJoined: (p: P) =>

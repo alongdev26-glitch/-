@@ -1,5 +1,9 @@
 import { useState, type MouseEvent as ReactMouseEvent } from 'react';
-import { newGame } from './engine/reducer';
+import { DEFAULT_RULES, newGame } from './engine/reducer';
+import { EDITIONS } from './data/editions';
+import { TOKENS } from './ui/Token';
+import { getName } from './ui/profile';
+import { useWallet } from './ui/Cosmetics';
 import type { GameState } from './engine/types';
 import { Game, loadGame, saveGame } from './screens/Game';
 import { Menu } from './screens/Menu';
@@ -7,7 +11,7 @@ import { Online } from './screens/Online';
 import { Setup } from './screens/Setup';
 import { Shop } from './screens/Shop';
 import { sfx } from './ui/sound';
-import { hasChosenLang, useLang } from './i18n';
+import { hasChosenLang, t, useLang } from './i18n';
 import { Welcome } from './screens/Welcome';
 import { Settings } from './screens/Settings';
 
@@ -21,7 +25,7 @@ type Screen =
   | { s: 'menu' }
   | { s: 'settings' }
   | { s: 'setup' }
-  | { s: 'online' }
+  | { s: 'online'; quick?: boolean }
   | { s: 'shop' }
   | { s: 'game'; game: GameState; key: number };
 
@@ -30,6 +34,7 @@ export function App() {
   const [screen, setScreen] = useState<Screen>(() => (hasChosenLang() ? { s: 'menu' } : { s: 'welcome' }));
   // every screen re-renders in the new language when it changes
   const lang = useLang();
+  const wallet = useWallet();
   const saved = screen.s === 'menu' ? loadGame() : null;
 
   return (
@@ -49,13 +54,38 @@ export function App() {
           <Setup
             onBack={() => setScreen({ s: 'menu' })}
             onOnline={() => setScreen({ s: 'online' })}
+            onQuick={() => setScreen({ s: 'online', quick: true })}
             onStart={(players, rules) => {
               sfx.start();
               setScreen({ s: 'game', game: newGame(players, Math.random, rules, lang), key: Date.now() });
             }}
           />
         )}
-        {screen.s === 'online' && <Online onBack={() => setScreen({ s: 'setup' })} />}
+        {screen.s === 'online' && (
+          <Online
+            quick={screen.quick}
+            onBack={() => setScreen({ s: 'setup' })}
+            onBotGame={() => {
+              // nobody free for 1v1: me against one bot
+              const me = getName() || t('player');
+              const bot = TOKENS.find((tk) => tk.id !== wallet.char)!;
+              sfx.start();
+              setScreen({
+                s: 'game',
+                game: newGame(
+                  [
+                    { name: me, token: wallet.char, isBot: false },
+                    { name: EDITIONS[lang].bots[0], token: bot.id, isBot: true },
+                  ],
+                  Math.random,
+                  DEFAULT_RULES,
+                  lang,
+                ),
+                key: Date.now(),
+              });
+            }}
+          />
+        )}
         {screen.s === 'shop' && <Shop onBack={() => setScreen({ s: 'menu' })} />}
       </div>
       {screen.s === 'game' && (

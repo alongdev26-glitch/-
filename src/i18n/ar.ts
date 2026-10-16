@@ -39,6 +39,15 @@ export const ar: Dict = {
   edition_ja: 'لوحة اليابان · ¥',
 
   playNow: 'العب الآن',
+  quickMatch: "1v1 عبر الإنترنت",
+  quickMatchNote: "خصم عشوائي، بدون رمز",
+  searching: "جارٍ البحث...",
+  searchingFor: "نبحث عن خصم... {n} ث",
+  foundOpponent: "وجدنا خصمًا!",
+  noOpponent: "لا يوجد لاعبون متاحون الآن",
+  playBotInstead: "العب ضد الكمبيوتر",
+  keepSearching: "واصل البحث",
+  cancelSearch: "إلغاء",
   resumeGame: 'تابع اللعبة المحفوظة',
   shop: 'المتجر',
   friendJoined: (p: P) =>

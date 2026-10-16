@@ -23,8 +23,8 @@ export function savedHostRoom(): Room | null {
 export interface RoomLink {
   readonly kind: 'claude' | 'peer';
   readonly uid: string;
-  /** open a new room with me in the first seat; resolves to its code */
-  create(seat: Seat): Promise<string>;
+  /** open a new room with me in the first seat; resolves to its code. A given code that is taken rejects with codeBusy. */
+  create(seat: Seat, code?: string, cap?: number): Promise<string>;
   /** take a seat in a friend's room (or get my seat back); rejects with a Hebrew message */
   join(code: string, seat: Seat): Promise<void>;
   /** room updates; `onClosed` when the room is gone for good */
@@ -42,14 +42,14 @@ export interface RoomLink {
 export function seatIn(room: Room, seat: Seat): { room: Room } | { error: string } {
   if (room.seats.some((s) => s.uid === seat.uid)) return { room };
   if (room.status !== 'lobby') return { error: t('roomStarted') };
-  if (room.seats.length + room.bots >= MAX_SEATS) return { error: t('roomFull') };
+  if (room.seats.length + room.bots >= (room.cap ?? MAX_SEATS)) return { error: t('roomFull') };
   const taken = new Set(room.seats.map((s) => s.token));
   const mine = { ...seat };
   if (taken.has(mine.token)) mine.token = TOKENS.find((t) => !taken.has(t.id))!.id;
   return { room: { ...room, seats: [...room.seats, mine] } };
 }
 
-export const freshRoom = (code: string, host: Seat): Room => ({
+export const freshRoom = (code: string, host: Seat, cap?: number): Room => ({
   code,
   host: host.uid,
   status: 'lobby',
@@ -58,6 +58,7 @@ export const freshRoom = (code: string, host: Seat): Room => ({
   rules: { mortgage: true },
   state: null,
   createdAt: Date.now(),
+  ...(cap ? { cap } : {}),
 });
 
 /** The claude.ai Artifact db, as it worked before. */
@@ -65,13 +66,19 @@ export function claudeLink(net: Net): RoomLink {
   return {
     kind: 'claude',
     uid: net.uid,
-    async create(seat) {
-      let c = newCode();
+    async create(seat, code, cap) {
+      let c = code ?? newCode();
       try {
-        for (let i = 0; i < 5 && (await roomRef(net, c).get()).exists; i++) c = newCode();
-        await roomRef(net, c).set(freshRoom(c, seat) as unknown as Record<string, unknown>);
-      } catch {
-        throw new Error(t('roomCreateFail'));
+        if (code) {
+          const snap = await roomRef(net, c).get();
+          // a quick-match slot is free again once its last game was closed
+          if (snap.exists && (snap.data() as unknown as Room).status !== 'closed') throw new Error(t('codeBusy'));
+        } else {
+          for (let i = 0; i < 5 && (await roomRef(net, c).get()).exists; i++) c = newCode();
+        }
+        await roomRef(net, c).set(freshRoom(c, seat, cap) as unknown as Record<string, unknown>);
+      } catch (e) {
+        throw e instanceof Error && e.message === t('codeBusy') ? e : new Error(t('roomCreateFail'));
       }
       return c;
     },
@@ -83,6 +90,7 @@ export function claudeLink(net: Net): RoomLink {
         const snap = await ref.get();
         if (!snap.exists) throw new Error(t('roomNotFound'));
         const r = snap.data() as unknown as Room;
+        if (r.status === 'closed') throw new Error(t('roomNotFound'));
         result = seatIn(r, seat);
         if ('room' in result && result.room !== r) await ref.update({ seats: result.room.seats });
       } catch (e) {
@@ -106,6 +114,11 @@ export function claudeLink(net: Net): RoomLink {
       await roomRef(net, code).set({ ...room, state } as unknown as Record<string, unknown>);
     },
     leave(code, room) {
+      // a quick-match slot is handed back when its host leaves
+      if (room?.cap && room.host === net.uid) {
+        roomRef(net, code).set({ ...room, status: 'closed', state: null } as unknown as Record<string, unknown>).catch(() => {});
+        return;
+      }
       if (room && room.status === 'lobby' && room.host !== net.uid) {
         roomRef(net, code)
           .update({ seats: room.seats.filter((s) => s.uid !== net.uid) })
