@@ -42,6 +42,8 @@ export const ru: Dict = {
   settingsSound: 'Звуки',
   version: 'Версия',
   privacy: 'Политика конфиденциальности',
+  save: "Сохранить",
+  saved: "Сохранено ✓",
   soundFx: "Звуковые эффекты",
   offWord: "Выкл.",
   onWord: "Вкл.",

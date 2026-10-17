@@ -32,6 +32,8 @@ export const he = {
   settingsSound: 'צלילים',
   version: 'גרסה',
   privacy: 'מדיניות פרטיות',
+  save: "שמור",
+  saved: "נשמר ✓",
   soundFx: "אפקטים קוליים",
   offWord: "כבוי",
   onWord: "פועל",

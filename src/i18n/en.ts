@@ -33,6 +33,8 @@ export const en: Dict = {
   settingsSound: 'Sounds',
   version: 'Version',
   privacy: 'Privacy policy',
+  save: "Save",
+  saved: "Saved ✓",
   soundFx: "Sound effects",
   offWord: "Off",
   onWord: "On",

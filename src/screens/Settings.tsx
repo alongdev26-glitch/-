@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { LANGS, locale, t, useLang } from '../i18n';
+import { LANGS, locale, setLang, t, useLang, type Lang } from '../i18n';
 import { APP_URL } from '../online/referral';
 import { getName, setName } from '../ui/profile';
 import { onSoundChange, setVolume, sfx, volume } from '../ui/sound';
@@ -37,18 +37,28 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 
 /** ⚙️ Settings, laid out like a game's settings page: sound, switches, then a grid of buttons. */
 export function Settings({ onBack }: { onBack: () => void }) {
-  const lang = useLang();
-  const [vol, setVol] = useState(volume);
-  useEffect(() => onSoundChange(() => setVol(volume())), []);
-  const [smooth, setSmoothState] = useState(smoothOn);
-  const [vibe, setVibe] = useState(vibrateOn);
+  const savedLang = useLang();
+  // what is saved now, and the draft being edited; nothing applies until Save
+  const saved = () => ({ vol: volume(), smooth: smoothOn(), vibe: vibrateOn(), name: getName(), lang: savedLang });
+  const [base, setBase] = useState(saved);
+  const [draft, setDraft] = useState(saved);
+  useEffect(() => onSoundChange(() => setBase((b) => ({ ...b, vol: volume() }))), []);
+  const set = <K extends keyof typeof draft>(k: K, v: (typeof draft)[K]) => setDraft((d) => ({ ...d, [k]: v }));
+  const dirty = (Object.keys(draft) as (keyof typeof draft)[]).some((k) => draft[k] !== base[k]);
+  const [justSaved, setJustSaved] = useState(false);
   const [open, setOpen] = useState<null | 'lang' | 'name' | 'rules' | 'credits'>(null);
-  const [name, setNameInput] = useState(getName);
+  const { vol, smooth, vibe, name, lang } = draft;
 
-  const changeVol = (n: number) => {
-    setVolume(n);
-    setVol(volume());
-    if (n > 0) sfx.coin();
+  const save = () => {
+    setVolume(vol);
+    setSmooth(smooth);
+    setVibrate(vibe);
+    setName(name);
+    if (lang !== savedLang) setLang(lang as Lang);
+    setBase({ ...draft });
+    setJustSaved(true);
+    window.setTimeout(() => setJustSaved(false), 1500);
+    sfx.coin();
   };
 
   return (
@@ -80,32 +90,20 @@ export function Settings({ onBack }: { onBack: () => void }) {
                 ))}
               </div>
               <div className="st-steps">
-                <button onClick={() => changeVol(vol - 1)} disabled={vol === 0} aria-label="−">
+                <button onClick={() => set('vol', vol - 1)} disabled={vol === 0} aria-label="−">
                   ‹
                 </button>
-                <button onClick={() => changeVol(vol + 1)} disabled={vol === 4} aria-label="+">
+                <button onClick={() => set('vol', vol + 1)} disabled={vol === 4} aria-label="+">
                   ›
                 </button>
               </div>
             </div>
           </Row>
           <Row label={t('smoothMode')}>
-            <Toggle
-              on={smooth}
-              onChange={(v) => {
-                setSmooth(v);
-                setSmoothState(v);
-              }}
-            />
+            <Toggle on={smooth} onChange={(v) => set('smooth', v)} />
           </Row>
           <Row label={t('vibration')}>
-            <Toggle
-              on={vibe}
-              onChange={(v) => {
-                setVibrate(v);
-                setVibe(v);
-              }}
-            />
+            <Toggle on={vibe} onChange={(v) => set('vibe', v)} />
           </Row>
         </div>
 
@@ -119,7 +117,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
           <div className="st-cell">
             <span className="st-label">{t('settingsName')}</span>
             <button className="st-btn" onClick={() => setOpen('name')}>
-              {getName() || '—'}
+              {name || '—'}
             </button>
           </div>
           <button className="st-btn" onClick={() => setOpen('rules')}>
@@ -139,6 +137,12 @@ export function Settings({ onBack }: { onBack: () => void }) {
           </a>
         </div>
 
+        <div className="st-save-bar">
+          <button className="st-save" disabled={!dirty} onClick={save}>
+            {justSaved ? t('saved') : t('save')}
+          </button>
+        </div>
+
         <div className="st-version">
           {t('version')}: {new Date(__BUILD__).toLocaleString(locale(), { dateStyle: 'short', timeStyle: 'short' })}
         </div>
@@ -146,7 +150,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
 
       {open === 'lang' && (
         <Modal title={t('settingsLang')} onClose={() => setOpen(null)}>
-          <LangPicker />
+          <LangPicker value={lang} onPick={(l) => set('lang', l)} />
         </Modal>
       )}
       {open === 'name' && (
@@ -158,10 +162,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
             maxLength={12}
             placeholder={t('welcomeNamePh')}
             autoFocus
-            onChange={(e) => {
-              setNameInput(e.target.value);
-              setName(e.target.value);
-            }}
+            onChange={(e) => set('name', e.target.value.slice(0, 12))}
           />
         </Modal>
       )}

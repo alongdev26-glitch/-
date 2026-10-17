@@ -1,9 +1,10 @@
-import { LANGS, dir, setLang, t, useLang, type Key } from '../i18n';
+import { LANGS, dir, setLang, t, useLang, type Key, type Lang } from '../i18n';
 import { sfx } from '../ui/sound';
 
 /** Three big flag cards: picking one switches the whole game to that language and board. */
-export function LangPicker() {
-  const lang = useLang();
+export function LangPicker({ value, onPick }: { value?: Lang; onPick?: (l: Lang) => void } = {}) {
+  const current = useLang();
+  const lang = value ?? current;
   return (
     <div className="lang-cards">
       {LANGS.map((l) => (
@@ -14,7 +15,8 @@ export function LangPicker() {
           dir={dir(l.id)}
           onClick={() => {
             sfx.pop();
-            setLang(l.id);
+            if (onPick) onPick(l.id);
+            else setLang(l.id);
           }}
         >
           <span className="lang-flag">{l.flag}</span>

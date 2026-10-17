@@ -31,6 +31,8 @@ export const ar: Dict = {
   settingsSound: 'الأصوات',
   version: 'الإصدار',
   privacy: 'سياسة الخصوصية',
+  save: "حفظ",
+  saved: "تم الحفظ ✓",
   soundFx: "المؤثرات الصوتية",
   offWord: "إيقاف",
   onWord: "تشغيل",

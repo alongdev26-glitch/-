@@ -31,6 +31,8 @@ export const ja: Dict = {
   settingsSound: 'サウンド',
   version: 'バージョン',
   privacy: 'プライバシーポリシー',
+  save: "保存",
+  saved: "保存しました ✓",
   soundFx: "効果音",
   offWord: "オフ",
   onWord: "オン",
