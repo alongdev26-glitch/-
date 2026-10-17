@@ -1,0 +1,234 @@
+/* ---------- settings: a game-style page (blue, chunky buttons, green switches) ---------- */
+.st {
+  height: 100%;
+  overflow-y: auto;
+  color: #fff;
+  background-color: #1f6fe0;
+  /* a faint pattern of the game's dice */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='%23ffffff' fill-opacity='0.07'%3E%3Crect x='14' y='14' width='30' height='30' rx='7'/%3E%3Crect x='60' y='56' width='24' height='24' rx='6' transform='rotate(18 72 68)'/%3E%3C/g%3E%3Cg fill='%231f6fe0'%3E%3Ccircle cx='22' cy='22' r='3'/%3E%3Ccircle cx='36' cy='36' r='3'/%3E%3Ccircle cx='29' cy='29' r='3'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(180deg, #2a86ff 0%, #1f6fe0 50%, #1756c2 100%);
+  background-size: 96px 96px, cover;
+}
+.st button,
+.st a {
+  font: inherit;
+  cursor: pointer;
+}
+.st-top {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #0f1a2e;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  direction: ltr;
+}
+.st-top h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 900;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+}
+.st-corner {
+  width: 54px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  background: linear-gradient(180deg, #4a5670, #2b3446);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.18), 0 4px 0 #111827;
+}
+.st-corner svg {
+  width: 26px;
+  height: 26px;
+}
+.st-corner:active {
+  transform: translateY(3px);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.18), 0 1px 0 #111827;
+}
+
+.st-body {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 18px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.st-label {
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+.st-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.st-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* sound volume: a bar of 4 steps and green arrows */
+.st-volume {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(100%, 420px);
+  /* fills left to right, minus on the left, in every language */
+  direction: ltr;
+}
+.st-vol-icon {
+  font-size: 30px;
+  line-height: 1;
+}
+.st-bar {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  height: 34px;
+  padding: 5px;
+  border-radius: 10px;
+  background: rgba(10, 20, 45, 0.45);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+.st-bar i {
+  flex: 1;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.12);
+}
+.st-bar i.full {
+  background: linear-gradient(180deg, #8ef05a, #3fbf1c);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35);
+}
+.st-steps {
+  display: flex;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 0 #1e6a0b;
+}
+.st-steps button {
+  width: 50px;
+  height: 46px;
+  border: 0;
+  color: #0f2a05;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(180deg, #8ef05a, #3fbf1c);
+}
+.st-steps button + button {
+  border-inline-start: 2px solid #2f9a12;
+}
+.st-steps button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* on/off switch */
+.st-toggle {
+  display: flex;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(10, 20, 45, 0.45);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+.st-toggle button {
+  min-width: 96px;
+  height: 46px;
+  border: 0;
+  color: #fff;
+  font-weight: 900;
+  font-size: 18px;
+  background: transparent;
+}
+.st-toggle button.lit {
+  color: #0f2a05;
+  background: linear-gradient(180deg, #8ef05a, #3fbf1c);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35);
+  border-radius: 12px;
+}
+
+/* the grid of blue buttons */
+.st-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 14px 12px;
+  align-items: end;
+}
+.st-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.st-btn {
+  min-height: 64px;
+  display: grid;
+  place-items: center;
+  padding: 8px 10px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 12px;
+  color: #fff;
+  text-decoration: none;
+  text-align: center;
+  font-weight: 900;
+  font-size: 18px;
+  line-height: 1.15;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  background: linear-gradient(180deg, #4aa3ff 0%, #2a7cf0 55%, #1d63d1 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3), 0 5px 0 #123f8f, 0 8px 14px rgba(0, 0, 0, 0.25);
+}
+.st-btn:active {
+  transform: translateY(3px);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3), 0 2px 0 #123f8f;
+}
+
+.st-version {
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.75;
+}
+.st-text {
+  margin: 0;
+  padding-inline-start: 18px;
+  text-align: start;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.st-text p {
+  margin: 0 0 8px;
+}
+.st-text li {
+  margin-bottom: 6px;
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .st-body {
+    padding-top: 12px;
+    gap: 14px;
+  }
+  .st-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px 24px;
+  }
+  .st-btn {
+    min-height: 54px;
+    font-size: 16px;
+  }
+  .st-volume {
+    width: 340px;
+  }
+}

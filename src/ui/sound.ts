@@ -2,6 +2,19 @@
 // Mobile browsers only allow sound after a tap, so the context is unlocked on the first pointer event.
 
 const KEY = 'bigdeal-sound';
+const VOL_KEY = 'dealcity-volume';
+/** loudness steps 1..4 (0 = off) */
+const GAINS = [0, 0.2, 0.38, 0.55, 0.8];
+let level = readLevel();
+
+function readLevel(): number {
+  try {
+    const n = Number(localStorage.getItem(VOL_KEY));
+    return n >= 1 && n <= 4 ? n : 3;
+  } catch {
+    return 3;
+  }
+}
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
@@ -23,7 +36,7 @@ function audio(): AudioContext | null {
     if (!AC) return null;
     ctx = new AC();
     master = ctx.createGain();
-    master.gain.value = 0.55;
+    master.gain.value = GAINS[level];
     master.connect(ctx.destination);
   }
   if (ctx.state === 'suspended') void ctx.resume();
@@ -49,6 +62,25 @@ export function setSoundOn(on: boolean) {
   }
   if (on) audio();
   listeners.forEach((f) => f(on));
+}
+
+/** 0 when sound is off, else the loudness step 1..4 */
+export function volume(): number {
+  return enabled ? level : 0;
+}
+
+export function setVolume(n: number) {
+  const v = Math.max(0, Math.min(4, Math.round(n)));
+  if (v === 0) return setSoundOn(false);
+  level = v;
+  try {
+    localStorage.setItem(VOL_KEY, String(v));
+  } catch {
+    /* private mode */
+  }
+  if (master) master.gain.value = GAINS[v];
+  if (!enabled) setSoundOn(true);
+  else listeners.forEach((f) => f(true));
 }
 
 export function onSoundChange(f: (on: boolean) => void) {
