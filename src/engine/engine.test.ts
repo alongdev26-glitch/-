@@ -209,7 +209,7 @@ describe('lotto pot', () => {
     expect(s.players[0].money).toBe(1320);
     expect(s.pot).toBe(180);
     s = run(s, { type: 'END_TURN' });
-    s.players[1].pos = 15;
+    s.players[1].pos = 25;
     s = run(s, { type: 'ROLL', dice: [2, 3] });
     expect(s.players[1].money).toBe(1680);
     expect(s.pot).toBe(0);
@@ -569,8 +569,8 @@ describe('first lap', () => {
 
   it('going to jail is not a lap', () => {
     let s = fresh();
-    s.players[0].pos = 24;
-    s = run(s, { type: 'ROLL', dice: [2, 4] }); // 24 → 30 "go to jail"
+    s.players[0].pos = GO_TO_JAIL - 6;
+    s = run(s, { type: 'ROLL', dice: [2, 4] }); // onto "מעצר"
     expect(s.players[0].pos).toBe(JAIL);
     expect(s.players[0].lapped).toBe(false);
   });

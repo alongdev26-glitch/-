@@ -246,7 +246,7 @@ function land(s: GameState, mod?: RentMod) {
     case 'parking':
       if (s.pot > 0) {
         p.money += s.pot;
-        moneyEvent(s, { kind: 'lotto', from: null, to: p.id, amount: s.pot, space: 20 });
+        moneyEvent(s, { kind: 'lotto', from: null, to: p.id, amount: s.pot, space: p.pos });
         log(s, tr(s, 'log.lotto', { name: p.name, amount: fmt(s.pot) }));
         s.pot = 0;
       }
