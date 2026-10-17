@@ -14,6 +14,7 @@ import { EDITIONS } from '../data/editions';
 import { tokenName } from '../data/tokens';
 import { getName } from '../ui/profile';
 import { findMatch } from '../online/match';
+import { ModeBadge } from '../ui/ModeIcons';
 
 const MAX = MAX_SEATS;
 
@@ -188,20 +189,22 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
           )}
           {view === 'profile' && (
             <button className="choice quick-choice" disabled={busy} onClick={() => setQuickOn(true)}>
-              <span className="choice-icon">⚡</span>
-              <b>{t('quickMatch')}</b>
-              <small>{t('quickMatchNote')}</small>
+              <ModeBadge kind="bolt" color="#c8001a" />
+              <b className="play-title">PLAY</b>
+              <small>
+                {t('quickMatch')} · {t('quickMatchNote')}
+              </small>
             </button>
           )}
           {view === 'profile' ? (
             <div className="choices small">
               <button className="choice" disabled={busy} onClick={create}>
-                <span className="choice-icon">✨</span>
+                <ModeBadge kind="people" color="#7b3fe4" />
                 <b>{t('createCode')}</b>
                 <small>{t('createCodeNote')}</small>
               </button>
               <button className="choice" disabled={busy} onClick={() => setView('join')}>
-                <span className="choice-icon">🔑</span>
+                <ModeBadge kind="key" color="#1f6fe0" />
                 <b>{t('enterCode')}</b>
                 <small>{t('enterCodeNote')}</small>
               </button>

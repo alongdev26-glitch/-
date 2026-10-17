@@ -1,3 +1,4 @@
+import { ModeBadge } from '../ui/ModeIcons';
 import { sfx } from '../ui/sound';
 import { useState } from 'react';
 import { FEE_ROUNDS } from '../data/board';
@@ -120,28 +121,30 @@ export function Setup({ onStart, onOnline, onQuick, onBack }: Props) {
 
       {step === 0 && (
         <div className="choices">
-          <button className={`choice${mode === 'bots' ? ' on' : ''}`} onClick={() => chooseMode('bots')}>
-            <span className="choice-icon">🤖</span>
-            <b>{t('vsComputer')}</b>
-            <small>{t('vsComputerNote')}</small>
-          </button>
+          {onQuick && (
+            <button className="choice quick-choice" onClick={onQuick}>
+              <ModeBadge kind="bolt" color="#c8001a" />
+              <b className="play-title">PLAY</b>
+              <small>
+                {t('quickMatch')} · {t('quickMatchNote')}
+              </small>
+            </button>
+          )}
           <button className={`choice${mode === 'people' ? ' on' : ''}`} onClick={() => chooseMode('people')}>
-            <span className="choice-icon">👫</span>
+            <ModeBadge kind="people" color="#7b3fe4" />
             <b>{t('samePhone')}</b>
             <small>{t('samePhoneNote')}</small>
           </button>
           <button className="choice" onClick={onOnline}>
-            <span className="choice-icon">🌐</span>
+            <ModeBadge kind="key" color="#1f6fe0" />
             <b>{t('withCode')}</b>
             <small>{t('withCodeNote')}</small>
           </button>
-          {onQuick && (
-            <button className="choice quick-choice" onClick={onQuick}>
-              <span className="choice-icon">⚡</span>
-              <b>{t('quickMatch')}</b>
-              <small>{t('quickMatchNote')}</small>
-            </button>
-          )}
+          <button className={`choice${mode === 'bots' ? ' on' : ''}`} onClick={() => chooseMode('bots')}>
+            <ModeBadge kind="controller" color="#2b3446" />
+            <b>{t('vsComputer')}</b>
+            <small>{t('vsComputerNote')}</small>
+          </button>
         </div>
       )}
 
