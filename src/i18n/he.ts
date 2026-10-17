@@ -50,6 +50,7 @@ export const he = {
 
   // ---------- menu ----------
   playNow: 'שחק עכשיו',
+  playBig: "שחק!",
   quickMatch: "1v1 אונליין",
   quickMatchNote: "יריב אקראי, בלי קוד",
   searching: "מחפש...",

@@ -190,7 +190,7 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
           {view === 'profile' && (
             <button className="choice quick-choice" disabled={busy} onClick={() => setQuickOn(true)}>
               <ModeBadge kind="bolt" color="#c8001a" />
-              <b className="play-title">PLAY</b>
+              <b className="play-title">{t('playBig')}</b>
               <small>
                 {t('quickMatch')} · {t('quickMatchNote')}
               </small>

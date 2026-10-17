@@ -59,6 +59,7 @@ export const ru: Dict = {
   edition_ja: 'Поле Япония · ¥',
 
   playNow: 'Играть',
+  playBig: "ИГРАТЬ",
   quickMatch: "Онлайн 1 на 1",
   quickMatchNote: "Случайный соперник, без кода",
   searching: "Поиск...",

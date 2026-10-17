@@ -587,7 +587,6 @@ html.smooth .quick-glass {
   letter-spacing: 0.02em;
   line-height: 1;
   color: #2a1600;
-  direction: ltr;
 }
 @media (orientation: landscape) and (max-height: 560px) {
   .mode-badge {

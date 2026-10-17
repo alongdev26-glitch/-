@@ -50,6 +50,7 @@ export const fr: Dict = {
   edition_ja: 'Plateau Japon · ¥',
 
   playNow: 'Jouer',
+  playBig: "JOUER",
   quickMatch: "1v1 en ligne",
   quickMatchNote: "Un adversaire au hasard, sans code",
   searching: "Recherche...",

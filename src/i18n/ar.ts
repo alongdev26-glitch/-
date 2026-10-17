@@ -48,6 +48,7 @@ export const ar: Dict = {
   edition_ja: 'لوحة اليابان · ¥',
 
   playNow: 'العب الآن',
+  playBig: "العب",
   quickMatch: "1v1 عبر الإنترنت",
   quickMatchNote: "خصم عشوائي، بدون رمز",
   searching: "جارٍ البحث...",

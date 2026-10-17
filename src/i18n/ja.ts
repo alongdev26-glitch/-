@@ -48,6 +48,7 @@ export const ja: Dict = {
   edition_ja: '日本版 · ¥',
 
   playNow: 'プレイ',
+  playBig: "プレイ",
   quickMatch: "オンライン 1v1",
   quickMatchNote: "ランダムな相手、コード不要",
   searching: "検索中...",

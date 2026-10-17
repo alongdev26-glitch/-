@@ -50,6 +50,7 @@ export const en: Dict = {
   edition_ja: 'Japan board · ¥',
 
   playNow: 'Play now',
+  playBig: "PLAY",
   quickMatch: "Online 1v1",
   quickMatchNote: "A random opponent, no code",
   searching: "Searching...",

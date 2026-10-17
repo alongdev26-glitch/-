@@ -124,7 +124,7 @@ export function Setup({ onStart, onOnline, onQuick, onBack }: Props) {
           {onQuick && (
             <button className="choice quick-choice" onClick={onQuick}>
               <ModeBadge kind="bolt" color="#c8001a" />
-              <b className="play-title">PLAY</b>
+              <b className="play-title">{t('playBig')}</b>
               <small>
                 {t('quickMatch')} · {t('quickMatchNote')}
               </small>
