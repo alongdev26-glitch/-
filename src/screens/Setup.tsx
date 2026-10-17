@@ -130,17 +130,17 @@ export function Setup({ onStart, onOnline, onQuick, onBack }: Props) {
               </small>
             </button>
           )}
-          <button className={`choice${mode === 'people' ? ' on' : ''}`} onClick={() => chooseMode('people')}>
+          <button className="choice mode-card mode-people" onClick={() => chooseMode('people')}>
             <ModeBadge kind="people" color="#7b3fe4" />
             <b>{t('samePhone')}</b>
             <small>{t('samePhoneNote')}</small>
           </button>
-          <button className="choice" onClick={onOnline}>
+          <button className="choice mode-card mode-code" onClick={onOnline}>
             <ModeBadge kind="key" color="#1f6fe0" />
             <b>{t('withCode')}</b>
             <small>{t('withCodeNote')}</small>
           </button>
-          <button className={`choice${mode === 'bots' ? ' on' : ''}`} onClick={() => chooseMode('bots')}>
+          <button className="choice mode-card mode-cpu" onClick={() => chooseMode('bots')}>
             <ModeBadge kind="controller" color="#2b3446" />
             <b>{t('vsComputer')}</b>
             <small>{t('vsComputerNote')}</small>
