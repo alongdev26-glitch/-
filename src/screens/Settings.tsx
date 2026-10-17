@@ -111,7 +111,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
           <div className="st-cell">
             <span className="st-label">{t('settingsLang')}</span>
             <button className="st-btn" onClick={() => setOpen('lang')}>
-              {LANGS.find((l) => l.id === lang)?.flag} {LANGS.find((l) => l.id === lang)?.name}
+              {LANGS.find((l) => l.id === lang)?.name}
             </button>
           </div>
           <div className="st-cell">
