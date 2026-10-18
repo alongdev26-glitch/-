@@ -43,7 +43,7 @@ export function Profile({ onBack }: { onBack: () => void }) {
       <div className="st-body">
         <div className="pf-card">
           <span className="pf-avatar">
-            <Token token={draft.char} size="84px" skin={wallet.skin} />
+            <Token token={draft.char} size="62px" skin={wallet.skin} />
           </span>
           <input
             id="profile-name"

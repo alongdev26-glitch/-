@@ -66,7 +66,7 @@ export function Menu({
     <div className="menu" onPointerDown={jingle}>
       {onProfile && (
         <button className="menu-profile" onClick={onProfile} aria-label={t('tabProfile')}>
-          <Token token={wallet.char} size="30px" skin={wallet.skin} />
+          <Token token={wallet.char} size="22px" skin={wallet.skin} />
         </button>
       )}
       {onSettings && (

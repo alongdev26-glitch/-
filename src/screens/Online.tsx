@@ -378,7 +378,7 @@ function TokenReel() {
       <span className="quick-reel-strip" style={{ ['--n' as string]: TOKENS.length }}>
         {strip.map((tk, i) => (
           <span key={i} className="quick-reel-row">
-            <Token token={tk.id} size="44px" />
+            <Token token={tk.id} size="34px" />
           </span>
         ))}
       </span>
