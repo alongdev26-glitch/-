@@ -209,7 +209,7 @@ describe('lotto pot', () => {
     expect(s.players[0].money).toBe(1320);
     expect(s.pot).toBe(180);
     s = run(s, { type: 'END_TURN' });
-    s.players[1].pos = 25;
+    s.players[1].pos = 15;
     s = run(s, { type: 'ROLL', dice: [2, 3] });
     expect(s.players[1].money).toBe(1680);
     expect(s.pot).toBe(0);
