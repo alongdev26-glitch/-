@@ -370,6 +370,22 @@ function QuickShell({ onBack, text, children }: { onBack: () => void; text?: str
 
 const WAIT_S = 30;
 
+/** Characters spinning past in a window, like a roulette, while we look for someone. Only for show. */
+function TokenReel() {
+  const strip = [...TOKENS, TOKENS[0]];
+  return (
+    <span className="quick-reel" aria-hidden="true">
+      <span className="quick-reel-strip" style={{ ['--n' as string]: TOKENS.length }}>
+        {strip.map((tk, i) => (
+          <span key={i} className="quick-reel-row">
+            <Token token={tk.id} size="44px" />
+          </span>
+        ))}
+      </span>
+    </span>
+  );
+}
+
 /** 1v1 with a random player: search the waiting spots, then play; after 30 seconds offer a bot. */
 function QuickMatch({ link, onBack, onBotGame }: { link: RoomLink; onBack: () => void; onBotGame?: () => void }) {
   const wallet = useWallet();
@@ -455,7 +471,13 @@ function QuickMatch({ link, onBack, onBotGame }: { link: RoomLink; onBack: () =>
           </span>
           <span className="quick-vs">VS</span>
           <span className={`quick-them${found ? '' : ' is-waiting'}`}>
-            {other ? <Token token={other.token} size="44px" /> : <span className="quick-q">?</span>}
+            {other ? (
+              <span className="quick-land">
+                <Token token={other.token} size="44px" />
+              </span>
+            ) : (
+              <TokenReel />
+            )}
             <b>{other ? other.name : t('searching')}</b>
           </span>
         </div>

@@ -532,6 +532,47 @@
 .quick-them.is-waiting .quick-q {
   animation: quick-pulse 1.2s ease-in-out infinite;
 }
+/* the roulette: a column of characters sliding up through a round window */
+.quick-reel {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: block;
+  position: relative;
+  background: rgba(255, 255, 255, 0.25);
+  border: 3px dashed rgba(255, 255, 255, 0.7);
+  box-sizing: border-box;
+}
+.quick-reel-strip {
+  display: flex;
+  flex-direction: column;
+  animation: quick-spin calc(var(--n) * 0.12s) linear infinite;
+  filter: blur(0.6px);
+}
+.quick-reel-row {
+  height: 60px;
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+@keyframes quick-spin {
+  to {
+    transform: translateY(calc(var(--n) * -60px));
+  }
+}
+.quick-land {
+  display: grid;
+  place-items: center;
+  height: 66px;
+  animation: quick-land 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@keyframes quick-land {
+  from {
+    transform: scale(1.4);
+    opacity: 0.4;
+  }
+}
 @keyframes quick-pulse {
   50% {
     opacity: 0.45;
@@ -558,6 +599,14 @@
   flex-direction: column;
   gap: 10px;
   width: 100%;
+}
+html.smooth .quick-reel-strip {
+  animation-duration: calc(var(--n) * 0.5s);
+  animation-timing-function: steps(var(--n));
+  filter: none;
+}
+html.smooth .quick-land {
+  animation: none;
 }
 html.smooth .quick-them.is-waiting .quick-q,
 html.smooth .quick-glass {
