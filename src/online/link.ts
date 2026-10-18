@@ -21,7 +21,7 @@ export function savedHostRoom(): Room | null {
  * (inside the Claude link) or a direct phone-to-phone connection (the website and app).
  */
 export interface RoomLink {
-  readonly kind: 'claude' | 'peer';
+  readonly kind: 'claude' | 'peer' | 'fire';
   readonly uid: string;
   /** open a new room with me in the first seat; resolves to its code. A given code that is taken rejects with codeBusy. */
   create(seat: Seat, code?: string, cap?: number): Promise<string>;
@@ -135,6 +135,13 @@ export function claudeLink(net: Net): RoomLink {
 export async function openLink(): Promise<RoomLink | null> {
   const net = await connect();
   if (net) return claudeLink(net);
+  // the shared database works from any network; direct phone-to-phone is the fallback
+  try {
+    const { fireAvailable, fireLink } = await import('./fire');
+    if (await fireAvailable()) return fireLink();
+  } catch {
+    /* fall through to direct connections */
+  }
   if (typeof RTCPeerConnection === 'undefined') return null;
   try {
     const { peerLink } = await import('./peer');

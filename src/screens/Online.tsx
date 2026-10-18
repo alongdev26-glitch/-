@@ -334,7 +334,7 @@ function OnlineGame({ link, code, room, onExit }: { link: RoomLink; code: string
         onExit={onExit}
         onNewGame={onExit}
       />
-      {link.kind === 'peer' && (
+      {link.kind !== 'claude' && (
         <div className={`net-status${connected ? ' on' : ''}`} role="status">
           {connected ? t('connected', { code }) : t('disconnected')}
         </div>
