@@ -142,6 +142,8 @@ export const he = {
   leaveRoom: 'צא מהחדר',
   connected: '🟢 מחובר · {code}',
   disconnected: '🔴 מנותק, מתחבר מחדש…',
+  viaServer: '🌐 מחובר לשרת · אפשר לשחק מכל מקום',
+  viaDirect: '📶 חיבור ישיר · רק קרוב / אותו Wi-Fi',
   noPermission: 'אין לך הרשאה לשמור מהלכים. בקש מבעל המשחק להזמין אותך כעורך (Editor) בתפריט Share.',
   moveNotSent: 'המהלך לא נשלח – אין חיבור למארח. מתחבר מחדש…',
   roomStarted: 'המשחק בחדר הזה כבר התחיל',

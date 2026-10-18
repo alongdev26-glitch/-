@@ -135,6 +135,8 @@ export const ja: Dict = {
   leaveRoom: 'ルームを出る',
   connected: '🟢 接続中 · {code}',
   disconnected: '🔴 切断、再接続中…',
+  viaServer: '🌐 サーバーに接続中 · どこからでも遊べます',
+  viaDirect: '📶 直接接続 · 近く/同じWi-Fiのみ',
   noPermission: '手を保存する権限がありません。オーナーにShareメニューからEditorとして招待してもらってください。',
   moveNotSent: '送信できませんでした – ホストとの接続がありません。再接続中…',
   roomStarted: 'このルームのゲームはもう始まっています',

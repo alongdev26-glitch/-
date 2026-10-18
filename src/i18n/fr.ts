@@ -140,6 +140,8 @@ export const fr: Dict = {
   leaveRoom: 'Quitter le salon',
   connected: '🟢 Connecté · {code}',
   disconnected: '🔴 Déconnecté, reconnexion…',
+  viaServer: '🌐 Connecté au serveur · jouez de partout',
+  viaDirect: '📶 Connexion directe · à proximité / même Wi-Fi',
   noPermission: "Tu ne peux pas enregistrer de coups. Demande au propriétaire de t'inviter comme Editor dans le menu Share.",
   moveNotSent: "Coup non envoyé – pas de connexion avec l'hôte. Reconnexion…",
   roomStarted: 'La partie de ce salon a déjà commencé',

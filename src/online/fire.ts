@@ -74,18 +74,37 @@ export function fireLink(db = dbUrl()): RoomLink {
   };
   let beat = 0;
 
-  async function read(code: string): Promise<{ node: Node | null; etag: string }> {
-    const r = await fetch(url(code), { headers: { 'X-Firebase-ETag': 'true' }, cache: 'no-store' });
-    if (!r.ok) throw new Error(t('netFail'));
-    return { node: (await r.json()) as Node | null, etag: r.headers.get('ETag') ?? '' };
+  // Ask for ETags so two phones can't overwrite each other. If the browser refuses those headers
+  // (a network error), go on without any extra headers, like the referrals do, and check each
+  // write by reading it back.
+  let plain = false;
+  async function get(code: string): Promise<Response> {
+    if (!plain) {
+      try {
+        return await fetch(url(code), { headers: { 'X-Firebase-ETag': 'true' }, cache: 'no-store' });
+      } catch {
+        plain = true;
+      }
+    }
+    return fetch(url(code), { cache: 'no-store' });
   }
-  async function write(code: string, room: Room, etag: string) {
-    const r = await fetch(url(code), {
-      method: 'PUT',
-      // without an ETag (a browser that hides the header) the write is last-one-wins
-      headers: etag ? { 'if-match': etag, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ v: JSON.stringify(room), t: Date.now() } satisfies Node),
-    });
+  async function read(code: string): Promise<{ node: Node | null; etag: string }> {
+    const r = await get(code);
+    if (!r.ok) throw new Error(t('netFail'));
+    return { node: (await r.json()) as Node | null, etag: plain ? '' : (r.headers.get('ETag') ?? '') };
+  }
+  async function write(code: string, node: Node, etag: string) {
+    const body = JSON.stringify(node);
+    let r: Response | null = null;
+    if (etag && !plain) {
+      try {
+        r = await fetch(url(code), { method: 'PUT', headers: { 'if-match': etag }, body });
+      } catch {
+        plain = true;
+      }
+    }
+    // without an ETag the write is last-one-wins (checked by reading it back)
+    r ??= await fetch(url(code), { method: 'PUT', body });
     if (r.status === 412) throw new Conflict();
     if (!r.ok) throw new Error(t('netFail'));
   }
@@ -95,12 +114,20 @@ export function fireLink(db = dbUrl()): RoomLink {
       const { node, etag } = await read(code);
       const next = f(parse(node), node?.t ?? 0);
       if (!next) return null;
+      const mine: Node = { v: JSON.stringify(next), t: Date.now() };
       try {
-        await write(code, next, etag);
+        await write(code, mine, etag);
+        if (!etag) {
+          // no ETag: wait a moment, then make sure nobody else's write landed on top of ours
+          await new Promise((ok) => setTimeout(ok, 400));
+          const back = await read(code);
+          if (back.node?.v !== mine.v) throw new Conflict();
+        }
         setOnline(true);
         return next;
       } catch (e) {
         if (!(e instanceof Conflict)) throw e;
+        await new Promise((ok) => setTimeout(ok, 150 + Math.random() * 350));
       }
     }
     throw new Error(t('netFail'));
@@ -208,10 +235,14 @@ export function fireLink(db = dbUrl()): RoomLink {
 /** Can this device use the shared database? (False until the database rules allow /rooms.) */
 export async function fireAvailable(db = dbUrl()): Promise<boolean> {
   if (!db) return false;
-  try {
-    const r = await fetch(`${db}/rooms/_probe.json`, { cache: 'no-store', signal: AbortSignal.timeout(6000) });
-    return r.ok;
-  } catch {
-    return false;
+  // twice, so one slow answer on a mobile network doesn't send us to direct connections
+  for (let i = 0; i < 2; i++) {
+    try {
+      const r = await fetch(`${db}/rooms/_probe.json`, { cache: 'no-store', signal: AbortSignal.timeout(10_000) });
+      if (r.ok) return true;
+    } catch {
+      /* try again */
+    }
   }
+  return false;
 }

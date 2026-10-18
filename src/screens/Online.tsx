@@ -157,6 +157,8 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
 
       {view === 'loading' && <div className="setup-summary">{t('connectingServer')}</div>}
 
+      {view !== 'loading' && <LinkKind link={link} />}
+
       {view === 'unavailable' && (
         <div className="setup-summary">
           {t('noOnline')}
@@ -350,6 +352,12 @@ function OnlineGame({ link, code, room, onExit }: { link: RoomLink; code: string
   );
 }
 
+/** Which way we're connected: the server works from anywhere, direct only nearby. */
+function LinkKind({ link }: { link: RoomLink | null }) {
+  if (!link || link.kind === 'claude') return null;
+  return <div className={`link-kind ${link.kind}`}>{link.kind === 'fire' ? t('viaServer') : t('viaDirect')}</div>;
+}
+
 function QuickShell({ onBack, text, children }: { onBack: () => void; text?: string; children?: ReactNode }) {
   return (
     <div className="setup">
@@ -510,6 +518,7 @@ function QuickMatch({ link, onBack, onBotGame }: { link: RoomLink; onBack: () =>
         )}
       </div>
       {error && <div className="setup-error">{error}</div>}
+      <LinkKind link={link} />
     </QuickShell>
   );
 }

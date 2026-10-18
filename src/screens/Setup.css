@@ -735,3 +735,21 @@ html.smooth .quick-glass {
     font-size: 30px;
   }
 }
+
+/* which way online is connected */
+.link-kind {
+  align-self: center;
+  margin: 6px auto 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.25);
+}
+.link-kind.fire {
+  background: rgba(40, 160, 70, 0.55);
+}
+.link-kind.peer {
+  background: rgba(200, 120, 0, 0.6);
+}

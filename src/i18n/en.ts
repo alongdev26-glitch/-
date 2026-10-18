@@ -140,6 +140,8 @@ export const en: Dict = {
   leaveRoom: 'Leave room',
   connected: '🟢 Connected · {code}',
   disconnected: '🔴 Disconnected, reconnecting…',
+  viaServer: '🌐 Connected to the server · play from anywhere',
+  viaDirect: '📶 Direct connection · nearby / same Wi-Fi only',
   noPermission: "You can't save moves. Ask the game's owner to invite you as an Editor in the Share menu.",
   moveNotSent: 'Move not sent – no connection to the host. Reconnecting…',
   roomStarted: 'The game in this room has already started',
