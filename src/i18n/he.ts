@@ -161,6 +161,7 @@ export const he = {
   tabMarket: 'נכסים פנויים',
   tabTrade: 'העברות',
   tabProfile: 'פרופיל',
+  myChars: 'הדמויות שלי',
   gameTabs: 'עמודי המשחק',
   potShort: 'קופה {n}',
   turnOf: 'התור של {name}',

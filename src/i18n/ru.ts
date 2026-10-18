@@ -166,6 +166,7 @@ export const ru: Dict = {
   tabMarket: 'Свободные',
   tabTrade: 'Сделки',
   tabProfile: 'Профиль',
+  myChars: 'Мои персонажи',
   gameTabs: 'Страницы игры',
   potShort: 'Банк {n}',
   turnOf: 'Ходит {name}',

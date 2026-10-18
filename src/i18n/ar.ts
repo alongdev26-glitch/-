@@ -155,6 +155,7 @@ export const ar: Dict = {
   tabMarket: 'عقارات متاحة',
   tabTrade: 'صفقات',
   tabProfile: 'الملف',
+  myChars: 'شخصياتي',
   gameTabs: 'صفحات اللعبة',
   potShort: 'الصندوق {n}',
   turnOf: 'دور {name}',

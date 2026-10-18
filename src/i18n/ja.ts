@@ -153,6 +153,7 @@ export const ja: Dict = {
   tabMarket: '空き物件',
   tabTrade: '取引',
   tabProfile: 'プロフィール',
+  myChars: 'マイキャラクター',
   gameTabs: 'ゲームのページ',
   potShort: 'ポット{n}',
   turnOf: '{name}の番',

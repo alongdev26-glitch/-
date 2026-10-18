@@ -5,7 +5,6 @@ import { ShareButton } from '../ui/ShareButton';
 import { REFERRAL_REWARD } from '../ui/shop';
 import { useWallet } from '../ui/Cosmetics';
 import { RibbonBanner } from '../ui/RibbonBanner';
-import { SoundToggle } from '../ui/SoundToggle';
 import { sfx } from '../ui/sound';
 import { TOKENS, Token } from '../ui/Token';
 import './Menu.css';
@@ -17,11 +16,13 @@ export function Menu({
   onResume,
   onShop,
   onSettings,
+  onProfile,
 }: {
   onPlay: () => void;
   onResume?: () => void;
   onShop?: () => void;
   onSettings?: () => void;
+  onProfile?: () => void;
 }) {
   const wallet = useWallet();
   // friends who joined from my link pay out here
@@ -63,7 +64,11 @@ export function Menu({
   };
   return (
     <div className="menu" onPointerDown={jingle}>
-      <SoundToggle className="menu-sound" />
+      {onProfile && (
+        <button className="menu-profile" onClick={onProfile} aria-label={t('tabProfile')}>
+          <Token token={wallet.char} size="30px" skin={wallet.skin} />
+        </button>
+      )}
       {onSettings && (
         <button className="menu-gear" onClick={onSettings} aria-label={t('settings')}>
           ⚙️

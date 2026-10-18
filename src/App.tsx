@@ -14,6 +14,7 @@ import { sfx } from './ui/sound';
 import { hasChosenLang, t, useLang } from './i18n';
 import { Welcome } from './screens/Welcome';
 import { Settings } from './screens/Settings';
+import { Profile } from './screens/Profile';
 
 /** A click sound for every button on the opening screens (the game screen has its own sounds). */
 const tapSound = (e: ReactMouseEvent) => {
@@ -24,6 +25,7 @@ type Screen =
   | { s: 'welcome' }
   | { s: 'menu' }
   | { s: 'settings' }
+  | { s: 'profile' }
   | { s: 'setup' }
   | { s: 'online'; quick?: boolean }
   | { s: 'shop' }
@@ -42,11 +44,13 @@ export function App() {
       <div className="intro-screens" key={lang} onClickCapture={screen.s === 'game' ? undefined : tapSound}>
         {screen.s === 'welcome' && <Welcome onDone={() => setScreen({ s: 'menu' })} />}
         {screen.s === 'settings' && <Settings onBack={() => setScreen({ s: 'menu' })} />}
+        {screen.s === 'profile' && <Profile onBack={() => setScreen({ s: 'menu' })} />}
         {screen.s === 'menu' && (
           <Menu
             onPlay={() => setScreen({ s: 'setup' })}
             onShop={() => setScreen({ s: 'shop' })}
             onSettings={() => setScreen({ s: 'settings' })}
+            onProfile={() => setScreen({ s: 'profile' })}
             onResume={saved ? () => setScreen({ s: 'game', game: saved, key: Date.now() }) : undefined}
           />
         )}

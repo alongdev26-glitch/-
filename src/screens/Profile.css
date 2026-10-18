@@ -1,0 +1,71 @@
+.pf-spacer {
+  visibility: hidden;
+}
+.pf-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 16px;
+  border-radius: 18px;
+  background: rgba(10, 20, 45, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+.pf-avatar {
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.08));
+  border: 3px solid #ffd54a;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+.pf-name {
+  max-width: 260px;
+  text-align: center;
+}
+.pf-stats {
+  display: flex;
+  gap: 18px;
+  font-size: 17px;
+  font-weight: 700;
+}
+.pf-stats b {
+  font-weight: 900;
+  color: #ffd54a;
+}
+.pf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 10px;
+}
+.pf-char {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: 14px;
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(10, 20, 45, 0.3);
+}
+.pf-char small {
+  font-size: 12px;
+  font-weight: 700;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pf-char.is-on {
+  border-color: #ffd54a;
+  background: rgba(255, 213, 74, 0.25);
+  box-shadow: 0 0 0 2px #ffd54a;
+}
+.pf-char.is-locked {
+  opacity: 0.4;
+  cursor: default;
+  filter: grayscale(0.8);
+}

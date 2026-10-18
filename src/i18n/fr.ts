@@ -158,6 +158,7 @@ export const fr: Dict = {
   tabMarket: 'À vendre',
   tabTrade: 'Échanges',
   tabProfile: 'Profil',
+  myChars: 'Mes personnages',
   gameTabs: 'Pages du jeu',
   potShort: 'Cagnotte {n}',
   turnOf: 'Au tour de {name}',

@@ -6,7 +6,7 @@ import type { GameRules, PlayerSetup, TokenId } from '../engine/types';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { TOKENS, Token } from '../ui/Token';
 import { useWallet } from '../ui/Cosmetics';
-import { rememberChar } from '../ui/shop';
+import { getWallet, rememberChar } from '../ui/shop';
 import './Setup.css';
 import { getLang, t } from '../i18n';
 import { EDITIONS } from '../data/editions';
@@ -24,11 +24,14 @@ interface Human {
   token: TokenId;
 }
 
-const defaultHumans = (): Human[] =>
-  TOKENS.slice(0, MAX_PLAYERS).map((tk, i) => ({
+// player 1 starts with the character picked in the profile
+const defaultHumans = (): Human[] => {
+  const mine = getWallet().char;
+  return [TOKENS.find((tk) => tk.id === mine) ?? TOKENS[0], ...TOKENS.filter((tk) => tk.id !== mine)].slice(0, MAX_PLAYERS).map((tk, i) => ({
     name: i === 0 ? getName() || t('me') : t('playerN', { n: i + 1 }),
     token: tk.id,
   }));
+};
 
 interface Props {
   onStart: (players: PlayerSetup[], rules: GameRules) => void;

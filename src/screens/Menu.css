@@ -100,7 +100,7 @@
     opacity: 0;
   }
 }
-.menu-sound {
+.menu-profile {
   position: absolute;
   top: 18px;
   left: 14px;
@@ -110,8 +110,9 @@
   border-radius: 50%;
   border: 2px solid #fff;
   background: rgba(17, 17, 17, 0.3);
-  font-size: 20px;
-  line-height: 1;
+  display: grid;
+  place-items: center;
+  padding: 0;
   cursor: pointer;
 }
 
