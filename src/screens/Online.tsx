@@ -15,6 +15,7 @@ import { tokenName } from '../data/tokens';
 import { getName } from '../ui/profile';
 import { findMatch, slotsFor } from '../online/match';
 import { STAKES, payStake, winStake } from '../ui/shop';
+import { GemTransfer } from '../ui/GemTransfer';
 import { ModeBadge } from '../ui/ModeIcons';
 
 const MAX = MAX_SEATS;
@@ -345,15 +346,20 @@ function OnlineGame({ link, code, room, onExit }: { link: RoomLink; code: string
   useEffect(() => {
     if (stake) payStake(stakeKey, stake);
   }, [stakeKey, stake]);
-  const [wonGems, setWonGems] = useState(0);
+  // at the end, everyone sees the diamonds change hands; the winner's wallet gets the table
+  const [showGems, setShowGems] = useState(false);
   const phase = room.state?.phase;
+  const over = !!stake && !!room.state && phase?.t === 'gameover';
   useEffect(() => {
-    if (!stake || !room.state || phase?.t !== 'gameover') return;
+    if (!over || !room.state || phase?.t !== 'gameover') return;
     const winner = room.state.players[phase.winner];
-    if (winner?.uid !== link.uid || winner.isBot) return;
-    const pot = stake * room.state.players.filter((p) => !p.isBot).length;
-    if (winStake(stakeKey, pot)) setWonGems(pot);
-  }, [phase, stake, stakeKey, room.state, link.uid]);
+    const id = window.setTimeout(() => setShowGems(true), 2500);
+    if (winner?.uid === link.uid && !winner.isBot) {
+      const pot = stake * room.state.players.filter((p) => !p.isBot).length;
+      winStake(stakeKey, pot);
+    }
+    return () => window.clearTimeout(id);
+  }, [over]); // eslint-disable-line react-hooks/exhaustive-deps
   const send = async (next: GameState) => {
     if (pending.current) return;
     pending.current = true;
@@ -381,10 +387,14 @@ function OnlineGame({ link, code, room, onExit }: { link: RoomLink; code: string
           {connected ? t('connected', { code }) : t('disconnected')}
         </div>
       )}
-      {wonGems > 0 && (
-        <div className="reward-pop gems-won" onClick={() => setWonGems(0)}>
-          {t('wonGems', { n: wonGems.toLocaleString() })}
-        </div>
+      {showGems && room.state && phase?.t === 'gameover' && !room.state.players[phase.winner].isBot && (
+        <GemTransfer
+          winner={room.state.players[phase.winner]}
+          losers={room.state.players.filter((p) => !p.isBot && p.id !== phase.winner)}
+          stake={stake}
+          me={link.uid}
+          onClose={() => setShowGems(false)}
+        />
       )}
       {writeError && (
         <div className="write-error" role="alert">

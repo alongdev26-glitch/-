@@ -143,6 +143,7 @@ export const ja: Dict = {
   winPot: "勝者は{n}獲得",
   onTable: "💎 {n} を賭け · 勝者は{pot}獲得",
   wonGems: "🏆 勝利！ +{n} 💎",
+  lostGems: "{n} 💎 を失いました",
   stakeQ: "各プレイヤーが賭けるダイヤは？",
   noStake: "なし",
   stakeEach: "💎 1人{n} · 勝者は{pot}獲得",

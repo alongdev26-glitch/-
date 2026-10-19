@@ -145,6 +145,7 @@ export const ar: Dict = {
   winPot: "الفائز يأخذ {n}",
   onTable: "💎 {n} على الطاولة · الفائز يأخذ {pot}",
   wonGems: "🏆 فزت! +{n} 💎",
+  lostGems: "خسرت {n} 💎",
   stakeQ: "كم ماسة يضع كل لاعب؟",
   noStake: "بدون",
   stakeEach: "💎 {n} من كل لاعب · الفائز يأخذ {pot}",

@@ -148,6 +148,7 @@ export const fr: Dict = {
   winPot: "Le gagnant prend {n}",
   onTable: "💎 {n} sur la table · le gagnant prend {pot}",
   wonGems: "🏆 Gagné ! +{n} 💎",
+  lostGems: "Tu as perdu {n} 💎",
   stakeQ: "Combien de diamants chaque joueur mise-t-il ?",
   noStake: "Aucun",
   stakeEach: "💎 {n} par joueur · le gagnant prend {pot}",

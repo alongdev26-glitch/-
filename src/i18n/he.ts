@@ -150,6 +150,7 @@ export const he = {
   winPot: "המנצח לוקח {n}",
   onTable: "💎 {n} על השולחן · המנצח לוקח {pot}",
   wonGems: "🏆 ניצחת! +{n} 💎",
+  lostGems: "הפסדת {n} 💎",
   stakeQ: "כמה יהלומים כל שחקן שם?",
   noStake: "בלי",
   stakeEach: "💎 {n} מכל שחקן · המנצח לוקח {pot}",

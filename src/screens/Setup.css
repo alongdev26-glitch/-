@@ -833,11 +833,6 @@ html.smooth .quick-glass {
 .stake-seg {
   flex-wrap: wrap;
 }
-.gems-won {
-  position: fixed;
-  top: 90px;
-  z-index: 60;
-}
 .stake-seg button {
   width: auto;
   min-width: 56px;
