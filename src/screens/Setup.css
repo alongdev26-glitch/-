@@ -753,3 +753,97 @@ html.smooth .quick-glass {
 .link-kind.peer {
   background: rgba(200, 120, 0, 0.6);
 }
+
+/* 💎 the stake before a 1v1 */
+.stake-balance {
+  align-self: center;
+  padding: 6px 18px;
+  border-radius: 999px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(180deg, #8fe3ff, #2aa8f0 60%, #1172c4);
+  border: 2px solid #fff;
+  box-shadow: 0 3px 0 #0b4f8f;
+}
+.stake-balance b {
+  font-weight: 900;
+}
+.stake-grid {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.stake-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px;
+  border-radius: 18px;
+  border: 3px solid #fff;
+  color: #fff;
+  font: inherit;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(180deg, var(--c1), var(--c2));
+  box-shadow: 0 5px 0 var(--c3), 0 8px 14px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+.stake-chip:last-child {
+  grid-column: 1 / -1;
+}
+.stake-chip b {
+  font-size: 22px;
+  font-weight: 900;
+}
+.stake-chip small {
+  font-size: 12px;
+  font-weight: 700;
+}
+.stake-gem {
+  font-size: 22px;
+  line-height: 1;
+}
+.stake-chip:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--c3);
+}
+.stake-chip:disabled {
+  cursor: default;
+  filter: grayscale(0.9);
+  opacity: 0.5;
+}
+.stake-chip.s0 { --c1: #9be36c; --c2: #3fae1f; --c3: #22700d; }
+.stake-chip.s1 { --c1: #6fd6ff; --c2: #1f8fe0; --c3: #0b4f8f; }
+.stake-chip.s2 { --c1: #b78cff; --c2: #7b3fe4; --c3: #4a1f9a; }
+.stake-chip.s3 { --c1: #ff9ad0; --c2: #e0408f; --c3: #8f1a55; }
+.stake-chip.s4 { --c1: #ffb36b; --c2: #f07a12; --c3: #9a4a00; }
+.stake-chip.s5 { --c1: #ff7a7a; --c2: #d90429; --c3: #7a0015; }
+.stake-chip.s6 { --c1: #fff3a8; --c2: #e8a20c; --c3: #8a5a00; color: #5a3400; text-shadow: none; }
+.quick-stake {
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 900;
+  background: rgba(0, 0, 0, 0.25);
+}
+.stake-seg {
+  flex-wrap: wrap;
+}
+.gems-won {
+  position: fixed;
+  top: 90px;
+  z-index: 60;
+}
+.stake-seg button {
+  width: auto;
+  min-width: 56px;
+  padding: 0 8px;
+  font-size: 14px;
+}
+.stake-seg button:disabled {
+  opacity: 0.35;
+}

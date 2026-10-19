@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { Token } from '../ui/Token';
 import { useWallet } from '../ui/Cosmetics';
-import { ALL_ITEMS, GAME_REWARD, buy, equip, itemName, rarityName, rotation, type ShopItem } from '../ui/shop';
+import { ALL_ITEMS, DAILY_GEMS, GAME_REWARD, buy, equip, itemName, rarityName, rotation, type ShopItem } from '../ui/shop';
 import type { TokenId } from '../engine/types';
 import { sfx } from '../ui/sound';
 import { ShareButton } from '../ui/ShareButton';
@@ -23,6 +23,14 @@ function BoardSwatch({ id }: { id: string }) {
   );
 }
 
+/** 💎 diamond packs for real money (open once the game is on Google Play) */
+const GEM_PACKS = [
+  { gems: 5000, price: '₪4.90', icon: '💎' },
+  { gems: 15000, price: '₪9.90', icon: '💎💎' },
+  { gems: 50000, price: '₪24.90', icon: '💰' },
+  { gems: 150000, price: '₪59.90', icon: '👑' },
+];
+
 const KIND_NAME: Record<ShopItem['kind'], Key> = { char: 'kindChar', skin: 'kindSkin', board: 'kindBoard' };
 
 function Preview({ item, char, size }: { item: ShopItem; char: TokenId; size: string }) {
@@ -41,6 +49,7 @@ function timeLeft(ms: number) {
 export function Shop({ onBack }: { onBack: () => void }) {
   const wallet = useWallet();
   const [note, setNote] = useState('');
+  const [gemNote, setGemNote] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 30_000);
@@ -88,6 +97,24 @@ export function Shop({ onBack }: { onBack: () => void }) {
         <span>🪙</span>
         <b>{wallet.coins}</b>
         <small>{t('coins')}</small>
+      </div>
+      <div className="shop-gems">
+        <h3>
+          💎 {t('buyGems')} · <b>{wallet.gems.toLocaleString()}</b>
+        </h3>
+        <div className="gem-packs">
+          {GEM_PACKS.map((p) => (
+            <button key={p.gems} className="gem-pack" onClick={() => setGemNote(true)}>
+              <span className="gem-pack-icon" aria-hidden="true">
+                {p.icon}
+              </span>
+              <b>{p.gems.toLocaleString()}</b>
+              <span className="gem-pack-price">{p.price}</span>
+            </button>
+          ))}
+        </div>
+        {gemNote && <div className="setup-summary">{t('gemsSoon')}</div>}
+        <small className="shop-how">{t('dailyGemsNote', { n: DAILY_GEMS })}</small>
       </div>
       <div className="shop-how">
         {t('howToEarn', { played: GAME_REWARD.played, won: GAME_REWARD.won })}

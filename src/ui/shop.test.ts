@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { BASE_TOKENS, TOKENS } from '../data/tokens';
-import { CHARS, award, buy, getWallet, rotation, ROTATION_DAYS } from './shop';
+import { CHARS, DAILY_GEMS, START_GEMS, award, buy, claimDailyGems, getWallet, payStake, rotation, ROTATION_DAYS, winStake } from './shop';
 
 const DAY = 86_400_000;
 
@@ -63,5 +63,34 @@ describe('wallet', () => {
     expect(buy(lion)).toBe(true);
     expect(getWallet().coins).toBe(50);
     expect(getWallet().owned).toContain('lion');
+  });
+});
+
+describe('diamonds', () => {
+  it('a new player starts with 5000', () => {
+    expect(getWallet().gems).toBe(START_GEMS);
+  });
+
+  it('a stake is paid once per game, and only when there is enough', () => {
+    expect(payStake('room1', 1000)).toBe(true);
+    expect(payStake('room1', 1000)).toBe(true);
+    expect(getWallet().gems).toBe(START_GEMS - 1000);
+    expect(payStake('room2', 50000)).toBe(false);
+    expect(getWallet().gems).toBe(START_GEMS - 1000);
+  });
+
+  it('the winner takes the table once', () => {
+    payStake('room1', 1000);
+    expect(winStake('room1', 2000)).toBe(true);
+    expect(winStake('room1', 2000)).toBe(false);
+    expect(getWallet().gems).toBe(START_GEMS + 1000);
+  });
+
+  it('the daily gift comes once a day', () => {
+    const day = new Date(2026, 9, 19, 12);
+    expect(claimDailyGems(day)).toBe(DAILY_GEMS);
+    expect(claimDailyGems(day)).toBe(0);
+    expect(claimDailyGems(new Date(day.getTime() + 86_400_000))).toBe(DAILY_GEMS);
+    expect(getWallet().gems).toBe(START_GEMS + 2 * DAILY_GEMS);
   });
 });

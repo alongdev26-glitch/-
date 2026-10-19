@@ -13,7 +13,8 @@ import { getLang, t } from '../i18n';
 import { EDITIONS } from '../data/editions';
 import { tokenName } from '../data/tokens';
 import { getName } from '../ui/profile';
-import { findMatch } from '../online/match';
+import { findMatch, slotsFor } from '../online/match';
+import { STAKES, payStake, winStake } from '../ui/shop';
 import { ModeBadge } from '../ui/ModeIcons';
 
 const MAX = MAX_SEATS;
@@ -34,6 +35,7 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [quickOn, setQuickOn] = useState(false);
+  const [stakeIdx, setStakeIdx] = useState<number | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -59,7 +61,7 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
     });
   }, [link, code]);
 
-  const me = (): Seat => ({ uid: link!.uid, name: name.trim() || getName() || t('player'), token });
+  const me = (): Seat => ({ uid: link!.uid, name: name.trim() || getName() || t('player'), token, gems: wallet.gems });
 
   const run = async (f: () => Promise<void>) => {
     setBusy(true);
@@ -132,13 +134,19 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
   if (quick || quickOn) {
     if (view === 'loading') return <QuickShell onBack={onBack} text={t('connectingServer')} />;
     if (!link) return <QuickShell onBack={onBack} text={t('noOnline')} />;
-    return <QuickMatch link={link} onBack={quick ? onBack : () => setQuickOn(false)} onBotGame={onBotGame} />;
+    const out = quick ? onBack : () => setQuickOn(false);
+    if (stakeIdx === null) return <StakePicker onBack={out} onPick={setStakeIdx} />;
+    return <QuickMatch link={link} stakeIdx={stakeIdx} onBack={() => setStakeIdx(null)} onBotGame={onBotGame} />;
   }
 
   // ---------- the game itself ----------
   if (link && code && room?.status === 'playing' && room.state && room.seats.some((s) => s.uid === link.uid)) {
     return <OnlineGame link={link} code={code} room={room} onExit={leave} />;
   }
+
+  // someone who can't pay the table holds the start
+  const stake = room?.stake ?? 0;
+  const poor = stake ? room?.seats.find((s) => (s.gems ?? 0) < stake) : undefined;
 
   const titles: Record<View, string> = {
     loading: t('connecting'),
@@ -255,6 +263,21 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
           {room.host === link.uid ? (
             <>
               <div className="setup-field">
+                {t('stakeQ')}
+                <div className="seg stake-seg">
+                  {[0, ...STAKES].map((n) => (
+                    <button
+                      key={n}
+                      className={n === (room.stake ?? 0) ? 'on' : ''}
+                      disabled={n > 0 && room.seats.some((s) => (s.gems ?? 0) < n)}
+                      onClick={() => setRoomField({ stake: n })}
+                    >
+                      {n ? `💎${short(n)}` : t('noStake')}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="setup-field">
                 {t('addBotsQ')}
                 <div className="seg">
                   {Array.from({ length: MAX - room.seats.length + 1 }, (_, i) => i).map((n) => (
@@ -280,12 +303,14 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
                     : t('mortgageOff')}
                 </small>
               </div>
-              <button className="btn btn-red" disabled={room.seats.length + room.bots < 2} onClick={start}>
+              {poor && <div className="setup-error">{t('seatNoGems', { name: poor.name })}</div>}
+              <button className="btn btn-red" disabled={room.seats.length + room.bots < 2 || !!poor} onClick={start}>
                 {t('startGameN', { n: room.seats.length + room.bots })}
               </button>
             </>
           ) : (
             <div className="setup-summary">
+              {!!room.stake && <div>{t('stakeEach', { n: room.stake, pot: room.stake * room.seats.length })}</div>}
               {t('waitingHost', { name: room.seats.find((s) => s.uid === room.host)?.name ?? t('host') })}
             </div>
           )}
@@ -314,6 +339,21 @@ function OnlineGame({ link, code, room, onExit }: { link: RoomLink; code: string
   useEffect(() => link.onStatus(setConnected), [link]);
   const latest = useRef(room);
   latest.current = room;
+  // 💎 the table: everyone pays when the game starts; the winner takes it all
+  const stakeKey = `${code}:${room.createdAt}`;
+  const stake = room.stake ?? 0;
+  useEffect(() => {
+    if (stake) payStake(stakeKey, stake);
+  }, [stakeKey, stake]);
+  const [wonGems, setWonGems] = useState(0);
+  const phase = room.state?.phase;
+  useEffect(() => {
+    if (!stake || !room.state || phase?.t !== 'gameover') return;
+    const winner = room.state.players[phase.winner];
+    if (winner?.uid !== link.uid || winner.isBot) return;
+    const pot = stake * room.state.players.filter((p) => !p.isBot).length;
+    if (winStake(stakeKey, pot)) setWonGems(pot);
+  }, [phase, stake, stakeKey, room.state, link.uid]);
   const send = async (next: GameState) => {
     if (pending.current) return;
     pending.current = true;
@@ -339,6 +379,11 @@ function OnlineGame({ link, code, room, onExit }: { link: RoomLink; code: string
       {link.kind !== 'claude' && (
         <div className={`net-status${connected ? ' on' : ''}`} role="status">
           {connected ? t('connected', { code }) : t('disconnected')}
+        </div>
+      )}
+      {wonGems > 0 && (
+        <div className="reward-pop gems-won" onClick={() => setWonGems(0)}>
+          {t('wonGems', { n: wonGems.toLocaleString() })}
         </div>
       )}
       {writeError && (
@@ -378,6 +423,30 @@ function QuickShell({ onBack, text, children }: { onBack: () => void; text?: str
 
 const WAIT_S = 30;
 
+/** 25000 → 25K */
+const short = (n: number) => (n >= 1000 ? `${n / 1000}K` : String(n));
+
+/** Before a 1v1: how many diamonds go on the table. Both players put the same amount; the winner takes both. */
+function StakePicker({ onBack, onPick }: { onBack: () => void; onPick: (i: number) => void }) {
+  const wallet = useWallet();
+  return (
+    <QuickShell onBack={onBack} text={t('pickStake')}>
+      <div className="stake-balance">
+        💎 <b>{wallet.gems.toLocaleString()}</b> {t('gems')}
+      </div>
+      <div className="stake-grid">
+        {STAKES.map((n, i) => (
+          <button key={n} className={`stake-chip s${i}`} disabled={wallet.gems < n} onClick={() => onPick(i)}>
+            <span className="stake-gem" aria-hidden="true">💎</span>
+            <b>{n.toLocaleString()}</b>
+            <small>{wallet.gems < n ? t('notEnoughGems') : t('winPot', { n: (n * 2).toLocaleString() })}</small>
+          </button>
+        ))}
+      </div>
+    </QuickShell>
+  );
+}
+
 /** Characters spinning past in a window, like a roulette, while we look for someone. Only for show. */
 function TokenReel() {
   const strip = [...TOKENS, TOKENS[0]];
@@ -395,9 +464,20 @@ function TokenReel() {
 }
 
 /** 1v1 with a random player: search the waiting spots, then play; after 30 seconds offer a bot. */
-function QuickMatch({ link, onBack, onBotGame }: { link: RoomLink; onBack: () => void; onBotGame?: () => void }) {
+function QuickMatch({
+  link,
+  stakeIdx,
+  onBack,
+  onBotGame,
+}: {
+  link: RoomLink;
+  stakeIdx: number;
+  onBack: () => void;
+  onBotGame?: () => void;
+}) {
   const wallet = useWallet();
-  const seat = useRef<Seat>({ uid: link.uid, name: getName() || t('player'), token: wallet.char });
+  const stake = STAKES[stakeIdx];
+  const seat = useRef<Seat>({ uid: link.uid, name: getName() || t('player'), token: wallet.char, gems: wallet.gems });
   const [code, setCode] = useState<string | null>(null);
   const [room, setRoom] = useState<Room | null>(null);
   const [error, setError] = useState('');
@@ -410,13 +490,13 @@ function QuickMatch({ link, onBack, onBotGame }: { link: RoomLink; onBack: () =>
   useEffect(() => {
     const c = new AbortController();
     ctl.current = c;
-    findMatch(link, seat.current, c.signal)
+    findMatch(link, seat.current, c.signal, slotsFor(stakeIdx))
       .then((m) => setCode(m.code))
       .catch((e) => {
         if ((e as Error).name !== 'AbortError') setError(e instanceof Error ? e.message : t('somethingWrong'));
       });
     return () => c.abort();
-  }, [link, attempt]);
+  }, [link, attempt, stakeIdx]);
 
   // the waiting clock
   useEffect(() => {
@@ -447,10 +527,10 @@ function QuickMatch({ link, onBack, onBotGame }: { link: RoomLink; onBack: () =>
         room.rules,
         getLang(),
       );
-      link.patch(code, room, { status: 'playing', state });
+      link.patch(code, room, { status: 'playing', state, stake });
     }, 1200);
     return () => window.clearTimeout(id);
-  }, [room, code, link]);
+  }, [room, code, link, stake]);
 
   const quit = () => {
     ctl.current?.abort();
@@ -489,6 +569,7 @@ function QuickMatch({ link, onBack, onBotGame }: { link: RoomLink; onBack: () =>
             <b>{other ? other.name : t('searching')}</b>
           </span>
         </div>
+        <div className="quick-stake">{t('onTable', { n: stake, pot: stake * 2 })}</div>
         {found ? (
           <div className="quick-status">{t('foundOpponent')} ⚔️</div>
         ) : nobody ? (
@@ -503,7 +584,7 @@ function QuickMatch({ link, onBack, onBotGame }: { link: RoomLink; onBack: () =>
                     onBotGame();
                   }}
                 >
-                  🤖 {t('playBotInstead')}
+                  🤖 {t('playBotInstead')} <small>({t('botNoGems')})</small>
                 </button>
               )}
               <button className="btn btn-white" onClick={() => setLimit(secs + WAIT_S)}>

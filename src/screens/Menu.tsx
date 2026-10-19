@@ -2,7 +2,7 @@ import logo from '../assets/logo.webp';
 import { useEffect, useRef, useState } from 'react';
 import { collectRewards, reportPending } from '../online/referral';
 import { ShareButton } from '../ui/ShareButton';
-import { REFERRAL_REWARD } from '../ui/shop';
+import { REFERRAL_REWARD, claimDailyGems } from '../ui/shop';
 import { useWallet } from '../ui/Cosmetics';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { sfx } from '../ui/sound';
@@ -27,6 +27,15 @@ export function Menu({
   const wallet = useWallet();
   // friends who joined from my link pay out here
   const [joined, setJoined] = useState(0);
+  // 💎 the daily gift, given on the first visit of the day
+  const [daily, setDaily] = useState(0);
+  useEffect(() => {
+    const n = claimDailyGems();
+    if (!n) return;
+    setDaily(n);
+    const id = setTimeout(() => setDaily(0), 5000);
+    return () => clearTimeout(id);
+  }, []);
   useEffect(() => {
     let live = true;
     const check = () =>
@@ -92,6 +101,14 @@ export function Menu({
             <small>🪙 {wallet.coins}</small>
           </span>
         </button>
+      )}
+      <button className="menu-gems" onClick={onShop} aria-label={t('gems')}>
+        💎 <b>{wallet.gems.toLocaleString()}</b>
+      </button>
+      {daily > 0 && !joined && (
+        <div className="reward-pop" onClick={() => setDaily(0)}>
+          {t('dailyGems', { n: daily })}
+        </div>
       )}
       {joined > 0 && (
         <div className="reward-pop" onClick={() => setJoined(0)}>

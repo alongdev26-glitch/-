@@ -8,6 +8,10 @@ import { t } from '../i18n';
  * empty it waits there itself, as the host of a 2-seat room.
  */
 export const SLOTS = ['QMAA', 'QMAB', 'QMAC', 'QMAD', 'QMAE', 'QMAF', 'QMAG', 'QMAH'];
+
+/** Each diamond stake waits in spots of its own, so players only meet someone who put the same amount. */
+export const slotsFor = (stakeIndex: number) =>
+  Array.from({ length: 8 }, (_, i) => `QS${'BCDEFGHJKLMN'[stakeIndex]}${'ABCDEFGH'[i]}`);
 const PAUSE_MS = 2000;
 
 export interface Match {

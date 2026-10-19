@@ -9,6 +9,12 @@ export type { Rarity };
 
 const KEY = 'bigdeal-wallet';
 export const START_COINS = 200;
+/** 💎 a new player starts with these */
+export const START_GEMS = 5000;
+/** what you can put on the table before an online game */
+export const STAKES = [250, 500, 1000, 5000, 10000, 25000, 50000];
+/** 💎 the daily gift */
+export const DAILY_GEMS = 500;
 
 export interface ShopItem {
   id: string;
@@ -70,6 +76,10 @@ export interface Wallet {
   refPaid: string[];
   /** the code of the friend whose link brought me here, until it's reported */
   pendingRef?: string;
+  /** 💎 diamonds, put on the table in online games */
+  gems: number;
+  /** the day (YYYY-MM-DD) the daily diamond gift was last taken */
+  gemDay?: string;
 }
 
 const randomId = (n: number, abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789') =>
@@ -85,6 +95,7 @@ const fresh = (): Wallet => ({
   deviceId: '',
   refCode: '',
   refPaid: [],
+  gems: START_GEMS,
 });
 
 /** Is there anything saved on this device yet? (a brand-new player has nothing) */
@@ -150,6 +161,34 @@ export function equip(item: ShopItem) {
 export function rememberChar(char: TokenId) {
   const w = getWallet();
   if (w.char !== char) save({ ...w, char });
+}
+
+/** Put diamonds on the table for an online game, once per game. False when there aren't enough. */
+export function payStake(gameKey: string, amount: number): boolean {
+  const w = getWallet();
+  const key = `s:${gameKey}`;
+  if (w.paid.includes(key)) return true;
+  if (w.gems < amount) return false;
+  save({ ...w, gems: w.gems - amount, paid: [...w.paid.slice(-30), key] });
+  return true;
+}
+
+/** The winner takes the table, once per game. */
+export function winStake(gameKey: string, amount: number): boolean {
+  const w = getWallet();
+  const key = `w:${gameKey}`;
+  if (w.paid.includes(key) || amount <= 0) return false;
+  save({ ...w, gems: w.gems + amount, paid: [...w.paid.slice(-30), key] });
+  return true;
+}
+
+/** The daily diamond gift: how many were given now (0 when already taken today). */
+export function claimDailyGems(now = new Date()): number {
+  const w = getWallet();
+  const day = now.toISOString().slice(0, 10);
+  if (w.gemDay === day) return 0;
+  save({ ...w, gems: w.gems + DAILY_GEMS, gemDay: day });
+  return DAILY_GEMS;
 }
 
 /** Coins for a finished game, once per game. */

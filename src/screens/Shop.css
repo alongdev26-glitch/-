@@ -236,3 +236,59 @@
     grid-template-columns: repeat(6, 1fr);
   }
 }
+
+/* 💎 diamond packs */
+.shop-gems {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.shop-gems h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+}
+.gem-packs {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.gem-pack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 2px;
+  border-radius: 14px;
+  border: 2px solid #fff;
+  color: #fff;
+  font: inherit;
+  background: linear-gradient(180deg, #8fe3ff, #2aa8f0 60%, #1172c4);
+  box-shadow: 0 4px 0 #0b4f8f, 0 6px 12px rgba(0, 0, 0, 0.25);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+.gem-pack:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #0b4f8f;
+}
+.gem-pack-icon {
+  font-size: 22px;
+  line-height: 1.2;
+}
+.gem-pack b {
+  font-size: 15px;
+  font-weight: 900;
+}
+.gem-pack-price {
+  margin-top: 2px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  background: #3ccf3c;
+  box-shadow: 0 2px 0 #1e7a1e;
+}

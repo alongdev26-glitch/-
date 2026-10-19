@@ -28,6 +28,8 @@ export interface Seat {
   uid: string;
   name: string;
   token: TokenId;
+  /** 💎 how many diamonds this player has, so the host only asks for a stake everyone can pay */
+  gems?: number;
 }
 
 export interface Room {
@@ -41,6 +43,8 @@ export interface Room {
   createdAt: number;
   /** quick-match rooms hold only this many seats (missing = MAX_SEATS) */
   cap?: number;
+  /** 💎 diamonds each player puts on the table; the winner takes them all */
+  stake?: number;
 }
 
 export interface Net {
