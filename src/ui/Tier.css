@@ -214,3 +214,16 @@ html.smooth .tier::after {
   background: #ffe259;
   text-shadow: none;
 }
+/* a drawing in place of the round medal (diamond packs) */
+.tier-art {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  margin: -6px 0;
+  filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.35));
+}
+.tier-art .gem-art {
+  width: 100%;
+  height: 100%;
+  display: block;
+}

@@ -8,6 +8,7 @@ import { sfx } from '../ui/sound';
 import { ShareButton } from '../ui/ShareButton';
 import './Shop.css';
 import '../ui/Tier.css';
+import { GemPackArt } from '../ui/GemPackArt';
 import { t, type Key } from '../i18n';
 
 /** A tiny board corner to preview a board design. */
@@ -26,10 +27,10 @@ function BoardSwatch({ id }: { id: string }) {
 
 /** 💎 diamond packs for real money (open once the game is on Google Play) */
 const GEM_PACKS = [
-  { gems: 5000, price: '₪4.90', icon: '💎', c: ['#6fd6ff', '#1f8fe0', '#0b4f8f'] },
-  { gems: 15000, price: '₪9.90', icon: '💎', c: ['#b78cff', '#7b3fe4', '#4a1f9a'], bonus: '+50%' },
-  { gems: 50000, price: '₪24.90', icon: '💰', c: ['#ffb36b', '#f05a28', '#8f2a00'], bonus: '+100%', ribbon: 'popular' as const },
-  { gems: 150000, price: '₪59.90', icon: '👑', c: ['#fff3a8', '#e8a20c', '#8a5a00'], bonus: '+150%', ribbon: 'bestValue' as const },
+  { gems: 5000, price: '₪4.90', c: ['#6fd6ff', '#1f8fe0', '#0b4f8f'] },
+  { gems: 15000, price: '₪9.90', c: ['#b78cff', '#7b3fe4', '#4a1f9a'], bonus: '+50%' },
+  { gems: 50000, price: '₪24.90', c: ['#ffb36b', '#f05a28', '#8f2a00'], bonus: '+100%', ribbon: 'popular' as const },
+  { gems: 150000, price: '₪59.90', c: ['#fff3a8', '#e8a20c', '#8a5a00'], bonus: '+150%', ribbon: 'bestValue' as const },
 ];
 
 const KIND_NAME: Record<ShopItem['kind'], Key> = { char: 'kindChar', skin: 'kindSkin', board: 'kindBoard' };
@@ -114,8 +115,8 @@ export function Shop({ onBack }: { onBack: () => void }) {
               onClick={() => setGemNote(true)}
             >
               {p.ribbon && <span className="tier-ribbon">{t(p.ribbon)}</span>}
-              <span className="tier-medal" aria-hidden="true">
-                {p.icon}
+              <span className="tier-art">
+                <GemPackArt kind={i as 0 | 1 | 2 | 3} />
               </span>
               <span className="tier-text">
                 <b>{t(`pack${i}` as Key)}</b>
