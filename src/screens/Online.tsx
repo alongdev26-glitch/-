@@ -36,7 +36,6 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
   const [room, setRoom] = useState<Room | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [quickOn, setQuickOn] = useState(false);
   const skinPress = useSkinPress();
   const [stakeIdx, setStakeIdx] = useState<number | null>(null);
 
@@ -134,11 +133,10 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
     setRoomField({ status: 'playing', state });
   };
 
-  if (quick || quickOn) {
+  if (quick) {
     if (view === 'loading') return <QuickShell onBack={onBack} text={t('connectingServer')} />;
     if (!link) return <QuickShell onBack={onBack} text={t('noOnline')} />;
-    const out = quick ? onBack : () => setQuickOn(false);
-    if (stakeIdx === null) return <StakePicker onBack={out} onPick={setStakeIdx} />;
+    if (stakeIdx === null) return <StakePicker onBack={onBack} onPick={setStakeIdx} />;
     return <QuickMatch link={link} stakeIdx={stakeIdx} onBack={() => setStakeIdx(null)} onBotGame={onBotGame} />;
   }
 
@@ -200,15 +198,6 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
           {view === 'profile' && resumable && (
             <button className="btn btn-gold" disabled={busy} onClick={resume}>
               {t('backToRoom', { code: resumable.code })}
-            </button>
-          )}
-          {view === 'profile' && (
-            <button className="choice quick-choice" disabled={busy} onClick={() => setQuickOn(true)}>
-              <ModeBadge kind="bolt" color="#c8001a" />
-              <b className="play-title">{t('playBig')}</b>
-              <small>
-                {t('quickMatch')} · {t('quickMatchNote')}
-              </small>
             </button>
           )}
           {view === 'profile' ? (
