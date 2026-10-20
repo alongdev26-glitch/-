@@ -108,44 +108,6 @@ export function Shop({ onBack }: { onBack: () => void }) {
         <b>{wallet.coins}</b>
         <small>{t('coins')}</small>
       </div>
-      <div className="shop-gems">
-        <h3>💎 {t('buyGems')}</h3>
-        <div className="tier-balance">
-          <span className="tier-balance-gem" aria-hidden="true">💎</span>
-          <b>{wallet.gems.toLocaleString()}</b>
-        </div>
-        <div className="tier-list">
-          {GEM_PACKS.map((p, i) => (
-            <button
-              key={p.gems}
-              className={`tier${p.ribbon ? ' best' : ''}${i === GEM_PACKS.length - 1 ? ' legend' : ''}`}
-              style={{ ['--c1' as string]: p.c[0], ['--c2' as string]: p.c[1], ['--c3' as string]: p.c[2] }}
-              onClick={() => setPaying(i)}
-            >
-              {p.ribbon && <span className="tier-ribbon">{t(p.ribbon)}</span>}
-              <span className="tier-art">
-                <GemPackArt kind={i as 0 | 1 | 2 | 3} />
-              </span>
-              <span className="tier-text">
-                <b>{t(`pack${i}` as Key)}</b>
-                <small>
-                  💎 {p.gems.toLocaleString()}
-                  {p.bonus && <span className="tier-bonus">{p.bonus}</span>}
-                </small>
-              </span>
-              <span className="tier-price">{priceOf(p)}</span>
-            </button>
-          ))}
-        </div>
-        {paying !== null && (
-          <Checkout
-            pack={{ ...GEM_PACKS[paying], price: priceOf(GEM_PACKS[paying]) }}
-            index={paying}
-            onClose={() => setPaying(null)}
-          />
-        )}
-        <small className="shop-how">{t('dailyGemsNote', { n: DAILY_GEMS })}</small>
-      </div>
       <div className="shop-how">
         {t('howToEarn', { played: GAME_REWARD.played, won: GAME_REWARD.won })}
       </div>
@@ -195,6 +157,44 @@ export function Shop({ onBack }: { onBack: () => void }) {
         {mine.length === 0 && <div className="shop-how">{t('nothingBought')}</div>}
       </div>
 
+      <div className="shop-gems">
+        <h3>💎 {t('buyGems')}</h3>
+        <div className="tier-balance">
+          <span className="tier-balance-gem" aria-hidden="true">💎</span>
+          <b>{wallet.gems.toLocaleString()}</b>
+        </div>
+        <div className="tier-list">
+          {GEM_PACKS.map((p, i) => (
+            <button
+              key={p.gems}
+              className={`tier${p.ribbon ? ' best' : ''}${i === GEM_PACKS.length - 1 ? ' legend' : ''}`}
+              style={{ ['--c1' as string]: p.c[0], ['--c2' as string]: p.c[1], ['--c3' as string]: p.c[2] }}
+              onClick={() => setPaying(i)}
+            >
+              {p.ribbon && <span className="tier-ribbon">{t(p.ribbon)}</span>}
+              <span className="tier-art">
+                <GemPackArt kind={i as 0 | 1 | 2 | 3} />
+              </span>
+              <span className="tier-text">
+                <b>{t(`pack${i}` as Key)}</b>
+                <small>
+                  💎 {p.gems.toLocaleString()}
+                  {p.bonus && <span className="tier-bonus">{p.bonus}</span>}
+                </small>
+              </span>
+              <span className="tier-price">{priceOf(p)}</span>
+            </button>
+          ))}
+        </div>
+        {paying !== null && (
+          <Checkout
+            pack={{ ...GEM_PACKS[paying], price: priceOf(GEM_PACKS[paying]) }}
+            index={paying}
+            onClose={() => setPaying(null)}
+          />
+        )}
+        <small className="shop-how">{t('dailyGemsNote', { n: DAILY_GEMS })}</small>
+      </div>
       <ShareButton />
 
       <div className="setup-nav">
