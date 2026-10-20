@@ -432,6 +432,8 @@ function QuickShell({ onBack, text, children }: { onBack: () => void; text?: str
 }
 
 const WAIT_S = 30;
+/** a matched game that hasn't begun after this long is abandoned (guest) or started again (host) */
+const START_WAIT_MS = 12_000;
 
 /** 25000 → 25K */
 const short = (n: number) => (n >= 1000 ? `${n / 1000}K` : String(n));
@@ -526,26 +528,59 @@ function QuickMatch({
 
   // the host starts as soon as the second player sits down
   const started = useRef(false);
+  const latestRoom = useRef(room);
+  latestRoom.current = room;
+  const [kick, setKick] = useState(0);
   useEffect(() => {
     if (!room || !code || started.current) return;
     if (room.host !== link.uid || room.status !== 'lobby' || room.seats.length < 2) return;
     started.current = true;
-    const id = window.setTimeout(() => {
+    // not cancelled when the room changes meanwhile: the start uses the latest room
+    window.setTimeout(() => {
+      const r = latestRoom.current;
+      if (!r || r.status !== 'lobby' || r.host !== link.uid || r.seats.length < 2) {
+        started.current = false;
+        return;
+      }
       const state = newGame(
-        room.seats.map((s) => ({ uid: s.uid, name: s.name, token: s.token, isBot: false })),
+        r.seats.map((s) => ({ uid: s.uid, name: s.name, token: s.token, isBot: false })),
         Math.random,
-        room.rules,
+        r.rules,
         getLang(),
       );
-      link.patch(code, room, { status: 'playing', state, stake });
+      link.patch(code, r, { status: 'playing', state, stake });
     }, 1200);
-    return () => window.clearTimeout(id);
-  }, [room, code, link, stake]);
+  }, [room, code, link, stake, kick]);
 
   const quit = () => {
     ctl.current?.abort();
     if (code) link.leave(code, room);
   };
+
+  // look again from scratch (leaving this spot)
+  const again = () => {
+    if (code) link.leave(code, room);
+    started.current = false;
+    setRoom(null);
+    setCode(null);
+    setAttempt((a) => a + 1);
+  };
+  // someone else took over this spot (I was away too long): look again
+  useEffect(() => {
+    if (code && room && room.status === 'lobby' && !room.seats.some((s) => s.uid === link.uid)) again();
+  }); // eslint-disable-line react-hooks/exhaustive-deps
+  // matched but the game doesn't begin: the host retries the start, a guest gives up and looks again
+  const full = !!room && room.status === 'lobby' && room.seats.length >= 2;
+  useEffect(() => {
+    if (!full) return;
+    const id = window.setTimeout(() => {
+      if (room?.host === link.uid) {
+        started.current = false;
+        setKick((k) => k + 1);
+      } else again();
+    }, START_WAIT_MS);
+    return () => window.clearTimeout(id);
+  }, [full, room?.host, kick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (code && room?.status === 'playing' && room.state && room.seats.some((s) => s.uid === link.uid)) {
     return <OnlineGame link={link} code={code} room={room} onExit={() => { quit(); onBack(); }} />;

@@ -16,6 +16,8 @@ const LOBBY_STALE_MS = 30_000;
 /** a quick-match game nobody moved in for this long is free again */
 const GAME_STALE_MS = 10 * 60_000;
 const BEAT_MS = 10_000;
+/** how often the room is also read, in case the live stream hangs */
+const POLL_MS = 4_000;
 
 interface Node {
   v: string;
@@ -136,8 +138,16 @@ export function fireLink(db = dbUrl()): RoomLink {
   const stopBeat = () => window.clearInterval(beat);
   const startBeat = (code: string) => {
     stopBeat();
-    beat = window.setInterval(() => {
-      change(code, (r) => (r && r.status === 'lobby' && r.host === uid ? r : null)).catch(() => setOnline(false));
+    // only the time is written, so a player who sits down meanwhile is never overwritten
+    beat = window.setInterval(async () => {
+      try {
+        const r = parse((await read(code)).node);
+        if (!r || r.status !== 'lobby' || r.host !== uid) return stopBeat();
+        const w = await fetch(`${db}/rooms/${code}/t.json`, { method: 'PUT', body: JSON.stringify(Date.now()) });
+        setOnline(w.ok);
+      } catch {
+        setOnline(false);
+      }
     }, BEAT_MS);
   };
 
@@ -189,22 +199,54 @@ export function fireLink(db = dbUrl()): RoomLink {
       if (error) throw new Error(error);
     },
     subscribe(code, onRoom, onClosed) {
-      const es = new EventSource(url(code));
       let node: Node | null = null;
-      const apply = (raw: string, patch: boolean) => {
-        const { path, data } = JSON.parse(raw) as { path: string; data: unknown };
-        if (path === '/') node = patch ? { ...(node ?? ({} as Node)), ...(data as Partial<Node>) } : (data as Node | null);
-        else if (node) node = { ...node, [path.slice(1)]: data } as Node;
+      let shown = '';
+      let done = false;
+      const show = () => {
+        // the heartbeat only touches the time: nothing new to show
+        if (done || (node?.v ?? '') === shown) return;
+        shown = node?.v ?? '';
         const room = parse(node);
         if (!room || room.status === 'closed') onClosed(t('roomClosed'));
         else onRoom(room);
       };
-      es.addEventListener('put', (e) => apply((e as MessageEvent).data, false));
-      es.addEventListener('patch', (e) => apply((e as MessageEvent).data, true));
-      es.addEventListener('open', () => setOnline(true));
-      es.addEventListener('error', () => setOnline(false));
-      es.addEventListener('cancel', () => onClosed(t('roomLost')));
-      return () => es.close();
+      const apply = (raw: string, patch: boolean) => {
+        const { path, data } = JSON.parse(raw) as { path: string; data: unknown };
+        if (path === '/') node = patch ? { ...(node ?? ({} as Node)), ...(data as Partial<Node>) } : (data as Node | null);
+        else if (node) node = { ...node, [path.slice(1)]: data } as Node;
+        show();
+      };
+      let es: EventSource;
+      const open = () => {
+        es = new EventSource(url(code));
+        es.addEventListener('put', (e) => apply((e as MessageEvent).data, false));
+        es.addEventListener('patch', (e) => apply((e as MessageEvent).data, true));
+        es.addEventListener('open', () => setOnline(true));
+        es.addEventListener('error', () => setOnline(false));
+        es.addEventListener('cancel', () => onClosed(t('roomLost')));
+      };
+      open();
+      // A phone can leave a live stream hanging without any error (after switching apps or
+      // networks), so the room is also read every few seconds and the stream reopened if it died.
+      const poll = async () => {
+        if (es.readyState === EventSource.CLOSED) open();
+        try {
+          node = (await read(code)).node;
+          setOnline(true);
+          show();
+        } catch {
+          setOnline(false);
+        }
+      };
+      const timer = window.setInterval(poll, POLL_MS);
+      const onShow = () => document.visibilityState === 'visible' && poll();
+      document.addEventListener('visibilitychange', onShow);
+      return () => {
+        done = true;
+        es.close();
+        window.clearInterval(timer);
+        document.removeEventListener('visibilitychange', onShow);
+      };
     },
     patch(code, _room, p) {
       change(code, (r) => (r ? { ...r, ...p } : null)).catch(() => setOnline(false));
