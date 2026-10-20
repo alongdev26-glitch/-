@@ -9,6 +9,7 @@ import { TOKENS, Token } from '../ui/Token';
 import { useWallet } from '../ui/Cosmetics';
 import { Game } from './Game';
 import './Setup.css';
+import '../ui/Tier.css';
 import { getLang, t, type Key } from '../i18n';
 import { EDITIONS } from '../data/editions';
 import { tokenName } from '../data/tokens';

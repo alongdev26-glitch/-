@@ -7,6 +7,7 @@ import type { TokenId } from '../engine/types';
 import { sfx } from '../ui/sound';
 import { ShareButton } from '../ui/ShareButton';
 import './Shop.css';
+import '../ui/Tier.css';
 import { t, type Key } from '../i18n';
 
 /** A tiny board corner to preview a board design. */
@@ -25,10 +26,10 @@ function BoardSwatch({ id }: { id: string }) {
 
 /** 💎 diamond packs for real money (open once the game is on Google Play) */
 const GEM_PACKS = [
-  { gems: 5000, price: '₪4.90', icon: '💎' },
-  { gems: 15000, price: '₪9.90', icon: '💎💎' },
-  { gems: 50000, price: '₪24.90', icon: '💰' },
-  { gems: 150000, price: '₪59.90', icon: '👑' },
+  { gems: 5000, price: '₪4.90', icon: '💎', c: ['#6fd6ff', '#1f8fe0', '#0b4f8f'] },
+  { gems: 15000, price: '₪9.90', icon: '💎', c: ['#b78cff', '#7b3fe4', '#4a1f9a'], bonus: '+50%' },
+  { gems: 50000, price: '₪24.90', icon: '💰', c: ['#ffb36b', '#f05a28', '#8f2a00'], bonus: '+100%', ribbon: 'popular' as const },
+  { gems: 150000, price: '₪59.90', icon: '👑', c: ['#fff3a8', '#e8a20c', '#8a5a00'], bonus: '+150%', ribbon: 'bestValue' as const },
 ];
 
 const KIND_NAME: Record<ShopItem['kind'], Key> = { char: 'kindChar', skin: 'kindSkin', board: 'kindBoard' };
@@ -99,17 +100,31 @@ export function Shop({ onBack }: { onBack: () => void }) {
         <small>{t('coins')}</small>
       </div>
       <div className="shop-gems">
-        <h3>
-          💎 {t('buyGems')} · <b>{wallet.gems.toLocaleString()}</b>
-        </h3>
-        <div className="gem-packs">
-          {GEM_PACKS.map((p) => (
-            <button key={p.gems} className="gem-pack" onClick={() => setGemNote(true)}>
-              <span className="gem-pack-icon" aria-hidden="true">
+        <h3>💎 {t('buyGems')}</h3>
+        <div className="tier-balance">
+          <span className="tier-balance-gem" aria-hidden="true">💎</span>
+          <b>{wallet.gems.toLocaleString()}</b>
+        </div>
+        <div className="tier-list">
+          {GEM_PACKS.map((p, i) => (
+            <button
+              key={p.gems}
+              className={`tier${p.ribbon ? ' best' : ''}${i === GEM_PACKS.length - 1 ? ' legend' : ''}`}
+              style={{ ['--c1' as string]: p.c[0], ['--c2' as string]: p.c[1], ['--c3' as string]: p.c[2] }}
+              onClick={() => setGemNote(true)}
+            >
+              {p.ribbon && <span className="tier-ribbon">{t(p.ribbon)}</span>}
+              <span className="tier-medal" aria-hidden="true">
                 {p.icon}
               </span>
-              <b>{p.gems.toLocaleString()}</b>
-              <span className="gem-pack-price">{p.price}</span>
+              <span className="tier-text">
+                <b>{t(`pack${i}` as Key)}</b>
+                <small>
+                  💎 {p.gems.toLocaleString()}
+                  {p.bonus && <span className="tier-bonus">{p.bonus}</span>}
+                </small>
+              </span>
+              <span className="tier-price">{p.price}</span>
             </button>
           ))}
         </div>
