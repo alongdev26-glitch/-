@@ -4,6 +4,7 @@ import { t } from '../i18n';
 import { sfx } from './sound';
 import { useWallet } from './Cosmetics';
 import { Token } from './Token';
+import { skinOf } from './shop';
 import './GemTransfer.css';
 
 const FLY = 14;
@@ -48,7 +49,7 @@ export function GemTransfer({ winner, losers, stake, me, onClose }: { winner: Pl
           <div className="gt-side gt-losers">
             {losers.map((p) => (
               <div key={p.id} className="gt-who lose">
-                <Token token={p.token} size="30px" skin={p.uid === me ? wallet.skin : undefined} />
+                <Token token={p.token} size="30px" skin={p.uid === me ? skinOf(wallet, p.token) : undefined} />
                 <b>{p.name}</b>
               </div>
             ))}
@@ -68,7 +69,7 @@ export function GemTransfer({ winner, losers, stake, me, onClose }: { winner: Pl
           <div className="gt-side gt-winner">
             <div className="gt-who win">
               <span className="gt-crown">👑</span>
-              <Token token={winner.token} size="38px" skin={winner.uid === me ? wallet.skin : undefined} />
+              <Token token={winner.token} size="38px" skin={winner.uid === me ? skinOf(wallet, winner.token) : undefined} />
               <b>{winner.name}</b>
             </div>
             <span className="gt-count win">💎 {winCount.toLocaleString()}</span>

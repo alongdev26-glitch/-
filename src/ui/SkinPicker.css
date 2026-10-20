@@ -1,0 +1,50 @@
+.sp-preview {
+  display: grid;
+  place-items: center;
+  height: 120px;
+}
+.sp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+}
+.sp-skin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 4px 8px;
+  border-radius: 14px;
+  border: 2px solid #e2e6ee;
+  background: #fff;
+  color: var(--ink, #1a1a2e);
+  font: inherit;
+  cursor: pointer;
+}
+.sp-skin small {
+  font-size: 12px;
+  font-weight: 800;
+}
+.sp-skin.on {
+  border-color: #f5b301;
+  background: #fff8d6;
+  box-shadow: 0 0 0 2px #f5b301;
+}
+.sp-hint {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+/* a character you can hold down to change its skin */
+.skin-hold {
+  -webkit-touch-callout: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+.skin-tip {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0.9;
+}

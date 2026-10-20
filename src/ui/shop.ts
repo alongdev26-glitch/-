@@ -62,7 +62,10 @@ export const ALL_ITEMS = [...CHARS, ...SKINS, ...BOARDS];
 export interface Wallet {
   coins: number;
   owned: string[];
+  /** old: one skin for every character (kept only to move it to the character it was used on) */
   skin: string;
+  /** each character's own skin */
+  skins?: Partial<Record<TokenId, string>>;
   board: string;
   /** the character I played last, to preview skins on */
   char: TokenId;
@@ -114,6 +117,11 @@ export function getWallet(): Wallet {
     // wallets from before characters were sold: the base pieces are always yours
     const base = BASE_TOKENS.map((t) => t.id).filter((id) => !w.owned.includes(id));
     if (base.length) w = { ...w, owned: [...base, ...w.owned] };
+    // skins used to apply to every character: keep it on the main character only
+    if (!w.skins) {
+      w = { ...w, skins: w.skin && w.skin !== 'skin-none' ? { [w.char]: w.skin } : {}, skin: 'skin-none' };
+      localStorage.setItem(KEY, JSON.stringify(w));
+    }
     // the device id and share code are made once and kept
     if (!w.deviceId || !w.refCode) {
       w = { ...w, deviceId: w.deviceId || randomId(16, 'abcdefghijklmnopqrstuvwxyz0123456789'), refCode: w.refCode || randomId(6) };
@@ -150,11 +158,22 @@ export function buy(item: ShopItem): boolean {
   return true;
 }
 
-/** Put on a skin or board you own. Characters are picked when setting up a game. */
+/** A character's skin ('skin-none' when it has none). */
+export const skinOf = (w: Wallet, char: TokenId) => w.skins?.[char] ?? 'skin-none';
+
+/** Put a skin you own on one character. */
+export function setSkin(char: TokenId, skin: string) {
+  const w = getWallet();
+  if (!w.owned.includes(skin)) return;
+  save({ ...w, skins: { ...w.skins, [char]: skin } });
+}
+
+/** Put on a skin (on the main character) or a board you own. Characters are picked when setting up a game. */
 export function equip(item: ShopItem) {
   const w = getWallet();
   if (!w.owned.includes(item.id) || item.kind === 'char') return;
-  save(item.kind === 'skin' ? { ...w, skin: item.id } : { ...w, board: item.id });
+  if (item.kind === 'skin') setSkin(w.char, item.id);
+  else save({ ...w, board: item.id });
 }
 
 /** Remember the character I play with, for the skin previews. */

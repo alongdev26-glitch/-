@@ -2,7 +2,7 @@ import logo from '../assets/logo.webp';
 import { useEffect, useRef, useState } from 'react';
 import { collectRewards, reportPending } from '../online/referral';
 import { ShareButton } from '../ui/ShareButton';
-import { REFERRAL_REWARD, claimDailyGems } from '../ui/shop';
+import { REFERRAL_REWARD, claimDailyGems, skinOf } from '../ui/shop';
 import { useWallet } from '../ui/Cosmetics';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { sfx } from '../ui/sound';
@@ -75,7 +75,7 @@ export function Menu({
     <div className="menu" onPointerDown={jingle}>
       {onProfile && (
         <button className="menu-profile" onClick={onProfile} aria-label={t('tabProfile')}>
-          <Token token={wallet.char} size="22px" skin={wallet.skin} />
+          <Token token={wallet.char} size="22px" skin={skinOf(wallet, wallet.char)} />
         </button>
       )}
       {onSettings && (
@@ -118,7 +118,7 @@ export function Menu({
       <div className="menu-parade" aria-hidden="true">
         {parade.map((t, i) => (
           <span key={t.id} style={{ animationDelay: `${i * 0.15}s` }}>
-            <Token token={t.id} size="clamp(22px, 6vw, 40px)" skin={wallet.skin} />
+            <Token token={t.id} size="clamp(22px, 6vw, 40px)" skin={skinOf(wallet, t.id)} />
           </span>
         ))}
       </div>

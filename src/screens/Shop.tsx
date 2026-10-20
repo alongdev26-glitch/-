@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { Token } from '../ui/Token';
 import { useWallet } from '../ui/Cosmetics';
-import { ALL_ITEMS, DAILY_GEMS, GAME_REWARD, buy, equip, itemName, rarityName, rotation, type ShopItem } from '../ui/shop';
+import { ALL_ITEMS, DAILY_GEMS, GAME_REWARD, skinOf, buy, equip, itemName, rarityName, rotation, type ShopItem } from '../ui/shop';
 import type { TokenId } from '../engine/types';
 import { sfx } from '../ui/sound';
 import { ShareButton } from '../ui/ShareButton';
@@ -58,7 +58,7 @@ export function Shop({ onBack }: { onBack: () => void }) {
   const { items, endsAt } = rotation(now);
 
   const isOn = (item: ShopItem) =>
-    item.kind === 'skin' ? wallet.skin === item.id : item.kind === 'board' ? wallet.board === item.id : false;
+    item.kind === 'skin' ? skinOf(wallet, wallet.char) === item.id : item.kind === 'board' ? wallet.board === item.id : false;
 
   const pick = (item: ShopItem) => {
     if (wallet.owned.includes(item.id)) {

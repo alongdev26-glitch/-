@@ -6,7 +6,8 @@ import type { GameRules, PlayerSetup, TokenId } from '../engine/types';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { TOKENS, Token } from '../ui/Token';
 import { useWallet } from '../ui/Cosmetics';
-import { getWallet, rememberChar } from '../ui/shop';
+import { getWallet, rememberChar, skinOf } from '../ui/shop';
+import { useSkinPress } from '../ui/SkinPicker';
 import './Setup.css';
 import { getLang, t } from '../i18n';
 import { EDITIONS } from '../data/editions';
@@ -60,6 +61,7 @@ export function Setup({ onStart, onOnline, onQuick, onBack }: Props) {
   const [auction, setAuction] = useState(true);
   const wallet = useWallet();
   const myTokens = TOKENS.filter((t) => wallet.owned.includes(t.id));
+  const skinPress = useSkinPress();
 
   const chooseMode = (m: Mode) => {
     setMode(m);
@@ -112,6 +114,7 @@ export function Setup({ onStart, onOnline, onQuick, onBack }: Props) {
 
   return (
     <div className="setup">
+      {skinPress.sheet}
       <div className="color-band top" aria-hidden="true" />
       <div className="setup-banner">
         <RibbonBanner text={titles[step]} />
@@ -226,13 +229,15 @@ export function Setup({ onStart, onOnline, onQuick, onBack }: Props) {
               onChange={(e) => setHuman(who, { name: e.target.value })}
             />
           </label>
+          <div className="skin-tip">{t('holdForSkin')}</div>
           <div className="setup-grid">
             {myTokens.map((tk) => {
               const taken = takenByOthers(who).has(tk.id);
               return (
                 <button
                   key={tk.id}
-                  className={`setup-tile${tk.id === humans[who].token ? ' selected' : ''}`}
+                  {...skinPress.bind(tk.id)}
+                  className={`setup-tile skin-hold${tk.id === humans[who].token ? ' selected' : ''}`}
                   style={{ ['--tc' as string]: tk.color }}
                   disabled={taken}
                   onClick={() => {
@@ -240,7 +245,7 @@ export function Setup({ onStart, onOnline, onQuick, onBack }: Props) {
                     setHuman(who, { token: tk.id });
                   }}
                 >
-                  <Token token={tk.id} size="clamp(22px, 7vw, 44px)" skin={wallet.skin} />
+                  <Token token={tk.id} size="clamp(22px, 7vw, 44px)" skin={skinOf(wallet, tk.id)} />
                   <span>{taken ? t('taken') : tokenName(tk.id)}</span>
                 </button>
               );

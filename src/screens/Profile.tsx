@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { t } from '../i18n';
 import { tokenName } from '../data/tokens';
 import { getName, setName } from '../ui/profile';
-import { rememberChar } from '../ui/shop';
+import { rememberChar, skinOf } from '../ui/shop';
+import { useSkinPress } from '../ui/SkinPicker';
 import { useWallet } from '../ui/Cosmetics';
 import { sfx } from '../ui/sound';
 import { TOKENS, Token } from '../ui/Token';
@@ -18,6 +19,7 @@ export function Profile({ onBack }: { onBack: () => void }) {
   const dirty = draft.name !== base.name || draft.char !== base.char;
   const [justSaved, setJustSaved] = useState(false);
   const owned = TOKENS.filter((tk) => wallet.owned.includes(tk.id));
+  const skinPress = useSkinPress();
 
   const save = () => {
     setName(draft.name);
@@ -30,6 +32,7 @@ export function Profile({ onBack }: { onBack: () => void }) {
 
   return (
     <div className="st">
+      {skinPress.sheet}
       <div className="st-top">
         <button className="st-corner" onClick={onBack} aria-label={t('back')}>
           <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -42,8 +45,8 @@ export function Profile({ onBack }: { onBack: () => void }) {
 
       <div className="st-body">
         <div className="pf-card">
-          <span className="pf-avatar">
-            <Token token={draft.char} size="62px" skin={wallet.skin} />
+          <span className="pf-avatar skin-hold" {...skinPress.bind(draft.char)}>
+            <Token token={draft.char} size="62px" skin={skinOf(wallet, draft.char)} />
           </span>
           <input
             id="profile-name"
@@ -67,18 +70,20 @@ export function Profile({ onBack }: { onBack: () => void }) {
 
         <div className="st-group">
           <span className="st-label">{t('myChars')}</span>
+          <span className="skin-tip">{t('holdForSkin')}</span>
           <div className="pf-grid">
             {TOKENS.map((tk) => {
               const mine = wallet.owned.includes(tk.id);
               return (
                 <button
                   key={tk.id}
-                  className={`pf-char${draft.char === tk.id ? ' is-on' : ''}${mine ? '' : ' is-locked'}`}
+                  {...(mine ? skinPress.bind(tk.id) : {})}
+                  className={`pf-char skin-hold${draft.char === tk.id ? ' is-on' : ''}${mine ? '' : ' is-locked'}`}
                   disabled={!mine}
                   aria-pressed={draft.char === tk.id}
                   onClick={() => setDraft((d) => ({ ...d, char: tk.id }))}
                 >
-                  <Token token={tk.id} size="44px" skin={mine ? wallet.skin : undefined} />
+                  <Token token={tk.id} size="44px" skin={mine ? skinOf(wallet, tk.id) : undefined} />
                   <small>{mine ? tokenName(tk.id) : '🔒'}</small>
                 </button>
               );

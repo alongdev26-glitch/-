@@ -15,7 +15,7 @@ import { ProfileTab } from '../tabs/ProfileTab';
 import { TradeTab, type TradeDraft } from '../tabs/TradeTab';
 import { Modal } from '../ui/Modal';
 import { CosmeticsProvider, useWallet } from '../ui/Cosmetics';
-import { award, GAME_REWARD } from '../ui/shop';
+import { award, GAME_REWARD, skinOf } from '../ui/shop';
 import { sfx } from '../ui/sound';
 import { CardReveal } from '../ui/CardReveal';
 import { buzz } from '../ui/haptic';
@@ -231,7 +231,7 @@ export function Game({ initial, online, onExit, onNewGame }: Props) {
   // the shop: this device's skin on the players it controls, and its board design
   const wallet = useWallet();
   const cosmetics = {
-    skinFor: (pid: number) => (controls(pid) ? wallet.skin : 'skin-none'),
+    skinFor: (pid: number) => (controls(pid) ? skinOf(wallet, game.players[pid].token) : 'skin-none'),
     board: wallet.board,
   };
   // coins for finishing a game, once: more for winning

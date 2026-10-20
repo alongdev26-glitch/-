@@ -14,7 +14,8 @@ import { EDITIONS } from '../data/editions';
 import { tokenName } from '../data/tokens';
 import { getName } from '../ui/profile';
 import { findMatch, slotsFor } from '../online/match';
-import { STAKES, payStake, winStake } from '../ui/shop';
+import { STAKES, payStake, skinOf, winStake } from '../ui/shop';
+import { useSkinPress } from '../ui/SkinPicker';
 import { GemTransfer } from '../ui/GemTransfer';
 import { ModeBadge } from '../ui/ModeIcons';
 
@@ -36,6 +37,7 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [quickOn, setQuickOn] = useState(false);
+  const skinPress = useSkinPress();
   const [stakeIdx, setStakeIdx] = useState<number | null>(null);
 
   useEffect(() => {
@@ -159,6 +161,7 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
 
   return (
     <div className="setup">
+      {skinPress.sheet}
       <div className="color-band top" aria-hidden="true" />
       <div className="setup-banner">
         <RibbonBanner text={titles[view]} />
@@ -184,11 +187,12 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
             {TOKENS.filter((tk) => wallet.owned.includes(tk.id)).map((tk) => (
               <button
                 key={tk.id}
-                className={`setup-tile${tk.id === token ? ' selected' : ''}`}
+                {...skinPress.bind(tk.id)}
+                className={`setup-tile skin-hold${tk.id === token ? ' selected' : ''}`}
                 style={{ ['--tc' as string]: tk.color }}
                 onClick={() => setToken(tk.id)}
               >
-                <Token token={tk.id} size="clamp(20px, 6vw, 40px)" skin={wallet.skin} />
+                <Token token={tk.id} size="clamp(20px, 6vw, 40px)" skin={skinOf(wallet, tk.id)} />
                 <span>{tokenName(tk.id)}</span>
               </button>
             ))}
@@ -599,7 +603,7 @@ function QuickMatch({
       <div className="quick-card">
         <div className="quick-versus">
           <span className="quick-me">
-            <Token token={seat.current.token} size="44px" skin={wallet.skin} />
+            <Token token={seat.current.token} size="44px" skin={skinOf(wallet, seat.current.token)} />
             <b>{seat.current.name}</b>
           </span>
           <span className="quick-vs">VS</span>

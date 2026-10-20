@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { BASE_TOKENS, TOKENS } from '../data/tokens';
-import { CHARS, DAILY_GEMS, START_GEMS, award, buy, claimDailyGems, getWallet, payStake, rotation, ROTATION_DAYS, winStake } from './shop';
+import { CHARS, DAILY_GEMS, START_GEMS, award, buy, claimDailyGems, getWallet, payStake, rotation, ROTATION_DAYS, winStake, setSkin, skinOf, equip, SKINS } from './shop';
 
 const DAY = 86_400_000;
 
@@ -92,5 +92,35 @@ describe('diamonds', () => {
     expect(claimDailyGems(day)).toBe(0);
     expect(claimDailyGems(new Date(day.getTime() + 86_400_000))).toBe(DAILY_GEMS);
     expect(getWallet().gems).toBe(START_GEMS + 2 * DAILY_GEMS);
+  });
+});
+
+describe('skins', () => {
+  it('a skin belongs to one character only', () => {
+    localStorage.setItem('bigdeal-wallet', JSON.stringify({ ...getWallet(), owned: [...getWallet().owned, 'skin-gold'] }));
+    setSkin('dog', 'skin-gold');
+    expect(skinOf(getWallet(), 'dog')).toBe('skin-gold');
+    expect(skinOf(getWallet(), 'cat')).toBe('skin-none');
+  });
+
+  it("a skin you don't own can't be put on", () => {
+    setSkin('dog', 'skin-galaxy');
+    expect(skinOf(getWallet(), 'dog')).toBe('skin-none');
+  });
+
+  it('the shop puts a skin on the main character', () => {
+    const gold = SKINS.find((x) => x.id === 'skin-gold')!;
+    localStorage.setItem('bigdeal-wallet', JSON.stringify({ ...getWallet(), char: 'duck', owned: [...getWallet().owned, 'skin-gold'] }));
+    equip(gold);
+    expect(skinOf(getWallet(), 'duck')).toBe('skin-gold');
+    expect(skinOf(getWallet(), 'cat')).toBe('skin-none');
+  });
+
+  it('an old wallet keeps its skin on the main character only', () => {
+    const old = { ...getWallet(), char: 'trex', skin: 'skin-fire', owned: [...getWallet().owned, 'skin-fire'] } as Record<string, unknown>;
+    delete old.skins;
+    localStorage.setItem('bigdeal-wallet', JSON.stringify(old));
+    expect(skinOf(getWallet(), 'trex')).toBe('skin-fire');
+    expect(skinOf(getWallet(), 'cat')).toBe('skin-none');
   });
 });
