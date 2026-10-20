@@ -755,74 +755,194 @@ html.smooth .quick-glass {
 }
 
 /* 💎 the stake before a 1v1 */
-.stake-balance {
+.tier-balance {
   align-self: center;
-  padding: 6px 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 22px 6px 10px;
   border-radius: 999px;
-  font-size: 18px;
-  font-weight: 800;
+  border: 3px solid #fff;
   color: #fff;
-  background: linear-gradient(180deg, #8fe3ff, #2aa8f0 60%, #1172c4);
-  border: 2px solid #fff;
-  box-shadow: 0 3px 0 #0b4f8f;
+  font-size: 24px;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+  background: linear-gradient(180deg, #8fe3ff 0%, #2aa8f0 55%, #1172c4 100%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.45), 0 5px 0 #0b4f8f, 0 10px 18px rgba(0, 0, 0, 0.3);
 }
-.stake-balance b {
+.tier-balance b {
   font-weight: 900;
 }
-.stake-grid {
+.tier-balance-gem {
+  font-size: 30px;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
+}
+.tier-list {
   width: 100%;
   max-width: 520px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.stake-chip {
+.tier {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 74px;
+  padding: 8px 10px 8px 12px;
+  border-radius: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  color: #fff;
+  font: inherit;
+  text-align: start;
+  overflow: hidden;
+  cursor: pointer;
+  background: linear-gradient(180deg, var(--c1) 0%, var(--c2) 70%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.35), 0 6px 0 var(--c3), 0 10px 16px rgba(0, 0, 0, 0.28);
+}
+/* a sweep of light across the open tables */
+.tier:not(.locked)::after {
+  content: '';
+  position: absolute;
+  inset: -20% auto -20% -40%;
+  width: 30%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transform: skewX(-20deg);
+  animation: tier-shine 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+.tier:nth-child(2)::after { animation-delay: 0.3s; }
+.tier:nth-child(3)::after { animation-delay: 0.6s; }
+.tier:nth-child(4)::after { animation-delay: 0.9s; }
+.tier:nth-child(5)::after { animation-delay: 1.2s; }
+.tier:nth-child(6)::after { animation-delay: 1.5s; }
+.tier:nth-child(7)::after { animation-delay: 1.8s; }
+@keyframes tier-shine {
+  0%,
+  60% {
+    left: -40%;
+  }
+  100% {
+    left: 140%;
+  }
+}
+.tier:active:not(:disabled) {
+  transform: translateY(5px);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.35), 0 1px 0 var(--c3);
+}
+.tier-medal {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  font-size: 30px;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.55) 45%, rgba(0, 0, 0, 0.08) 100%);
+  border: 3px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 3px 0 var(--c3), 0 4px 8px rgba(0, 0, 0, 0.25);
+}
+.tier-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.tier-text b {
+  font-size: 21px;
+  font-weight: 900;
+  line-height: 1.1;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tier-text small {
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 800;
+  opacity: 0.95;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+.tier-prize {
+  flex: none;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 10px 6px;
-  border-radius: 18px;
-  border: 3px solid #fff;
-  color: #fff;
-  font: inherit;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  background: linear-gradient(180deg, var(--c1), var(--c2));
-  box-shadow: 0 5px 0 var(--c3), 0 8px 14px rgba(0, 0, 0, 0.25);
-  cursor: pointer;
+  justify-content: center;
+  min-width: 78px;
+  padding: 4px 10px;
+  border-radius: 14px;
+  color: #5a3400;
+  background: linear-gradient(180deg, #fff6b8, #ffd23f 55%, #e8a20c);
+  border: 2px solid #fff;
+  box-shadow: 0 3px 0 #9a5f00;
+  text-shadow: none;
 }
-.stake-chip:last-child {
-  grid-column: 1 / -1;
+.tier-prize small {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
 }
-.stake-chip b {
-  font-size: 22px;
+.tier-prize b {
+  font-size: 17px;
   font-weight: 900;
+  line-height: 1.1;
 }
-.stake-chip small {
-  font-size: 12px;
-  font-weight: 700;
+.tier-ribbon {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  padding: 1px 12px 2px;
+  border-radius: 0 0 10px 10px;
+  font-size: 11px;
+  font-weight: 900;
+  color: #5a3400;
+  background: #ffe259;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+  z-index: 1;
 }
-.stake-gem {
-  font-size: 22px;
-  line-height: 1;
+[dir='rtl'] .tier-ribbon {
+  transform: translateX(50%);
 }
-.stake-chip:active:not(:disabled) {
-  transform: translateY(4px);
-  box-shadow: 0 1px 0 var(--c3);
+.tier.best {
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.35), 0 6px 0 var(--c3), 0 0 0 3px #ffe259, 0 0 22px 4px rgba(255, 226, 89, 0.7);
 }
-.stake-chip:disabled {
+.tier.legend:not(.locked) {
+  color: #5a3400;
+}
+.tier.legend:not(.locked) .tier-text b,
+.tier.legend:not(.locked) .tier-text small {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+/* tables you can't afford yet: dark, with what's missing */
+.tier.locked {
   cursor: default;
-  filter: grayscale(0.9);
-  opacity: 0.5;
+  background: linear-gradient(180deg, #4a5670, #2b3446);
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.12), 0 5px 0 #161c28;
+  color: rgba(255, 255, 255, 0.8);
 }
-.stake-chip.s0 { --c1: #9be36c; --c2: #3fae1f; --c3: #22700d; }
-.stake-chip.s1 { --c1: #6fd6ff; --c2: #1f8fe0; --c3: #0b4f8f; }
-.stake-chip.s2 { --c1: #b78cff; --c2: #7b3fe4; --c3: #4a1f9a; }
-.stake-chip.s3 { --c1: #ff9ad0; --c2: #e0408f; --c3: #8f1a55; }
-.stake-chip.s4 { --c1: #ffb36b; --c2: #f07a12; --c3: #9a4a00; }
-.stake-chip.s5 { --c1: #ff7a7a; --c2: #d90429; --c3: #7a0015; }
-.stake-chip.s6 { --c1: #fff3a8; --c2: #e8a20c; --c3: #8a5a00; color: #5a3400; text-shadow: none; }
+.tier.locked .tier-medal {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: none;
+  font-size: 24px;
+}
+.tier.locked .tier-prize {
+  color: #fff;
+  background: rgba(217, 4, 41, 0.75);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: none;
+}
+html.smooth .tier::after {
+  animation: none;
+  display: none;
+}
 .quick-stake {
   padding: 4px 14px;
   border-radius: 999px;

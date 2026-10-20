@@ -13,6 +13,16 @@ export const START_COINS = 200;
 export const START_GEMS = 5000;
 /** what you can put on the table before an online game */
 export const STAKES = [250, 500, 1000, 5000, 10000, 25000, 50000];
+/** each stake's table: its icon and colors (light, dark, edge) */
+export const TIERS = [
+  { icon: '🏠', c: ['#9be36c', '#3fae1f', '#22700d'] },
+  { icon: '🏘️', c: ['#6fd6ff', '#1f8fe0', '#0b4f8f'] },
+  { icon: '🏙️', c: ['#b78cff', '#7b3fe4', '#4a1f9a'] },
+  { icon: '🌆', c: ['#ff9ad0', '#e0408f', '#8f1a55'] },
+  { icon: '🏦', c: ['#ffb36b', '#f07a12', '#9a4a00'] },
+  { icon: '💰', c: ['#ff7a7a', '#d90429', '#7a0015'] },
+  { icon: '👑', c: ['#fff3a8', '#e8a20c', '#8a5a00'] },
+];
 /** 💎 the daily gift */
 export const DAILY_GEMS = 500;
 

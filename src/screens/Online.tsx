@@ -9,12 +9,12 @@ import { TOKENS, Token } from '../ui/Token';
 import { useWallet } from '../ui/Cosmetics';
 import { Game } from './Game';
 import './Setup.css';
-import { getLang, t } from '../i18n';
+import { getLang, t, type Key } from '../i18n';
 import { EDITIONS } from '../data/editions';
 import { tokenName } from '../data/tokens';
 import { getName } from '../ui/profile';
 import { findMatch, slotsFor } from '../online/match';
-import { STAKES, payStake, skinOf, winStake } from '../ui/shop';
+import { STAKES, TIERS, payStake, skinOf, winStake } from '../ui/shop';
 import { useSkinPress } from '../ui/SkinPicker';
 import { GemTransfer } from '../ui/GemTransfer';
 import { ModeBadge } from '../ui/ModeIcons';
@@ -431,22 +431,53 @@ const START_WAIT_MS = 12_000;
 /** 25000 → 25K */
 const short = (n: number) => (n >= 1000 ? `${n / 1000}K` : String(n));
 
-/** Before a 1v1: how many diamonds go on the table. Both players put the same amount; the winner takes both. */
+/** Before a 1v1: pick a table. Both players put its entry on the table; the winner takes both. */
 function StakePicker({ onBack, onPick }: { onBack: () => void; onPick: (i: number) => void }) {
   const wallet = useWallet();
+  // the richest table I can sit at gets a ribbon
+  const best = STAKES.reduce((b, n, i) => (wallet.gems >= n ? i : b), -1);
   return (
     <QuickShell onBack={onBack} text={t('pickStake')}>
-      <div className="stake-balance">
-        💎 <b>{wallet.gems.toLocaleString()}</b> {t('gems')}
+      <div className="tier-balance">
+        <span className="tier-balance-gem" aria-hidden="true">💎</span>
+        <b>{wallet.gems.toLocaleString()}</b>
       </div>
-      <div className="stake-grid">
-        {STAKES.map((n, i) => (
-          <button key={n} className={`stake-chip s${i}`} disabled={wallet.gems < n} onClick={() => onPick(i)}>
-            <span className="stake-gem" aria-hidden="true">💎</span>
-            <b>{n.toLocaleString()}</b>
-            <small>{wallet.gems < n ? t('notEnoughGems') : t('winPot', { n: (n * 2).toLocaleString() })}</small>
-          </button>
-        ))}
+      <div className="tier-list">
+        {STAKES.map((n, i) => {
+          const open = wallet.gems >= n;
+          const [c1, c2, c3] = TIERS[i].c;
+          return (
+            <button
+              key={n}
+              className={`tier${open ? '' : ' locked'}${i === best ? ' best' : ''}${i === STAKES.length - 1 ? ' legend' : ''}`}
+              style={{ ['--c1' as string]: c1, ['--c2' as string]: c2, ['--c3' as string]: c3 }}
+              disabled={!open}
+              onClick={() => onPick(i)}
+            >
+              {i === best && <span className="tier-ribbon">{t('recommended')}</span>}
+              <span className="tier-medal" aria-hidden="true">
+                {open ? TIERS[i].icon : '🔒'}
+              </span>
+              <span className="tier-text">
+                <b>{t(`tier${i}` as Key)}</b>
+                <small>{t('entry', { n: n.toLocaleString() })}</small>
+              </span>
+              <span className="tier-prize">
+                {open ? (
+                  <>
+                    <small>🏆</small>
+                    <b>{(n * 2).toLocaleString()}</b>
+                  </>
+                ) : (
+                  <>
+                    <small>{t('missingGems')}</small>
+                    <b>💎 {(n - wallet.gems).toLocaleString()}</b>
+                  </>
+                )}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </QuickShell>
   );
