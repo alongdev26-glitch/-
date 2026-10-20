@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { collectRewards, reportPending } from '../online/referral';
 import { ShareButton } from '../ui/ShareButton';
 import { REFERRAL_REWARD, claimDailyGems, skinOf } from '../ui/shop';
+import { restorePurchases } from '../ui/billing';
 import { useWallet } from '../ui/Cosmetics';
 import { RibbonBanner } from '../ui/RibbonBanner';
 import { sfx } from '../ui/sound';
@@ -27,6 +28,16 @@ export function Menu({
   const wallet = useWallet();
   // friends who joined from my link pay out here
   const [joined, setJoined] = useState(0);
+  const [restored, setRestored] = useState(0);
+  // 💎 a purchase that was paid but not delivered (the app closed during it) arrives now
+  useEffect(() => {
+    restorePurchases().then((n) => {
+      if (n) {
+        setRestored(n);
+        sfx.buy();
+      }
+    });
+  }, []);
   // 💎 the daily gift, given on the first visit of the day
   const [daily, setDaily] = useState(0);
   useEffect(() => {
@@ -105,7 +116,12 @@ export function Menu({
       <button className="menu-gems" onClick={onShop} aria-label={t('gems')}>
         💎 <b>{wallet.gems.toLocaleString()}</b>
       </button>
-      {daily > 0 && !joined && (
+      {restored > 0 && (
+        <div className="reward-pop" onClick={() => setRestored(0)}>
+          {t('restoredGems', { n: restored.toLocaleString() })}
+        </div>
+      )}
+      {daily > 0 && !joined && !restored && (
         <div className="reward-pop" onClick={() => setDaily(0)}>
           {t('dailyGems', { n: daily })}
         </div>

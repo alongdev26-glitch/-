@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { BASE_TOKENS, TOKENS } from '../data/tokens';
-import { CHARS, DAILY_GEMS, START_GEMS, award, buy, claimDailyGems, getWallet, payStake, rotation, ROTATION_DAYS, winStake, setSkin, skinOf, equip, SKINS } from './shop';
+import { CHARS, DAILY_GEMS, START_GEMS, award, buy, claimDailyGems, getWallet, payStake, rotation, ROTATION_DAYS, winStake, setSkin, skinOf, equip, SKINS, addBoughtGems } from './shop';
 
 const DAY = 86_400_000;
 
@@ -122,5 +122,15 @@ describe('skins', () => {
     localStorage.setItem('bigdeal-wallet', JSON.stringify(old));
     expect(skinOf(getWallet(), 'trex')).toBe('skin-fire');
     expect(skinOf(getWallet(), 'cat')).toBe('skin-none');
+  });
+});
+
+describe('bought diamonds', () => {
+  it('a Google Play purchase is credited once, however many times it is reported', () => {
+    expect(addBoughtGems('tok-1', 15000)).toBe(true);
+    expect(addBoughtGems('tok-1', 15000)).toBe(false);
+    expect(getWallet().gems).toBe(START_GEMS + 15000);
+    expect(addBoughtGems('tok-2', 5000)).toBe(true);
+    expect(getWallet().gems).toBe(START_GEMS + 20000);
   });
 });

@@ -93,6 +93,8 @@ export interface Wallet {
   gems: number;
   /** the day (YYYY-MM-DD) the daily diamond gift was last taken */
   gemDay?: string;
+  /** Google Play purchases already turned into diamonds (their purchase tokens) */
+  bought?: string[];
 }
 
 const randomId = (n: number, abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789') =>
@@ -218,6 +220,15 @@ export function claimDailyGems(now = new Date()): number {
   if (w.gemDay === day) return 0;
   save({ ...w, gems: w.gems + DAILY_GEMS, gemDay: day });
   return DAILY_GEMS;
+}
+
+/** Diamonds bought with real money: once per purchase, however many times it's reported. */
+export function addBoughtGems(purchaseToken: string, gems: number): boolean {
+  const w = getWallet();
+  const bought = w.bought ?? [];
+  if (bought.includes(purchaseToken)) return false;
+  save({ ...w, gems: w.gems + gems, bought: [...bought.slice(-100), purchaseToken] });
+  return true;
 }
 
 /** Coins for a finished game, once per game. */
