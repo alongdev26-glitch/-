@@ -75,10 +75,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.gt-who.lose {
-  filter: grayscale(0.6);
-  opacity: 0.85;
-}
 .gt-who.win {
   animation: gt-win 0.5s ease-in-out 2.1s 2;
 }
@@ -103,8 +99,25 @@
 .gt-count.win {
   background: linear-gradient(180deg, #9be36c, #3fae1f);
 }
-.gt-count.lose {
-  background: linear-gradient(180deg, #ff7a7a, #c4001c);
+.gt-count.bank {
+  color: #5a3400;
+  background: linear-gradient(180deg, #fff6b8, #ffd23f 55%, #e8a20c);
+}
+.gt-vault {
+  width: 64px;
+  height: 64px;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.3));
+}
+.gt-vault .gem-art {
+  width: 100%;
+  height: 100%;
+}
+.gt-note {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  opacity: 0.9;
 }
 .gt-air {
   position: absolute;

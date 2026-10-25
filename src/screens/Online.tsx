@@ -15,7 +15,7 @@ import { EDITIONS } from '../data/editions';
 import { tokenName } from '../data/tokens';
 import { getName } from '../ui/profile';
 import { findMatch, slotsFor } from '../online/match';
-import { STAKES, TIERS, payStake, skinOf, winStake } from '../ui/shop';
+import { STAKES, TIERS, skinOf, winPrize } from '../ui/shop';
 import { useSkinPress } from '../ui/SkinPicker';
 import { GemTransfer } from '../ui/GemTransfer';
 import { ModeBadge } from '../ui/ModeIcons';
@@ -146,10 +146,6 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
     return <OnlineGame link={link} code={code} room={room} onExit={leave} />;
   }
 
-  // someone who can't pay the table holds the start
-  const stake = room?.stake ?? 0;
-  const poor = stake ? room?.seats.find((s) => (s.gems ?? 0) < stake) : undefined;
-
   const titles: Record<View, string> = {
     loading: t('connecting'),
     unavailable: t('codeGame'),
@@ -258,21 +254,6 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
           {room.host === link.uid ? (
             <>
               <div className="setup-field">
-                {t('stakeQ')}
-                <div className="seg stake-seg">
-                  {[0, ...STAKES].map((n) => (
-                    <button
-                      key={n}
-                      className={n === (room.stake ?? 0) ? 'on' : ''}
-                      disabled={n > 0 && room.seats.some((s) => (s.gems ?? 0) < n)}
-                      onClick={() => setRoomField({ stake: n })}
-                    >
-                      {n ? `💎${short(n)}` : t('noStake')}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="setup-field">
                 {t('addBotsQ')}
                 <div className="seg">
                   {Array.from({ length: MAX - room.seats.length + 1 }, (_, i) => i).map((n) => (
@@ -298,14 +279,12 @@ export function Online({ onBack, quick, onBotGame }: { onBack: () => void; quick
                     : t('mortgageOff')}
                 </small>
               </div>
-              {poor && <div className="setup-error">{t('seatNoGems', { name: poor.name })}</div>}
-              <button className="btn btn-red" disabled={room.seats.length + room.bots < 2 || !!poor} onClick={start}>
+              <button className="btn btn-red" disabled={room.seats.length + room.bots < 2} onClick={start}>
                 {t('startGameN', { n: room.seats.length + room.bots })}
               </button>
             </>
           ) : (
             <div className="setup-summary">
-              {!!room.stake && <div>{t('stakeEach', { n: room.stake, pot: room.stake * room.seats.length })}</div>}
               {t('waitingHost', { name: room.seats.find((s) => s.uid === room.host)?.name ?? t('host') })}
             </div>
           )}
@@ -334,24 +313,18 @@ function OnlineGame({ link, code, room, onExit }: { link: RoomLink; code: string
   useEffect(() => link.onStatus(setConnected), [link]);
   const latest = useRef(room);
   latest.current = room;
-  // 💎 the table: everyone pays when the game starts; the winner takes it all
+  // 💎 a diamond table: nobody pays to play; the game pays the winner the table's prize
   const stakeKey = `${code}:${room.createdAt}`;
   const stake = room.stake ?? 0;
-  useEffect(() => {
-    if (stake) payStake(stakeKey, stake);
-  }, [stakeKey, stake]);
-  // at the end, everyone sees the diamonds change hands; the winner's wallet gets the table
   const [showGems, setShowGems] = useState(false);
+  const [paid, setPaid] = useState(0);
   const phase = room.state?.phase;
   const over = !!stake && !!room.state && phase?.t === 'gameover';
   useEffect(() => {
     if (!over || !room.state || phase?.t !== 'gameover') return;
     const winner = room.state.players[phase.winner];
     const id = window.setTimeout(() => setShowGems(true), 2500);
-    if (winner?.uid === link.uid && !winner.isBot) {
-      const pot = stake * room.state.players.filter((p) => !p.isBot).length;
-      winStake(stakeKey, pot);
-    }
+    if (winner?.uid === link.uid && !winner.isBot) setPaid(winPrize(stakeKey, stake));
     return () => window.clearTimeout(id);
   }, [over]); // eslint-disable-line react-hooks/exhaustive-deps
   const send = async (next: GameState) => {
@@ -384,8 +357,8 @@ function OnlineGame({ link, code, room, onExit }: { link: RoomLink; code: string
       {showGems && room.state && phase?.t === 'gameover' && !room.state.players[phase.winner].isBot && (
         <GemTransfer
           winner={room.state.players[phase.winner]}
-          losers={room.state.players.filter((p) => !p.isBot && p.id !== phase.winner)}
-          stake={stake}
+          prize={stake}
+          paid={paid}
           me={link.uid}
           onClose={() => setShowGems(false)}
         />
@@ -429,9 +402,6 @@ const WAIT_S = 30;
 /** a matched game that hasn't begun after this long is abandoned (guest) or started again (host) */
 const START_WAIT_MS = 12_000;
 
-/** 25000 → 25K */
-const short = (n: number) => (n >= 1000 ? `${n / 1000}K` : String(n));
-
 /** Before a 1v1: pick a table. Both players put its entry on the table; the winner takes both. */
 function StakePicker({ onBack, onPick }: { onBack: () => void; onPick: (i: number) => void }) {
   const wallet = useWallet();
@@ -467,7 +437,7 @@ function StakePicker({ onBack, onPick }: { onBack: () => void; onPick: (i: numbe
                 {open ? (
                   <>
                     <small>🏆</small>
-                    <b>{(n * 2).toLocaleString()}</b>
+                    <b>+{n.toLocaleString()}</b>
                   </>
                 ) : (
                   <>
@@ -639,7 +609,7 @@ function QuickMatch({
             <b>{other ? other.name : t('searching')}</b>
           </span>
         </div>
-        <div className="quick-stake">{t('onTable', { n: stake, pot: stake * 2 })}</div>
+        <div className="quick-stake">{t('onTable', { n: stake.toLocaleString() })}</div>
         {found ? (
           <div className="quick-status">{t('foundOpponent')} ⚔️</div>
         ) : nobody ? (

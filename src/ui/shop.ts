@@ -11,7 +11,7 @@ const KEY = 'bigdeal-wallet';
 export const START_COINS = 200;
 /** 💎 a new player starts with these */
 export const START_GEMS = 5000;
-/** what you can put on the table before an online game */
+/** the diamond tables of online 1v1: each opens at this many diamonds and pays it as the winner's prize */
 export const STAKES = [250, 500, 1000, 5000, 10000, 25000, 50000];
 /** each stake's table: its icon and colors (light, dark, edge) */
 export const TIERS = [
@@ -93,6 +93,9 @@ export interface Wallet {
   gems: number;
   /** the day (YYYY-MM-DD) the daily diamond gift was last taken */
   gemDay?: string;
+  /** the day of the last table prize, and how many were paid that day */
+  prizeDay?: string;
+  prizeCount?: number;
   /** Google Play purchases already turned into diamonds (their purchase tokens) */
   bought?: string[];
 }
@@ -194,23 +197,25 @@ export function rememberChar(char: TokenId) {
   if (w.char !== char) save({ ...w, char });
 }
 
-/** Put diamonds on the table for an online game, once per game. False when there aren't enough. */
-export function payStake(gameKey: string, amount: number): boolean {
-  const w = getWallet();
-  const key = `s:${gameKey}`;
-  if (w.paid.includes(key)) return true;
-  if (w.gems < amount) return false;
-  save({ ...w, gems: w.gems - amount, paid: [...w.paid.slice(-30), key] });
-  return true;
-}
+/** A table's prize is paid for this many wins a day (more would let two phones farm diamonds). */
+export const DAILY_PRIZE_WINS = 5;
 
-/** The winner takes the table, once per game. */
-export function winStake(gameKey: string, amount: number): boolean {
+/**
+ * A win at a diamond table: the game pays the prize (nobody puts diamonds in, the loser loses
+ * nothing). Once per game, and for at most DAILY_PRIZE_WINS wins a day. Returns what was paid.
+ */
+export function winPrize(gameKey: string, prize: number, now = new Date()): number {
   const w = getWallet();
   const key = `w:${gameKey}`;
-  if (w.paid.includes(key) || amount <= 0) return false;
-  save({ ...w, gems: w.gems + amount, paid: [...w.paid.slice(-30), key] });
-  return true;
+  if (w.paid.includes(key) || prize <= 0) return 0;
+  const day = now.toISOString().slice(0, 10);
+  const count = w.prizeDay === day ? (w.prizeCount ?? 0) : 0;
+  if (count >= DAILY_PRIZE_WINS) {
+    save({ ...w, paid: [...w.paid.slice(-30), key] });
+    return 0;
+  }
+  save({ ...w, gems: w.gems + prize, paid: [...w.paid.slice(-30), key], prizeDay: day, prizeCount: count + 1 });
+  return prize;
 }
 
 /** The daily diamond gift: how many were given now (0 when already taken today). */

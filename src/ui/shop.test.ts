@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { BASE_TOKENS, TOKENS } from '../data/tokens';
-import { CHARS, DAILY_GEMS, START_GEMS, award, buy, claimDailyGems, getWallet, payStake, rotation, ROTATION_DAYS, winStake, setSkin, skinOf, equip, SKINS, addBoughtGems } from './shop';
+import { CHARS, DAILY_GEMS, START_GEMS, award, buy, claimDailyGems, getWallet, rotation, ROTATION_DAYS, winPrize, DAILY_PRIZE_WINS, setSkin, skinOf, equip, SKINS, addBoughtGems } from './shop';
 
 const DAY = 86_400_000;
 
@@ -71,19 +71,18 @@ describe('diamonds', () => {
     expect(getWallet().gems).toBe(START_GEMS);
   });
 
-  it('a stake is paid once per game, and only when there is enough', () => {
-    expect(payStake('room1', 1000)).toBe(true);
-    expect(payStake('room1', 1000)).toBe(true);
-    expect(getWallet().gems).toBe(START_GEMS - 1000);
-    expect(payStake('room2', 50000)).toBe(false);
-    expect(getWallet().gems).toBe(START_GEMS - 1000);
+  it('a table prize comes from the game, once per game', () => {
+    expect(winPrize('room1', 1000)).toBe(1000);
+    expect(winPrize('room1', 1000)).toBe(0);
+    expect(getWallet().gems).toBe(START_GEMS + 1000);
   });
 
-  it('the winner takes the table once', () => {
-    payStake('room1', 1000);
-    expect(winStake('room1', 2000)).toBe(true);
-    expect(winStake('room1', 2000)).toBe(false);
-    expect(getWallet().gems).toBe(START_GEMS + 1000);
+  it('table prizes stop after the daily limit and come back the next day', () => {
+    const day = new Date(2026, 9, 25, 12);
+    for (let i = 0; i < DAILY_PRIZE_WINS; i++) expect(winPrize(`g${i}`, 250, day)).toBe(250);
+    expect(winPrize('extra', 250, day)).toBe(0);
+    expect(winPrize('tomorrow', 250, new Date(day.getTime() + 86_400_000))).toBe(250);
+    expect(getWallet().gems).toBe(START_GEMS + 250 * (DAILY_PRIZE_WINS + 1));
   });
 
   it('the daily gift comes once a day', () => {

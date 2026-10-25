@@ -4,7 +4,8 @@ import { t } from '../i18n';
 import { sfx } from './sound';
 import { useWallet } from './Cosmetics';
 import { Token } from './Token';
-import { skinOf } from './shop';
+import { DAILY_PRIZE_WINS, skinOf } from './shop';
+import { GemPackArt } from './GemPackArt';
 import './GemTransfer.css';
 
 const FLY = 14;
@@ -27,15 +28,15 @@ function useCount(from: number, to: number, ms: number, delay: number) {
 }
 
 /**
- * The end of a diamond game: the losers' diamonds fly over to the winner, and the counters
- * show how many changed hands.
+ * The end of a diamond-table game: the prize flies from the game's vault to the winner. Nobody
+ * pays to play, so the loser loses nothing. `paid` is what this device's wallet actually got
+ * (0 after the daily prize limit).
  */
-export function GemTransfer({ winner, losers, stake, me, onClose }: { winner: Player; losers: Player[]; stake: number; me?: string; onClose: () => void }) {
+export function GemTransfer({ winner, prize, paid, me, onClose }: { winner: Player; prize: number; paid: number; me?: string; onClose: () => void }) {
   const wallet = useWallet();
-  const pot = stake * (losers.length + 1);
   const iWon = !!me && winner.uid === me;
-  const winCount = useCount(stake, pot, 1600, 600);
-  const loseCount = useCount(stake, 0, 1600, 600);
+  const capped = iWon && paid === 0;
+  const winCount = useCount(0, prize, 1600, 600);
   useEffect(() => {
     const id = window.setTimeout(() => (iWon ? sfx.buy() : sfx.coin()), 700);
     return () => window.clearTimeout(id);
@@ -44,16 +45,15 @@ export function GemTransfer({ winner, losers, stake, me, onClose }: { winner: Pl
   return (
     <div className="gt" onClick={onClose} role="dialog" aria-label={t('gems')}>
       <div className="gt-card" onClick={(e) => e.stopPropagation()}>
-        <div className={`gt-title${iWon ? ' won' : ''}`}>{iWon ? t('wonGems', { n: (pot).toLocaleString() }) : t('lostGems', { n: stake.toLocaleString() })}</div>
+        <div className={`gt-title${iWon ? ' won' : ''}`}>
+          {iWon ? t('wonGems', { n: prize.toLocaleString() }) : t('lostGems', { name: winner.name })}
+        </div>
         <div className="gt-stage" dir="ltr">
-          <div className="gt-side gt-losers">
-            {losers.map((p) => (
-              <div key={p.id} className="gt-who lose">
-                <Token token={p.token} size="30px" skin={p.uid === me ? skinOf(wallet, p.token) : undefined} />
-                <b>{p.name}</b>
-              </div>
-            ))}
-            <span className="gt-count lose">💎 {loseCount.toLocaleString()}</span>
+          <div className="gt-side gt-bank">
+            <span className="gt-vault">
+              <GemPackArt kind={3} />
+            </span>
+            <span className="gt-count bank">🏆 {prize.toLocaleString()}</span>
           </div>
           <div className="gt-air" aria-hidden="true">
             {Array.from({ length: FLY }, (_, i) => (
@@ -72,9 +72,10 @@ export function GemTransfer({ winner, losers, stake, me, onClose }: { winner: Pl
               <Token token={winner.token} size="38px" skin={winner.uid === me ? skinOf(wallet, winner.token) : undefined} />
               <b>{winner.name}</b>
             </div>
-            <span className="gt-count win">💎 {winCount.toLocaleString()}</span>
+            <span className="gt-count win">+💎 {winCount.toLocaleString()}</span>
           </div>
         </div>
+        {capped && <p className="gt-note">{t('prizeCapReached', { n: DAILY_PRIZE_WINS })}</p>}
         <div className="gt-mine">
           {t('gems')}: <b>💎 {wallet.gems.toLocaleString()}</b>
         </div>
