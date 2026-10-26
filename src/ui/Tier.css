@@ -95,13 +95,11 @@
   gap: 2px;
 }
 .tier-text b {
-  font-size: 21px;
+  font-size: clamp(15px, 4.6vw, 21px);
   font-weight: 900;
   line-height: 1.1;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 .tier-text small {
   white-space: nowrap;
