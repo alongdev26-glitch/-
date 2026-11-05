@@ -14,6 +14,10 @@ captureRef();
 applyDocLang();
 // smooth mode, if this phone turned it on
 applySmooth();
+// phones play standing up; the lock only takes in the installed app (desktop and browser tabs ignore it)
+if (matchMedia('(pointer: coarse)').matches) {
+  (screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> }).lock?.('portrait').catch(() => {});
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
