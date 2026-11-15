@@ -1,17 +1,17 @@
-import { QUESTIONS } from './questions.js?v=18';
-import { matchAnswer } from './checker.js?v=18';
-import { makeOpponent, botSkill, planBotTurn, TURN_SECONDS, NAMES } from './bot.js?v=18';
+import { QUESTIONS } from './questions.js?v=19';
+import { matchAnswer } from './checker.js?v=19';
+import { makeOpponent, botSkill, planBotTurn, TURN_SECONDS, NAMES } from './bot.js?v=19';
 import {
   MAX_ENERGY, COST, SHOP, DAILY_REWARDS, FREE_COINS, dailyState, claimDailyReward, freeCoinsState, claimFreeCoinsReward, buyItem, rewardsReady,
   defaultSave, tickEnergy, energyCountdownMs, spendEnergy, spend, rewards, pickQuestion,
   TASK_WINS, TASK_GEMS, taskState, recordWin, claimTask,
-} from './economy.js?v=18';
-import { BP_LEVELS, XP_PER_LEVEL, PREMIUM_COST, XP, bpState, addXp, xpForMatch, rewardFor, isClaimed, claimable, claimReward, claimAll, unlockPremium } from './battlepass.js?v=18';
-import { I, emblem } from './icons.js?v=18';
-import { findMatch } from './net.js?v=18';
-import { toGuest, acceptAnswer, cleanName, cleanLogo } from './protocol.js?v=18';
-import { LOGOS, ageGroup, validateProfile, MIN_AGE, MAX_AGE } from './profile.js?v=18';
-import { newRound, hit as ruleHit, miss as ruleMiss, LIVES } from './rules.js?v=18';
+} from './economy.js?v=19';
+import { BP_LEVELS, XP_PER_LEVEL, PREMIUM_COST, XP, bpState, addXp, xpForMatch, rewardFor, isClaimed, claimable, claimReward, claimAll, unlockPremium } from './battlepass.js?v=19';
+import { I, emblem } from './icons.js?v=19';
+import { findMatch } from './net.js?v=19';
+import { toGuest, acceptAnswer, cleanName, cleanLogo } from './protocol.js?v=19';
+import { LOGOS, ageGroup, validateProfile, MIN_AGE, MAX_AGE } from './profile.js?v=19';
+import { newRound, hit as ruleHit, miss as ruleMiss, LIVES } from './rules.js?v=19';
 
 const KEY = 'rosh-brosh-save-v1';
 const PRE_SECONDS = 6;
@@ -577,7 +577,7 @@ function questionnaire(first) {
   show(`
 <div class="flex-1 min-h-0 ${SCREEN_BG} flex flex-col overflow-y-auto">
   <form id="qform" class="px-5 pt-8 pb-6 flex flex-col gap-5" autocomplete="off">
-    <img src="./icon-512.png?v=18" alt="ראש בראש" class="w-28 h-28 mx-auto drop-shadow-lg" />
+    <img src="./icon-512.png?v=19" alt="ראש בראש" class="w-28 h-28 mx-auto drop-shadow-lg" />
     <h1 class="text-4xl font-black text-3d-white text-center">${first ? 'ברוך הבא!' : 'עריכת פרופיל'}</h1>
     <p class="text-center text-white/85 -mt-2">${first ? 'כמה שאלות קצרות לפני שמתחילים' : 'אפשר לשנות בכל זמן'}</p>
     <label class="flex flex-col gap-1.5">
@@ -727,7 +727,7 @@ function home() {
     </section>
     ${taskCard()}
   </main>
-  <footer class="mt-auto pt-3 pb-8 text-center text-[10px] text-white/60 z-10">v18 · <a href="./privacy.html" class="underline">מדיניות פרטיות</a></footer>
+  <footer class="mt-auto pt-3 pb-8 text-center text-[10px] text-white/60 z-10">v19 · <a href="./privacy.html" class="underline">מדיניות פרטיות</a></footer>
 </div>`, null, 'home');
 }
 
