@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { matchAnswer, skeleton } from './checker.js';
+import { matchAnswer, skeleton, loose } from './checker.js';
 import { QUESTIONS } from './questions.js';
 
 const find = (text) => QUESTIONS.find((q) => q.text.includes(text));
@@ -40,11 +40,11 @@ describe('בדיקת תשובות', () => {
     expect(idx('השטחים', '')).toBeNull();
     expect(idx('חיות מחמד', 'כלם')).toBeNull();
   });
-  it('המאגר תקין: 50 שאלות, בלי שמות ריקים או כפולים בתוך שאלה', () => {
-    expect(QUESTIONS.length).toBe(50);
+  it('המאגר תקין: 70 שאלות, בלי שמות ריקים או כפולים בתוך שאלה', () => {
+    expect(QUESTIONS.length).toBe(70);
     for (const q of QUESTIONS) {
       expect(q.answers.length).toBeGreaterThanOrEqual(5);
-      const keys = q.answers.map((a) => skeleton(a.names[0]));
+      const keys = q.answers.map((a) => loose(a.names[0]));
       expect(new Set(keys).size, q.text).toBe(keys.length);
       for (const a of q.answers) for (const n of a.names) expect(skeleton(n).length, `${q.text}: ${n}`).toBeGreaterThan(0);
     }
@@ -69,5 +69,26 @@ describe('בדיקת תשובות', () => {
     for (const t of ['פליז', 'צעיף', 'קפוצון', 'מגפי גשם', 'מעיל פוך', 'כובע צמר', 'טייץ']) {
       expect(matchAnswer(t, w.answers), t).not.toBeNull();
     }
+  });
+  it('אין שם זהה בשתי תשובות של אותה שאלה, ושמות עם אותו שלד מזוהים לפי התאמה מדויקת', () => {
+    for (const q of QUESTIONS) {
+      const seen = new Set();
+      for (const a of q.answers) for (const n of a.names) {
+        const k = loose(n);
+        expect(seen.has(k), `${q.text}: ${n}`).toBe(false);
+        seen.add(k);
+      }
+    }
+    const farm = QUESTIONS.find((q) => q.text === 'חיות בחווה');
+    const goat = matchAnswer('עז', farm.answers).index;
+    const goose = matchAnswer('אווז', farm.answers).index;
+    expect(goat).not.toBe(goose);
+  });
+  it('תשובות חדשות מתקבלות: מדינות באסיה, כלי עבודה, תבלינים', () => {
+    const ask = (title, words) => { const q = QUESTIONS.find((x) => x.text === title); for (const w of words) expect(matchAnswer(w, q.answers), `${title}: ${w}`).not.toBeNull(); };
+    ask('מדינות באסיה', ['יפן', 'קוריאה הדרומית', 'תאילנד', 'איחוד האמירויות', 'וייטנאם']);
+    ask('כלי עבודה', ['פטיש', 'מברג', 'מקדחה', 'פלס']);
+    ask('תבלינים ועשבי תיבול', ['כמון', 'פפריקה', 'בזיליקום', 'כורכום']);
+    ask('חלקי הגוף', ['ברך', 'כתף', 'אצבעות']);
   });
 });

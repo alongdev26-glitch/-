@@ -19,6 +19,11 @@ export function normalize(input) {
     .trim();
 }
 
+/** השוואה מדויקת בלי קיפול אותיות: בלי ניקוד, פיסוק, רווחים ו"ה" הידיעה. משמשת להעדיף התאמה מדויקת. */
+export function loose(input) {
+  return normalize(input).split(' ').filter(Boolean).map((w) => (w.length >= 4 && w[0] === 'ה' ? w.slice(1) : w)).join('');
+}
+
 /** מפתח השוואה: מתעלם מ"ה" הידיעה, מרווחים, מ-ו/י (מלא וחסר) ומאותיות דומות. */
 export function skeleton(input) {
   const words = normalize(input)
@@ -66,11 +71,13 @@ export function tolerance(len) {
 export function matchAnswer(input, answers) {
   const q = skeleton(input);
   if (q.length < 2) return null;
+  const L = loose(input);
   let best = null;
   let tie = false;
   answers.forEach((ans, index) => {
     let d = Infinity;
     for (const name of ans.names) {
+      if (loose(name) === L) { d = -1; break; } // התאמה מדויקת מנצחת, גם אם לשתי תשובות יש אותו שלד (עז / אווז)
       const k = skeleton(name);
       if (!k) continue;
       if (k === q) {
@@ -89,5 +96,5 @@ export function matchAnswer(input, answers) {
     }
   });
   if (!best || (tie && best.distance > 0)) return null;
-  return best;
+  return { index: best.index, distance: Math.max(0, best.distance) };
 }
