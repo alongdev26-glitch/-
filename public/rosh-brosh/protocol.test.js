@@ -37,7 +37,8 @@ describe('פרוטוקול אונליין', () => {
     expect(cleanName(12)).toBe('שחקן');
   });
   it('לוגו מהיריב רק מהרשימה', () => {
-    expect(cleanLogo('crown')).toBe('crown');
+    expect(cleanLogo('kira')).toBe('kira');
+    expect(cleanLogo('crown')).toBe('kira'); // מזהה ישן
     expect(cleanLogo('<img onerror=x>')).toBeUndefined();
     expect(cleanLogo(5)).toBeUndefined();
   });

@@ -1,26 +1,27 @@
-import { QUESTIONS } from './questions.js?v=21';
-import { matchAnswer } from './checker.js?v=21';
-import { makeOpponent, botSkill, planBotTurn, TURN_SECONDS, NAMES } from './bot.js?v=21';
+import { QUESTIONS } from './questions.js?v=22';
+import { matchAnswer } from './checker.js?v=22';
+import { makeOpponent, botSkill, planBotTurn, TURN_SECONDS, NAMES } from './bot.js?v=22';
 import {
   MAX_ENERGY, COST, SHOP, DAILY_REWARDS, FREE_COINS, dailyState, claimDailyReward, freeCoinsState, claimFreeCoinsReward, buyItem, rewardsReady,
   defaultSave, tickEnergy, energyCountdownMs, spendEnergy, spend, rewards, pickQuestion,
   TASK_WINS, TASK_GEMS, taskState, recordWin, claimTask,
-} from './economy.js?v=21';
-import { BP_LEVELS, XP_PER_LEVEL, PREMIUM_COST, XP, bpState, addXp, xpForMatch, rewardFor, isClaimed, claimable, claimReward, claimAll, unlockPremium } from './battlepass.js?v=21';
-import * as snd from './sound.js?v=21';
-import { suspenseLevel, shouldTick } from './sound.js?v=21';
-import { I, emblem } from './icons.js?v=21';
-import { findMatch } from './net.js?v=21';
-import { toGuest, acceptAnswer, cleanName, cleanLogo } from './protocol.js?v=21';
-import { LOGOS, ageGroup, validateProfile, MIN_AGE, MAX_AGE } from './profile.js?v=21';
-import { newRound, hit as ruleHit, miss as ruleMiss, LIVES } from './rules.js?v=21';
+} from './economy.js?v=22';
+import { BP_LEVELS, XP_PER_LEVEL, PREMIUM_COST, XP, bpState, addXp, xpForMatch, rewardFor, isClaimed, claimable, claimReward, claimAll, unlockPremium } from './battlepass.js?v=22';
+import * as snd from './sound.js?v=22';
+import { suspenseLevel, shouldTick } from './sound.js?v=22';
+import { I } from './icons.js?v=22';
+import { animeFace, charByName } from './anime.js?v=22';
+import { findMatch } from './net.js?v=22';
+import { toGuest, acceptAnswer, cleanName, cleanLogo } from './protocol.js?v=22';
+import { LOGOS, normLogo, ageGroup, validateProfile, MIN_AGE, MAX_AGE } from './profile.js?v=22';
+import { newRound, hit as ruleHit, miss as ruleMiss, LIVES } from './rules.js?v=22';
 
 const KEY = 'rosh-brosh-save-v1';
 const PRE_SECONDS = 6;
 const WINS_NEEDED = 2;
 const MAX_ROUNDS = 5;
 
-const ME = { get name() { return save.name || 'אופיר שאול'; }, get logo() { return save.logo || 'flame'; } };
+const ME = { get name() { return save.name || 'אופיר שאול'; }, get logo() { return normLogo(save.logo) || 'hana'; } };
 const FRIENDS = [
   { name: 'שימי ביטון', trophies: 68 },
   { name: 'יוני הררי', trophies: 677 },
@@ -46,8 +47,9 @@ const screen = $('#screen');
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 /** לוגו עגול לשחקן (SVG), עם מסגרת מ-extra. */
+const faceOf = (p, cls = 'w-full h-full block') => animeFace(normLogo(p.logo) || charByName(p.name), cls);
 const avatar = (p, size, extra = '') =>
-  `<div class="${size} rounded-full overflow-hidden shrink-0 ${extra}">${emblem(p.name, 'w-full h-full block', p.logo)}</div>`;
+  `<div class="${size} rounded-full overflow-hidden shrink-0 ${extra}">${faceOf(p)}</div>`;
 
 const PLUS = (pos) => `<span class="absolute ${pos} z-10 text-[10px] bg-green-500 rounded-md w-4 h-4 flex items-center justify-center text-white font-extrabold leading-none border border-white/80">+</span>`;
 
@@ -114,7 +116,7 @@ const gameHeader = () => `
   </div>
 </header>`;
 
-const SCREEN_BG = 'bg-gradient-to-b from-[#af182c] via-[#a5162a] to-[#6c0e1e]';
+const SCREEN_BG = 'speed-bg bg-gradient-to-b from-[#af182c] via-[#a5162a] to-[#6c0e1e]';
 const cost = (n) => `<div class="flex items-center bg-[#5e0f19] px-1.5 py-0.5 rounded-md text-xs font-bold text-yellow-300 gap-1 border border-yellow-500/30"><span>${n}</span>${I.coin('w-3.5 h-3.5')}</div>`;
 const darkBtn = (act, cls, inner) => `<button data-act="${act}" type="button" class="${cls} bg-[#7c1723] hover:bg-[#901c2a] active:scale-95 transition-all text-white py-2 rounded-xl flex items-center justify-center gap-1.5 btn-3d-dark border border-white/20">${inner}</button>`;
 const bigGloss = (act, label, extra = '') => `<button data-act="${act}" class="game-gloss-card w-full h-16 rounded-xl flex items-center justify-center cursor-pointer text-2xl font-black text-3d-white ${extra}">${label}</button>`;
@@ -197,6 +199,28 @@ function confetti(parent, n = 30) {
   parent.append(box);
   setTimeout(() => box.remove(), 4200);
 }
+/** כוכב מנגה (פוליגון משונן) לרקע של פרצים וכותרות. */
+const burstPoints = (spikes = 14, outer = 50, inner = 36) => Array.from({ length: spikes * 2 }, (_, i) => {
+  const a = (i / (spikes * 2)) * Math.PI * 2 - Math.PI / 2;
+  const r = i % 2 ? inner : outer;
+  return `${(50 + Math.cos(a) * r).toFixed(1)},${(50 + Math.sin(a) * r).toFixed(1)}`;
+}).join(' ');
+function burst(word, kind = 'good') {
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  document.querySelectorAll('.burst').forEach((b) => b.remove());
+  const el = document.createElement('div');
+  el.className = `burst burst-${kind}`;
+  el.innerHTML = `<svg viewBox="0 0 100 100"><polygon points="${burstPoints(12, 50, 34)}"/></svg><span>${esc(word)}</span>`;
+  $('#app').append(el);
+  setTimeout(() => el.remove(), 1100);
+}
+function shakeScreen() {
+  const app = $('#app');
+  app.classList.remove('shake-screen'); void app.offsetWidth; app.classList.add('shake-screen');
+  setTimeout(() => app.classList.remove('shake-screen'), 500);
+}
+const titleBurst = (inner) => `<div class="title-wrap">${`<svg class="title-burst" viewBox="0 0 100 100" aria-hidden="true"><polygon points="${burstPoints(16, 50, 40)}"/></svg>`}${inner}</div>`;
+
 setInterval(() => {
   renderBar();
   updateDots();
@@ -589,16 +613,16 @@ async function invite() {
 }
 
 // ---------- פרופיל ושאלון ----------
-const LOGO_LABEL = { crown: 'כתר', bolt: 'ברק', star: 'כוכב', shield: 'מגן', flame: 'להבה', gem: 'יהלום' };
+const LOGO_LABEL = { hana: 'האנה', ren: 'רן', kira: 'קירה', sora: 'סורה', mika: 'מיקה', yuki: 'יוקי' };
 
 /** השאלון: שם, גיל ולוגו. first = הפעלה ראשונה. */
 function questionnaire(first) {
-  let logo = save.logo || 'flame';
+  let logo = normLogo(save.logo) || 'hana';
   const nameVal = save.name || '';
   show(`
 <div class="flex-1 min-h-0 ${SCREEN_BG} flex flex-col overflow-y-auto">
   <form id="qform" class="px-5 pt-8 pb-6 flex flex-col gap-5" autocomplete="off">
-    <img src="./icon-512.png?v=21" alt="ראש בראש" class="w-28 h-28 mx-auto drop-shadow-lg" />
+    <img src="./icon-512.png?v=22" alt="ראש בראש" class="w-28 h-28 mx-auto drop-shadow-lg" />
     <h1 class="text-4xl font-black text-3d-white text-center">${first ? 'ברוך הבא!' : 'עריכת פרופיל'}</h1>
     <p class="text-center text-white/85 -mt-2">${first ? 'כמה שאלות קצרות לפני שמתחילים' : 'אפשר לשנות בכל זמן'}</p>
     <label class="flex flex-col gap-1.5">
@@ -613,7 +637,7 @@ function questionnaire(first) {
       </div>
     </label>
     <div class="flex flex-col gap-2">
-      <span class="font-extrabold">בחר לוגו</span>
+      <span class="font-extrabold">בחר דמות</span>
       <div id="q-logos" class="grid grid-cols-3 gap-3"></div>
     </div>
     <p id="q-err" class="text-yellow-200 text-sm min-h-5 text-center font-bold"></p>
@@ -627,7 +651,7 @@ function questionnaire(first) {
     const nm = nameEl.value.trim() || 'שחקן';
     $('#q-logos').innerHTML = LOGOS.map((l) => `
       <button type="button" data-logo="${l}" aria-label="${LOGO_LABEL[l]}" aria-pressed="${l === logo}" class="logo-opt flex flex-col items-center gap-1 rounded-xl py-2 ${l === logo ? 'logo-on' : ''}">
-        <div class="w-16 h-16 rounded-full overflow-hidden">${emblem(nm, 'w-full h-full block', l)}</div>
+        <div class="w-16 h-16 rounded-full overflow-hidden">${animeFace(l, 'w-full h-full block')}</div>
         <span class="text-xs font-bold">${LOGO_LABEL[l]}</span>
       </button>`).join('');
   };
@@ -659,7 +683,7 @@ function profileScreen() {
 <div class="flex-1 min-h-0 ${SCREEN_BG} flex flex-col overflow-y-auto">
   ${gameHeader()}
   <section class="px-5 pb-6 flex flex-col items-center gap-4">
-    <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-yellow-300 shadow-xl crown-in">${emblem(ME.name, 'w-full h-full block', ME.logo)}</div>
+    <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-yellow-300 shadow-xl crown-in">${faceOf(ME)}</div>
     <h1 class="text-3xl font-black text-3d-white">${esc(ME.name)}</h1>
     <div class="flex gap-2">
       <span class="stat-pill rounded-lg px-4 py-1 text-sm font-extrabold">${esc(ageGroup(save.age) || 'ללא גיל')}</span>
@@ -709,7 +733,7 @@ function home() {
   const bpSt = bpState(save);
   const bpCan = claimable(save).length > 0;
   show(`
-<div class="flex-1 min-h-0 bg-game-swirls flex flex-col justify-between overflow-y-auto">
+<div class="speed-bg flex-1 min-h-0 bg-game-swirls flex flex-col justify-between overflow-y-auto">
   ${homeHeader()}
   <main class="menu-in px-4 flex flex-col justify-start gap-3.5 mt-2 z-10">
     <section class="grid grid-cols-2 gap-3">
@@ -752,7 +776,7 @@ function home() {
     </section>
     ${taskCard()}
   </main>
-  <footer class="mt-auto pt-3 pb-8 text-center text-[10px] text-white/60 z-10">v21 · <a href="./privacy.html" class="underline">מדיניות פרטיות</a></footer>
+  <footer class="mt-auto pt-3 pb-8 text-center text-[10px] text-white/60 z-10">v22 · <a href="./privacy.html" class="underline">מדיניות פרטיות</a></footer>
 </div>`, null, 'home');
 }
 
@@ -1149,14 +1173,20 @@ function mountPlay(q) {
 </div>`, forfeit);
   snd.startSuspense();
   snd.play('start');
+  burst('לדו-קרב!', 'good');
   return { rows: $('#rows'), form: $('#form'), input: $('#ans'), send: $('#send'), tbar: $('#tbar'), chip: $('#chip'), shown: { me: LIVES, bot: LIVES } };
 }
 
 function drawPlay(v, st, n) {
   const prevLen = v.logLen ?? st.log.length;
   v.logLen = st.log.length;
-  for (let i = prevLen; i < st.log.length; i++) snd.play(st.log[i].hit ? 'correct' : 'wrong');
-  if (st.lives.me < v.shown.me || st.lives.bot < v.shown.bot) setTimeout(() => snd.play('life'), 180);
+  for (let i = prevLen; i < st.log.length; i++) {
+    const e = st.log[i];
+    snd.play(e.hit ? 'correct' : 'wrong');
+    if (e.hit) burst(e.who === 'me' ? 'נכון!' : 'היריב!', e.who === 'me' ? 'good' : 'hit');
+    else burst(e.who === 'me' ? 'טעות!' : 'פספס!', e.who === 'me' ? 'bad' : 'good');
+  }
+  if (st.lives.me < v.shown.me || st.lives.bot < v.shown.bot) { setTimeout(() => snd.play('life'), 180); if (st.lives.me < v.shown.me) shakeScreen(); }
   v.rows.innerHTML = st.log.map(bubbleRow).join('');
   v.rows.scrollTop = v.rows.scrollHeight;
   $('#left').textContent = `נשארו ${n - st.count}`;
@@ -1207,7 +1237,7 @@ function showBanner(w, reason, missed) {
     : (you && loser === 'me' ? 'נגמרו לך החיים' : `${nm[loser]} נשאר בלי חיים`);
   const banner = document.createElement('div');
   banner.className = 'banner';
-  banner.innerHTML = `<div class="px-6"><h2 class="text-4xl font-black text-3d-white mb-2">${esc(title)}</h2><p class="text-xl text-purple-100 font-bold">${esc(why)}</p>${missed.length ? `<p class="mt-3 text-sm text-purple-200">לא נמצאו: ${esc(missed.slice(0, 4).join(', '))}${missed.length > 4 ? '…' : ''}</p>` : ''}</div>`;
+  banner.innerHTML = `<div class="px-6">${titleBurst(`<h2 class="text-4xl font-black text-3d-white">${esc(title)}</h2>`)}<div class="h-2"></div><p class="text-xl text-purple-100 font-bold">${esc(why)}</p>${missed.length ? `<p class="mt-3 text-sm text-purple-200">לא נמצאו: ${esc(missed.slice(0, 4).join(', '))}${missed.length > 4 ? '…' : ''}</p>` : ''}</div>`;
   $('#app').append(banner);
   snd.play(w === 'me' || !you ? 'roundWin' : 'roundLose');
   if (w === 'me' && you) confetti(banner, 24);
@@ -1468,7 +1498,7 @@ function finishMatch(outcome) {
       <div class="text-5xl font-black text-3d-white" dir="ltr">${M.score[0]}-${M.score[1]}</div>
       ${avatar(M.opp, 'w-20 h-20', 'border-[3px] border-white shadow-xl')}
     </div>
-    <h2 class="text-5xl font-black text-3d-banner">${esc(title)}</h2>
+    <div>${titleBurst(`<h2 class="text-5xl font-black text-3d-banner">${esc(title)}</h2>`)}</div>
     ${local2 ? '' : `<div class="flex justify-center gap-3">
       <div id="r-tp" class="stat-pill rounded-lg px-5 py-2 text-xl font-bold pop"></div>
       <div id="r-co" class="stat-pill rounded-lg px-5 py-2 text-xl font-bold pop" style="animation-delay:.15s"></div>
