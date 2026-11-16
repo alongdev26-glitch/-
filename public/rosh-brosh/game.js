@@ -1,19 +1,19 @@
-import { QUESTIONS } from './questions.js?v=20';
-import { matchAnswer } from './checker.js?v=20';
-import { makeOpponent, botSkill, planBotTurn, TURN_SECONDS, NAMES } from './bot.js?v=20';
+import { QUESTIONS } from './questions.js?v=21';
+import { matchAnswer } from './checker.js?v=21';
+import { makeOpponent, botSkill, planBotTurn, TURN_SECONDS, NAMES } from './bot.js?v=21';
 import {
   MAX_ENERGY, COST, SHOP, DAILY_REWARDS, FREE_COINS, dailyState, claimDailyReward, freeCoinsState, claimFreeCoinsReward, buyItem, rewardsReady,
   defaultSave, tickEnergy, energyCountdownMs, spendEnergy, spend, rewards, pickQuestion,
   TASK_WINS, TASK_GEMS, taskState, recordWin, claimTask,
-} from './economy.js?v=20';
-import { BP_LEVELS, XP_PER_LEVEL, PREMIUM_COST, XP, bpState, addXp, xpForMatch, rewardFor, isClaimed, claimable, claimReward, claimAll, unlockPremium } from './battlepass.js?v=20';
-import * as snd from './sound.js?v=20';
-import { suspenseLevel, shouldTick } from './sound.js?v=20';
-import { I, emblem } from './icons.js?v=20';
-import { findMatch } from './net.js?v=20';
-import { toGuest, acceptAnswer, cleanName, cleanLogo } from './protocol.js?v=20';
-import { LOGOS, ageGroup, validateProfile, MIN_AGE, MAX_AGE } from './profile.js?v=20';
-import { newRound, hit as ruleHit, miss as ruleMiss, LIVES } from './rules.js?v=20';
+} from './economy.js?v=21';
+import { BP_LEVELS, XP_PER_LEVEL, PREMIUM_COST, XP, bpState, addXp, xpForMatch, rewardFor, isClaimed, claimable, claimReward, claimAll, unlockPremium } from './battlepass.js?v=21';
+import * as snd from './sound.js?v=21';
+import { suspenseLevel, shouldTick } from './sound.js?v=21';
+import { I, emblem } from './icons.js?v=21';
+import { findMatch } from './net.js?v=21';
+import { toGuest, acceptAnswer, cleanName, cleanLogo } from './protocol.js?v=21';
+import { LOGOS, ageGroup, validateProfile, MIN_AGE, MAX_AGE } from './profile.js?v=21';
+import { newRound, hit as ruleHit, miss as ruleMiss, LIVES } from './rules.js?v=21';
 
 const KEY = 'rosh-brosh-save-v1';
 const PRE_SECONDS = 6;
@@ -70,7 +70,7 @@ const homeHeader = () => `
       <button data-act="gems" class="stat-pill relative pl-3 pr-2 py-0.5 rounded-lg flex items-center gap-1 min-w-[76px] justify-between h-7">
         ${PLUS('-top-2 -left-2')}
         <span data-v="gems" class="font-bold text-xs tracking-tight text-white"></span>
-        <div class="flex items-center justify-center">${I.gem('w-4 h-4')}</div>
+        <div class="flex items-center justify-center">${I.gem('w-5 h-5')}</div>
       </button>
       <button data-act="coins" class="stat-pill relative pl-3 pr-2 py-0.5 rounded-lg flex items-center gap-1 min-w-[68px] justify-between h-7">
         ${PLUS('-top-2 -left-2')}
@@ -108,7 +108,7 @@ const gameHeader = () => `
         </button>
         <span data-v="timer" class="text-[10px] text-white/90 font-medium tracking-tight mt-0.5 h-3"></span>
       </div>
-      ${gamePill('gems', 'gems', I.gem('w-4 h-4'))}
+      ${gamePill('gems', 'gems', I.gem('w-5 h-5'))}
       ${gamePill('coins', 'coins', I.coin('w-4 h-4'))}
     </div>
   </div>
@@ -511,7 +511,7 @@ function shop(section) {
     </div>`).join('');
   const gems = SHOP.gems.map((it) => `
     <div class="shop-card shop-soon" data-card="${it.id}">
-      <div class="flex-1 flex flex-col items-center justify-center gap-1">${I.gem('w-12 h-12')}<b class="text-2xl font-black text-3d-white">${it.gems}</b></div>
+      <div class="gem-glint flex-1 flex flex-col items-center justify-center gap-1">${I.gem('w-12 h-12')}<b class="text-2xl font-black text-3d-white">${it.gems}</b></div>
       <button data-buy="${it.id}" class="rounded-lg px-3 py-2 font-black bg-black/30 border border-white/20 text-sm">${it.price}<span class="block text-[10px] font-bold text-yellow-200">בקרוב</span></button>
     </div>`).join('');
   show(`
@@ -598,7 +598,7 @@ function questionnaire(first) {
   show(`
 <div class="flex-1 min-h-0 ${SCREEN_BG} flex flex-col overflow-y-auto">
   <form id="qform" class="px-5 pt-8 pb-6 flex flex-col gap-5" autocomplete="off">
-    <img src="./icon-512.png?v=20" alt="ראש בראש" class="w-28 h-28 mx-auto drop-shadow-lg" />
+    <img src="./icon-512.png?v=21" alt="ראש בראש" class="w-28 h-28 mx-auto drop-shadow-lg" />
     <h1 class="text-4xl font-black text-3d-white text-center">${first ? 'ברוך הבא!' : 'עריכת פרופיל'}</h1>
     <p class="text-center text-white/85 -mt-2">${first ? 'כמה שאלות קצרות לפני שמתחילים' : 'אפשר לשנות בכל זמן'}</p>
     <label class="flex flex-col gap-1.5">
@@ -752,7 +752,7 @@ function home() {
     </section>
     ${taskCard()}
   </main>
-  <footer class="mt-auto pt-3 pb-8 text-center text-[10px] text-white/60 z-10">v20 · <a href="./privacy.html" class="underline">מדיניות פרטיות</a></footer>
+  <footer class="mt-auto pt-3 pb-8 text-center text-[10px] text-white/60 z-10">v21 · <a href="./privacy.html" class="underline">מדיניות פרטיות</a></footer>
 </div>`, null, 'home');
 }
 
