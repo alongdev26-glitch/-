@@ -1,27 +1,27 @@
-import { QUESTIONS } from './questions.js?v=22';
-import { matchAnswer } from './checker.js?v=22';
-import { makeOpponent, botSkill, planBotTurn, TURN_SECONDS, NAMES } from './bot.js?v=22';
+import { QUESTIONS } from './questions.js?v=23';
+import { matchAnswer } from './checker.js?v=23';
+import { makeOpponent, botSkill, planBotTurn, TURN_SECONDS, NAMES } from './bot.js?v=23';
 import {
   MAX_ENERGY, COST, SHOP, DAILY_REWARDS, FREE_COINS, dailyState, claimDailyReward, freeCoinsState, claimFreeCoinsReward, buyItem, rewardsReady,
   defaultSave, tickEnergy, energyCountdownMs, spendEnergy, spend, rewards, pickQuestion,
   TASK_WINS, TASK_GEMS, taskState, recordWin, claimTask,
-} from './economy.js?v=22';
-import { BP_LEVELS, XP_PER_LEVEL, PREMIUM_COST, XP, bpState, addXp, xpForMatch, rewardFor, isClaimed, claimable, claimReward, claimAll, unlockPremium } from './battlepass.js?v=22';
-import * as snd from './sound.js?v=22';
-import { suspenseLevel, shouldTick } from './sound.js?v=22';
-import { I } from './icons.js?v=22';
-import { animeFace, charByName } from './anime.js?v=22';
-import { findMatch } from './net.js?v=22';
-import { toGuest, acceptAnswer, cleanName, cleanLogo } from './protocol.js?v=22';
-import { LOGOS, normLogo, ageGroup, validateProfile, MIN_AGE, MAX_AGE } from './profile.js?v=22';
-import { newRound, hit as ruleHit, miss as ruleMiss, LIVES } from './rules.js?v=22';
+} from './economy.js?v=23';
+import { BP_LEVELS, XP_PER_LEVEL, PREMIUM_COST, XP, bpState, addXp, xpForMatch, rewardFor, isClaimed, claimable, claimReward, claimAll, unlockPremium } from './battlepass.js?v=23';
+import * as snd from './sound.js?v=23';
+import { suspenseLevel, shouldTick } from './sound.js?v=23';
+import { I } from './icons.js?v=23';
+import { animeFace, charByName } from './anime.js?v=23';
+import { findMatch } from './net.js?v=23';
+import { toGuest, acceptAnswer, cleanName, cleanLogo } from './protocol.js?v=23';
+import { LOGOS, normLogo, ageGroup, validateProfile, MIN_AGE, MAX_AGE } from './profile.js?v=23';
+import { newRound, hit as ruleHit, miss as ruleMiss, LIVES } from './rules.js?v=23';
 
 const KEY = 'rosh-brosh-save-v1';
 const PRE_SECONDS = 6;
 const WINS_NEEDED = 2;
 const MAX_ROUNDS = 5;
 
-const ME = { get name() { return save.name || 'אופיר שאול'; }, get logo() { return normLogo(save.logo) || 'hana'; } };
+const ME = { get name() { return save.name || 'אופיר שאול'; }, get logo() { return normLogo(save.logo) || charByName(save.name || 'אופיר שאול'); } };
 const FRIENDS = [
   { name: 'שימי ביטון', trophies: 68 },
   { name: 'יוני הררי', trophies: 677 },
@@ -613,16 +613,14 @@ async function invite() {
 }
 
 // ---------- פרופיל ושאלון ----------
-const LOGO_LABEL = { hana: 'האנה', ren: 'רן', kira: 'קירה', sora: 'סורה', mika: 'מיקה', yuki: 'יוקי' };
 
 /** השאלון: שם, גיל ולוגו. first = הפעלה ראשונה. */
 function questionnaire(first) {
-  let logo = normLogo(save.logo) || 'hana';
   const nameVal = save.name || '';
   show(`
 <div class="flex-1 min-h-0 ${SCREEN_BG} flex flex-col overflow-y-auto">
   <form id="qform" class="px-5 pt-8 pb-6 flex flex-col gap-5" autocomplete="off">
-    <img src="./icon-512.png?v=22" alt="ראש בראש" class="w-28 h-28 mx-auto drop-shadow-lg" />
+    <img src="./icon-512.png?v=23" alt="ראש בראש" class="w-28 h-28 mx-auto drop-shadow-lg" />
     <h1 class="text-4xl font-black text-3d-white text-center">${first ? 'ברוך הבא!' : 'עריכת פרופיל'}</h1>
     <p class="text-center text-white/85 -mt-2">${first ? 'כמה שאלות קצרות לפני שמתחילים' : 'אפשר לשנות בכל זמן'}</p>
     <label class="flex flex-col gap-1.5">
@@ -636,10 +634,6 @@ function questionnaire(first) {
         <span id="q-group" class="stat-pill rounded-lg px-4 py-1.5 text-sm font-extrabold min-w-[84px] text-center"></span>
       </div>
     </label>
-    <div class="flex flex-col gap-2">
-      <span class="font-extrabold">בחר דמות</span>
-      <div id="q-logos" class="grid grid-cols-3 gap-3"></div>
-    </div>
     <p id="q-err" class="text-yellow-200 text-sm min-h-5 text-center font-bold"></p>
     <button type="submit" class="play-btn-glow h-16 rounded-xl text-2xl font-extrabold"><span class="text-3d-white">${first ? 'שמור והתחל' : 'שמור'}</span></button>
     ${first ? '' : '<button type="button" data-act="profile" class="game-gloss-card h-12 rounded-xl text-lg font-black">ביטול</button>'}
@@ -647,27 +641,12 @@ function questionnaire(first) {
 </div>`, first ? null : profileScreen);
   const nameEl = $('#q-name');
   const ageEl = $('#q-age');
-  const drawLogos = () => {
-    const nm = nameEl.value.trim() || 'שחקן';
-    $('#q-logos').innerHTML = LOGOS.map((l) => `
-      <button type="button" data-logo="${l}" aria-label="${LOGO_LABEL[l]}" aria-pressed="${l === logo}" class="logo-opt flex flex-col items-center gap-1 rounded-xl py-2 ${l === logo ? 'logo-on' : ''}">
-        <div class="w-16 h-16 rounded-full overflow-hidden">${animeFace(l, 'w-full h-full block')}</div>
-        <span class="text-xs font-bold">${LOGO_LABEL[l]}</span>
-      </button>`).join('');
-  };
   const drawGroup = () => { $('#q-group').textContent = ageGroup(ageEl.value) || 'קבוצת גיל'; };
-  drawLogos(); drawGroup();
-  nameEl.addEventListener('input', drawLogos);
+  drawGroup();
   ageEl.addEventListener('input', drawGroup);
-  $('#q-logos').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-logo]');
-    if (!b) return;
-    logo = b.dataset.logo;
-    drawLogos();
-  });
   $('#qform').addEventListener('submit', (e) => {
     e.preventDefault();
-    const r = validateProfile({ name: nameEl.value, age: ageEl.value, logo });
+    const r = validateProfile({ name: nameEl.value, age: ageEl.value, logo: normLogo(save.logo) || charByName(nameEl.value.trim()) });
     if (r.error) { $('#q-err').textContent = r.error; return; }
     Object.assign(save, r.value, { profileDone: true });
     persist();
@@ -776,7 +755,7 @@ function home() {
     </section>
     ${taskCard()}
   </main>
-  <footer class="mt-auto pt-3 pb-8 text-center text-[10px] text-white/60 z-10">v22 · <a href="./privacy.html" class="underline">מדיניות פרטיות</a></footer>
+  <footer class="mt-auto pt-3 pb-8 text-center text-[10px] text-white/60 z-10">v23 · <a href="./privacy.html" class="underline">מדיניות פרטיות</a></footer>
 </div>`, null, 'home');
 }
 
