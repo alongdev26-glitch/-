@@ -93,7 +93,7 @@ function ensure() {
     comp.threshold.value = -14; comp.ratio.value = 6;
     master = ctx.createGain(); master.gain.value = 0.85;
     fxGain = ctx.createGain(); fxGain.gain.value = 1;
-    musicGain = ctx.createGain(); musicGain.gain.value = 0.55;
+    musicGain = ctx.createGain(); musicGain.gain.value = 0.26;
     fxGain.connect(master); musicGain.connect(master); master.connect(comp).connect(ctx.destination);
   } catch { ctx = null; }
   return ctx;
@@ -134,12 +134,12 @@ export function startSuspense() {
   const c = ensure();
   if (!c) return;
   const d = drone(c);
-  d.out.gain.exponentialRampToValueAtTime(0.5, c.currentTime + 0.8);
+  d.out.gain.exponentialRampToValueAtTime(0.32, c.currentTime + 1.2);
   state.suspense = d;
   const beat = () => {
     if (!state.suspense) return;
     const t = c.currentTime + 0.02;
-    const v = 0.25 + 0.5 * state.level;
+    const v = 0.12 + 0.28 * state.level;
     note(c, musicGain, { t, f: 70, f2: 40, dur: 0.22, type: 'sine', vol: v });
     note(c, musicGain, { t: t + 0.17, f: 62, f2: 38, dur: 0.2, type: 'sine', vol: v * 0.7 });
     state.beatTimer = setTimeout(beat, heartbeatGap(state.level) * 1000);
