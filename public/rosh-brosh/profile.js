@@ -1,5 +1,8 @@
 // פרופיל שחקן: שם, גיל ולוגו. פונקציות טהורות, כדי שאפשר יהיה לבדוק אותן.
-export const LOGOS = ['crown', 'bolt', 'star', 'shield', 'flame', 'gem'];
+// "הלוגו" של השחקן הוא דמות אנימה. מזהים ישנים (סמלים) ממופים לדמויות כדי ששמירות קיימות לא יישברו.
+export const LOGOS = ['hana', 'ren', 'kira', 'sora', 'mika', 'yuki'];
+export const LEGACY_LOGOS = { flame: 'hana', bolt: 'ren', crown: 'kira', shield: 'sora', star: 'mika', gem: 'yuki' };
+export const normLogo = (l) => (LOGOS.includes(l) ? l : LEGACY_LOGOS[l]);
 export const MIN_AGE = 5;
 export const MAX_AGE = 99;
 
@@ -20,6 +23,7 @@ export function validateProfile({ name, age, logo }) {
   const raw = String(age ?? '').trim();
   const a = Number(raw);
   if (!raw || !Number.isInteger(a) || a < MIN_AGE || a > MAX_AGE) return { error: `כתוב גיל בין ${MIN_AGE} ל-${MAX_AGE}` };
-  if (!LOGOS.includes(logo)) return { error: 'בחר לוגו' };
-  return { value: { name: n, age: a, logo } };
+  const lg = normLogo(logo);
+  if (!lg) return { error: 'בחר דמות' };
+  return { value: { name: n, age: a, logo: lg } };
 }
