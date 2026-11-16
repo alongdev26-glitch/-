@@ -189,3 +189,10 @@ button:active { transition: transform .08s; }
 .bp-claimed { opacity: .75; }
 .bp-ready { border-color: #ffd23f; animation: readyGlow 1.4s ease-in-out infinite; cursor: pointer; }
 .bp-mark { position: absolute; top: 2px; left: 4px; }
+
+/* מתגי סאונד */
+.sw-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: 12px; background: rgba(0,0,0,.22); border: 1.5px solid rgba(255,255,255,.18); }
+.sw { position: relative; width: 52px; height: 30px; border-radius: 999px; background: #3c0f1c; border: 2px solid rgba(255,255,255,.25); transition: background .2s; }
+.sw i { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: #ffc9d2; transition: transform .2s, background .2s; }
+.sw-on { background: #3fcf3f; border-color: #bff5bf; }
+.sw-on i { transform: translateX(-22px); background: #fff; }

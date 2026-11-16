@@ -1,17 +1,19 @@
-import { QUESTIONS } from './questions.js?v=19';
-import { matchAnswer } from './checker.js?v=19';
-import { makeOpponent, botSkill, planBotTurn, TURN_SECONDS, NAMES } from './bot.js?v=19';
+import { QUESTIONS } from './questions.js?v=20';
+import { matchAnswer } from './checker.js?v=20';
+import { makeOpponent, botSkill, planBotTurn, TURN_SECONDS, NAMES } from './bot.js?v=20';
 import {
   MAX_ENERGY, COST, SHOP, DAILY_REWARDS, FREE_COINS, dailyState, claimDailyReward, freeCoinsState, claimFreeCoinsReward, buyItem, rewardsReady,
   defaultSave, tickEnergy, energyCountdownMs, spendEnergy, spend, rewards, pickQuestion,
   TASK_WINS, TASK_GEMS, taskState, recordWin, claimTask,
-} from './economy.js?v=19';
-import { BP_LEVELS, XP_PER_LEVEL, PREMIUM_COST, XP, bpState, addXp, xpForMatch, rewardFor, isClaimed, claimable, claimReward, claimAll, unlockPremium } from './battlepass.js?v=19';
-import { I, emblem } from './icons.js?v=19';
-import { findMatch } from './net.js?v=19';
-import { toGuest, acceptAnswer, cleanName, cleanLogo } from './protocol.js?v=19';
-import { LOGOS, ageGroup, validateProfile, MIN_AGE, MAX_AGE } from './profile.js?v=19';
-import { newRound, hit as ruleHit, miss as ruleMiss, LIVES } from './rules.js?v=19';
+} from './economy.js?v=20';
+import { BP_LEVELS, XP_PER_LEVEL, PREMIUM_COST, XP, bpState, addXp, xpForMatch, rewardFor, isClaimed, claimable, claimReward, claimAll, unlockPremium } from './battlepass.js?v=20';
+import * as snd from './sound.js?v=20';
+import { suspenseLevel, shouldTick } from './sound.js?v=20';
+import { I, emblem } from './icons.js?v=20';
+import { findMatch } from './net.js?v=20';
+import { toGuest, acceptAnswer, cleanName, cleanLogo } from './protocol.js?v=20';
+import { LOGOS, ageGroup, validateProfile, MIN_AGE, MAX_AGE } from './profile.js?v=20';
+import { newRound, hit as ruleHit, miss as ruleMiss, LIVES } from './rules.js?v=20';
 
 const KEY = 'rosh-brosh-save-v1';
 const PRE_SECONDS = 6;
@@ -205,6 +207,19 @@ setInterval(() => {
 }, 1000);
 
 // ---------- אנימציות פרסים ----------
+snd.configure({ sfx: save.sfx !== false, music: save.music !== false });
+const soundOn = () => save.sfx !== false || save.music !== false;
+function setSound(sfx, music) {
+  save.sfx = sfx; save.music = music; persist();
+  snd.configure({ sfx, music });
+  document.querySelectorAll('[data-act="mute"]').forEach((b) => { b.innerHTML = soundOn() ? I.sound('w-5 h-5') : I.mute('w-5 h-5'); });
+}
+document.addEventListener('pointerdown', (e) => {
+  snd.unlock();
+  const t = e.target.closest?.('button, [data-tab]');
+  if (!t) return;
+  snd.play(t.matches('#tabbar *') ? 'tab' : 'tap');
+}, { capture: true });
 const hold = new Set(); // מונים שנשארים במקומם עד שהאייקונים הפורחים נוחתים
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const reduced = () => !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -233,7 +248,7 @@ function flyTo(fromEl, key, icon, n = 8) {
       { transform: `translate(${spread}px,${-50 - Math.random() * 40}px) scale(1.1)`, opacity: 1, offset: 0.25 },
       { transform: `translate(${dx}px,${dy}px) scale(.5)`, opacity: 1 },
     ], { duration: 950 + i * 70, delay: i * 60, easing: 'cubic-bezier(.4,0,.6,1)', fill: 'forwards' });
-    return anim.finished.then(() => { el.remove(); bump(to); });
+    return anim.finished.then(() => { el.remove(); bump(to); coinSound(); });
   });
   return Promise.all(jobs);
 }
@@ -246,6 +261,8 @@ const GIFT = `<svg viewBox="0 0 120 120" class="w-36 h-36 gift-box" aria-hidden=
   <path d="M60 34C42 34 34 22 42 14c8-8 18 6 18 20zm0 0c18 0 26-12 18-20-8-8-18 6-18 20z" fill="#ffd23f" stroke="#4d0510" stroke-width="4" stroke-linejoin="round"/></g>
 </svg>`;
 
+let lastCoin = 0;
+const coinSound = () => { const n = performance.now(); if (n - lastCoin > 70) { lastCoin = n; snd.play('coin'); } };
 const rewardIcon = (key, c = 'w-6 h-6') => (key === 'gems' ? I.gem(c) : key === 'energy' ? I.bolt(c) : I.coin(c));
 
 /** חלון פתיחת פרס: קופסה נפתחת, הפרסים עולים, ואז עפים אל הסרגל העליון. */
@@ -262,6 +279,8 @@ async function rewardModal(title, items) {
     </div>
   </div>`;
   m.hidden = false;
+  snd.play('rattle');
+  setTimeout(() => snd.play('open'), 1250);
   await sleep(reduced() ? 600 : 2300);
   const gift = $('#gift');
   await Promise.all(items.map((it) => flyTo(gift, it.key, rewardIcon(it.key), Math.min(10, Math.max(4, Math.round(it.n / 8))))));
@@ -308,11 +327,13 @@ async function claimDaily() {
 async function buyShopItem(item, fromEl) {
   const r = buyItem(save, item);
   if (!r.ok) {
+    snd.play('error');
     if (r.error === 'gems') return toast(`חסרים לך ${r.missing} יהלומים`);
     if (r.error === 'full') return toast('האנרגיה מלאה');
     return toast('בקרוב');
   }
   persist();
+  snd.play('buy');
   if (r.coins) {
     hold.add('coins');
     renderBar();
@@ -362,7 +383,7 @@ function updateDots() {
 const ACTIONS = {
   back: () => backAction?.(),
   energy: () => shop('energy'), gems: () => shop('gems'), coins: () => shop('coins'), shop: () => shop(), invite,
-  daily: claimDaily, free: claimFree, bp: () => battlePass(), 'bp-claim': (el) => bpClaim(Number(el.dataset.lv), el.dataset.tr), 'bp-all': () => bpAll(), 'bp-premium': () => bpPremium(), leaderboard: () => leaderboard(), seasons: () => leaderboard(), play: () => startOnline(), local2: () => startLocal2(), bot: () => startMatch(), rename: () => profileScreen(), profile: () => profileScreen(), 'edit-profile': () => questionnaire(false),
+  daily: claimDaily, free: claimFree, mute: () => (soundOn() ? setSound(false, false) : setSound(true, true)), 'toggle-sfx': () => { setSound(save.sfx === false, save.music !== false); profileScreen(); }, 'toggle-music': () => { setSound(save.sfx !== false, save.music === false); profileScreen(); }, bp: () => battlePass(), 'bp-claim': (el) => bpClaim(Number(el.dataset.lv), el.dataset.tr), 'bp-all': () => bpAll(), 'bp-premium': () => bpPremium(), leaderboard: () => leaderboard(), seasons: () => leaderboard(), play: () => startOnline(), local2: () => startLocal2(), bot: () => startMatch(), rename: () => profileScreen(), profile: () => profileScreen(), 'edit-profile': () => questionnaire(false),
   friend: (el) => startMatch(FRIENDS[Number(el.dataset.i)]),
   home: () => home(),
   claim: () => { if (claimTask(save)) { addXp(save, XP.task); persist(); renderBar(); toast(`קיבלת ${TASK_GEMS} יהלומים`); home(); } },
@@ -402,7 +423,7 @@ function bpPremium() {
     { label: `פתח ב-${PREMIUM_COST} ${I.gem('w-5 h-5')}`, run: () => {
       const r = unlockPremium(save);
       if (!r.ok) return toast(r.error === 'gems' ? `חסרים לך ${r.missing} יהלומים` : 'הפרימיום כבר פעיל');
-      persist(); renderBar(); toast('הפרימיום נפתח!'); battlePass();
+      persist(); renderBar(); snd.play('levelUp'); toast('הפרימיום נפתח!'); battlePass();
     } },
     { label: 'אחר כך', ghost: true },
   ]);
@@ -577,7 +598,7 @@ function questionnaire(first) {
   show(`
 <div class="flex-1 min-h-0 ${SCREEN_BG} flex flex-col overflow-y-auto">
   <form id="qform" class="px-5 pt-8 pb-6 flex flex-col gap-5" autocomplete="off">
-    <img src="./icon-512.png?v=19" alt="ראש בראש" class="w-28 h-28 mx-auto drop-shadow-lg" />
+    <img src="./icon-512.png?v=20" alt="ראש בראש" class="w-28 h-28 mx-auto drop-shadow-lg" />
     <h1 class="text-4xl font-black text-3d-white text-center">${first ? 'ברוך הבא!' : 'עריכת פרופיל'}</h1>
     <p class="text-center text-white/85 -mt-2">${first ? 'כמה שאלות קצרות לפני שמתחילים' : 'אפשר לשנות בכל זמן'}</p>
     <label class="flex flex-col gap-1.5">
@@ -646,6 +667,10 @@ function profileScreen() {
     </div>
     <div class="grid grid-cols-3 gap-3 w-full mt-2">
       ${stat('גביעים', save.trophies)}${stat('משחקים', save.played)}${stat('ניצחונות', save.wins)}
+    </div>
+    <div class="w-full flex flex-col gap-2 mt-1">
+      <button data-act="toggle-sfx" role="switch" aria-checked="${save.sfx !== false}" class="sw-row"><span class="flex items-center gap-2 font-extrabold">${I.sound('w-5 h-5')} אפקטים</span><span class="sw ${save.sfx !== false ? 'sw-on' : ''}"><i></i></span></button>
+      <button data-act="toggle-music" role="switch" aria-checked="${save.music !== false}" class="sw-row"><span class="flex items-center gap-2 font-extrabold">${I.sound('w-5 h-5')} מוזיקת מתח</span><span class="sw ${save.music !== false ? 'sw-on' : ''}"><i></i></span></button>
     </div>
     <button data-act="edit-profile" class="play-btn-glow w-full h-16 rounded-xl text-2xl font-extrabold mt-2"><span class="text-3d-white">ערוך פרופיל</span></button>
   </section>
@@ -727,7 +752,7 @@ function home() {
     </section>
     ${taskCard()}
   </main>
-  <footer class="mt-auto pt-3 pb-8 text-center text-[10px] text-white/60 z-10">v19 · <a href="./privacy.html" class="underline">מדיניות פרטיות</a></footer>
+  <footer class="mt-auto pt-3 pb-8 text-center text-[10px] text-white/60 z-10">v20 · <a href="./privacy.html" class="underline">מדיניות פרטיות</a></footer>
 </div>`, null, 'home');
 }
 
@@ -832,10 +857,12 @@ function startRoulette() {
   let raf = 0;
   let last = performance.now();
   const apply = () => { strip.style.transform = `translateY(${-(pos % total)}px)`; };
+  let lastRow = 0;
+  const rowTick = () => { const r = Math.floor(pos / ROW); if (r !== lastRow) { lastRow = r; snd.play('tick'); } };
   const loop = (now) => {
     const dt = (now - last) / 1000;
     last = now;
-    if (!landing && !REDUCED()) { pos += 900 * dt; apply(); }
+    if (!landing && !REDUCED()) { pos += 900 * dt; apply(); rowTick(); }
     raf = requestAnimationFrame(loop);
   };
   raf = requestAnimationFrame(loop);
@@ -858,8 +885,10 @@ function startRoulette() {
           const k = dur ? Math.min(1, (now - t0) / dur) : 1;
           pos = from + (target - from) * (1 - (1 - k) ** 3);
           apply();
+          rowTick();
           if (k < 1) return requestAnimationFrame(step);
           cancelAnimationFrame(raf);
+          snd.play('ding');
           strip.children[idx].classList.add('roulette-win');
           strip.children[idx + n].classList.add('roulette-win');
           resolve();
@@ -974,6 +1003,7 @@ function forfeit() {
 }
 
 function stopRound() {
+  snd.stopSuspense();
   if (!R) return;
   clearInterval(R.iv);
   (R.botTimers || []).forEach(clearTimeout);
@@ -1030,6 +1060,7 @@ function intro() {
   R = { iv: setInterval(() => {
     left -= 1;
     count.textContent = Math.max(left, 0); bump(count);
+    if (left > 0 && left <= 5) snd.play('beep');
     if (left <= 0) { clearInterval(R.iv); play(); }
   }, 1000) };
 }
@@ -1082,9 +1113,10 @@ function mountPlay(q) {
       </div>
       <div class="flex flex-col items-center gap-1"><div id="av-bot" class="rounded-full">${avatar(M.opp, 'w-11 h-11', 'border-2 border-white shadow-lg')}</div><div id="lives-bot" class="flex gap-0.5"></div></div>
     </div>
-    <div class="bg-[#8b2dbf] p-3 pb-3.5 rounded-2xl border-2 border-white/25 shadow-xl flex flex-col gap-2.5 min-h-0">
-      <h1 class="text-center font-extrabold text-white text-[21px] leading-tight px-2 text-emboss tracking-normal">${esc(q.text)}</h1>
-      <div class="doodle-bg rounded-xl p-3 border border-purple-300/40 relative shadow-inner min-h-[175px] flex flex-col justify-between overflow-hidden">
+    <div class="relative bg-[#8b2dbf] p-3 pb-3.5 rounded-2xl border-2 border-white/25 shadow-xl flex flex-col gap-2.5 min-h-0">
+      <button data-act="mute" aria-label="סאונד" class="absolute top-2 right-2 w-8 h-8 rounded-lg bg-black/25 border border-white/20 flex items-center justify-center z-10">${soundOn() ? I.sound('w-5 h-5') : I.mute('w-5 h-5')}</button>
+      <h1 class="text-center font-extrabold text-white text-[21px] leading-tight px-9 text-emboss tracking-normal">${esc(q.text)}</h1>
+      <div class="doodle-bg rounded-xl p-3 border border-[#ff8f9b]/40 relative shadow-inner min-h-[175px] flex flex-col justify-between overflow-hidden">
         <div id="rows" class="flex flex-col gap-2.5 w-full max-h-[30dvh] overflow-y-auto"></div>
         <div class="mt-2 pt-1 border-t border-purple-200/50 flex items-center justify-between text-xs font-bold text-purple-900 px-1">
           <span class="text-purple-800 text-[13px] font-black">${esc(ME.name)}</span>
@@ -1115,10 +1147,16 @@ function mountPlay(q) {
     </div>
   </footer>
 </div>`, forfeit);
+  snd.startSuspense();
+  snd.play('start');
   return { rows: $('#rows'), form: $('#form'), input: $('#ans'), send: $('#send'), tbar: $('#tbar'), chip: $('#chip'), shown: { me: LIVES, bot: LIVES } };
 }
 
 function drawPlay(v, st, n) {
+  const prevLen = v.logLen ?? st.log.length;
+  v.logLen = st.log.length;
+  for (let i = prevLen; i < st.log.length; i++) snd.play(st.log[i].hit ? 'correct' : 'wrong');
+  if (st.lives.me < v.shown.me || st.lives.bot < v.shown.bot) setTimeout(() => snd.play('life'), 180);
   v.rows.innerHTML = st.log.map(bubbleRow).join('');
   v.rows.scrollTop = v.rows.scrollHeight;
   $('#left').textContent = `נשארו ${n - st.count}`;
@@ -1130,6 +1168,10 @@ function drawPlay(v, st, n) {
 
 function paintPlayTurn(v, turn) {
   const on = inputOn(turn);
+  if (v.lastTurn !== undefined && v.lastTurn !== turn) snd.play('turn');
+  v.lastTurn = turn;
+  v.mine = on;
+  snd.setSuspenseLevel(suspenseLevel(10, 10) * (on ? 1 : 0.55));
   $('#chip-text').textContent = turnLabel(turn);
   $('#chip-sec').style.visibility = turn === 'me' || M.mode !== 'bot' ? 'visible' : 'hidden';
   $('#av-me').className = `rounded-full ${turn === 'me' ? 'turn-active' : 'turn-idle'}`;
@@ -1145,6 +1187,8 @@ function paintPlayTurn(v, turn) {
 function tickPlay(v, left, total) {
   $('#chip-sec').textContent = Math.max(0, Math.ceil(left / 1000));
   v.tbar.style.width = `${Math.max(0, (left / total) * 100)}%`;
+  snd.setSuspenseLevel(suspenseLevel(left, total) * (v.mine ? 1 : 0.55));
+  if (v.mine && shouldTick(left)) { const sec = Math.ceil(left / 1000); if (sec !== v.lastSec) { v.lastSec = sec; snd.clockTick(); } }
   const low = left < 3000;
   v.tbar.classList.toggle('bar-low', low);
   v.chip.classList.toggle('chip-low', low);
@@ -1165,6 +1209,7 @@ function showBanner(w, reason, missed) {
   banner.className = 'banner';
   banner.innerHTML = `<div class="px-6"><h2 class="text-4xl font-black text-3d-white mb-2">${esc(title)}</h2><p class="text-xl text-purple-100 font-bold">${esc(why)}</p>${missed.length ? `<p class="mt-3 text-sm text-purple-200">לא נמצאו: ${esc(missed.slice(0, 4).join(', '))}${missed.length > 4 ? '…' : ''}</p>` : ''}</div>`;
   $('#app').append(banner);
+  snd.play(w === 'me' || !you ? 'roundWin' : 'roundLose');
   if (w === 'me' && you) confetti(banner, 24);
   return banner;
 }
@@ -1321,7 +1366,7 @@ function guestHandle(m) {
       let left = Math.round((m.ms || 6000) / 1000);
       const count = $('#count');
       count.textContent = left;
-      R = { iv: setInterval(() => { left -= 1; count.textContent = Math.max(left, 0); bump(count); if (left <= 0) clearInterval(R.iv); }, 1000) };
+      R = { iv: setInterval(() => { left -= 1; count.textContent = Math.max(left, 0); bump(count); if (left > 0 && left <= 5) snd.play('beep'); if (left <= 0) clearInterval(R.iv); }, 1000) };
       break;
     }
     case 'start': return playMirror(m);
@@ -1439,6 +1484,8 @@ function finishMatch(outcome) {
     countUp($('#r-co'), r.coins, '+', I.coin('w-5 h-5'));
     countUp($('#r-xp'), bpXp.gained, '+', '<span class="text-sm">XP</span>');
   }
+  snd.play(outcome === 'win' ? 'fanfare' : 'defeat');
+  if (bpXp?.levelsUp) setTimeout(() => snd.play('levelUp'), 1400);
   if (outcome === 'win' && !local2) confetti(screen, 40);
   if (M.conn && mode !== 'bot') { const c = M.conn; setTimeout(() => c.close(), 500); }
 }
