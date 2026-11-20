@@ -44,14 +44,14 @@ export interface Space {
 }
 
 export const GROUP_COLORS: Record<Group, string> = {
-  brown: '#0fa3a3',
-  lightblue: '#e2337f',
-  pink: '#f5c400',
-  orange: '#f08a00',
-  red: '#8e44ad',
-  yellow: '#6fae12',
-  green: '#c0392b',
-  darkblue: '#7f8c8d',
+  brown: '#8b3a2b',
+  lightblue: '#1e9bd7',
+  pink: '#e0218a',
+  orange: '#f28c1e',
+  red: '#e3001b',
+  yellow: '#f7d117',
+  green: '#1fa24a',
+  darkblue: '#1c4fa0',
 };
 
 const prop = (
