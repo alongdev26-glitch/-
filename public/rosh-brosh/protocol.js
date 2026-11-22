@@ -1,4 +1,3 @@
-import { normLogo } from './profile.js';
 
 // הודעות בין שני הטלפונים. המארח (host) מחליט הכול, והאורח (guest) מציג ושולח תשובות.
 // כל ההודעות של המארח כתובות מנקודת המבט שלו: "me" = המארח, "bot" = היריב (האורח).
@@ -39,4 +38,3 @@ export const cleanName = (s, fallback = 'שחקן') => {
 };
 
 /** לוגו שמגיע מהיריב: רק מהרשימה המותרת. */
-export const cleanLogo = (l) => normLogo(l);
