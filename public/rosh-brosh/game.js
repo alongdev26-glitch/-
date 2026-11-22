@@ -1,27 +1,26 @@
-import { QUESTIONS } from './questions.js?v=23';
-import { matchAnswer } from './checker.js?v=23';
-import { makeOpponent, botSkill, planBotTurn, TURN_SECONDS, NAMES } from './bot.js?v=23';
+import { QUESTIONS } from './questions.js?v=24';
+import { matchAnswer } from './checker.js?v=24';
+import { makeOpponent, botSkill, planBotTurn, TURN_SECONDS, NAMES } from './bot.js?v=24';
 import {
   MAX_ENERGY, COST, SHOP, DAILY_REWARDS, FREE_COINS, dailyState, claimDailyReward, freeCoinsState, claimFreeCoinsReward, buyItem, rewardsReady,
   defaultSave, tickEnergy, energyCountdownMs, spendEnergy, spend, rewards, pickQuestion,
   TASK_WINS, TASK_GEMS, taskState, recordWin, claimTask,
-} from './economy.js?v=23';
-import { BP_LEVELS, XP_PER_LEVEL, PREMIUM_COST, XP, bpState, addXp, xpForMatch, rewardFor, isClaimed, claimable, claimReward, claimAll, unlockPremium } from './battlepass.js?v=23';
-import * as snd from './sound.js?v=23';
-import { suspenseLevel, shouldTick } from './sound.js?v=23';
-import { I } from './icons.js?v=23';
-import { animeFace, charByName } from './anime.js?v=23';
-import { findMatch } from './net.js?v=23';
-import { toGuest, acceptAnswer, cleanName, cleanLogo } from './protocol.js?v=23';
-import { LOGOS, normLogo, ageGroup, validateProfile, MIN_AGE, MAX_AGE } from './profile.js?v=23';
-import { newRound, hit as ruleHit, miss as ruleMiss, LIVES } from './rules.js?v=23';
+} from './economy.js?v=24';
+import { BP_LEVELS, XP_PER_LEVEL, PREMIUM_COST, XP, bpState, addXp, xpForMatch, rewardFor, isClaimed, claimable, claimReward, claimAll, unlockPremium } from './battlepass.js?v=24';
+import * as snd from './sound.js?v=24';
+import { suspenseLevel, shouldTick } from './sound.js?v=24';
+import { I } from './icons.js?v=24';
+import { findMatch } from './net.js?v=24';
+import { toGuest, acceptAnswer, cleanName } from './protocol.js?v=24';
+import { ageGroup, validateProfile, MIN_AGE, MAX_AGE } from './profile.js?v=24';
+import { newRound, hit as ruleHit, miss as ruleMiss, LIVES } from './rules.js?v=24';
 
 const KEY = 'rosh-brosh-save-v1';
 const PRE_SECONDS = 6;
 const WINS_NEEDED = 2;
 const MAX_ROUNDS = 5;
 
-const ME = { get name() { return save.name || 'אופיר שאול'; }, get logo() { return normLogo(save.logo) || charByName(save.name || 'אופיר שאול'); } };
+const ME = { get name() { return save.name || 'אופיר שאול'; }, };
 const FRIENDS = [
   { name: 'שימי ביטון', trophies: 68 },
   { name: 'יוני הררי', trophies: 677 },
@@ -47,9 +46,6 @@ const screen = $('#screen');
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 /** לוגו עגול לשחקן (SVG), עם מסגרת מ-extra. */
-const faceOf = (p, cls = 'w-full h-full block') => animeFace(normLogo(p.logo) || charByName(p.name), cls);
-const avatar = (p, size, extra = '') =>
-  `<div class="${size} rounded-full overflow-hidden shrink-0 ${extra}">${faceOf(p)}</div>`;
 
 const PLUS = (pos) => `<span class="absolute ${pos} z-10 text-[10px] bg-green-500 rounded-md w-4 h-4 flex items-center justify-center text-white font-extrabold leading-none border border-white/80">+</span>`;
 
@@ -82,8 +78,7 @@ const homeHeader = () => `
     </div>
   </div>
   <div class="flex items-center gap-2 mt-1 mr-1">
-    <button data-act="rename" aria-label="שנה שם" class="rounded-full">${avatar(ME, 'w-12 h-12', 'border-2 border-yellow-400 shadow-lg')}</button>
-    <span class="text-sm font-bold text-white/90">${esc(ME.name)}</span>
+    <button data-act="rename" aria-label="שנה שם" class="name-chip">${esc(ME.name)}</button>
     <div class="stat-pill px-2.5 py-0.5 rounded-lg flex items-center gap-1 h-6"><span class="text-xs font-bold text-white">${save.trophies}</span>${I.trophy('w-4 h-4')}</div>
   </div>
 </header>`;
@@ -591,7 +586,6 @@ function friends() {
     <div class="flex flex-col gap-3">
       ${FRIENDS.map((f, i) => `
       <div class="friend-row">
-        ${avatar(f, 'w-14 h-14', 'border-2 border-white/90 shadow-lg')}
         <div class="flex-1 text-right min-w-0"><b class="block font-black text-lg truncate">${esc(f.name)}</b><span class="stat-pill rounded-lg px-2 py-0.5 text-xs font-extrabold inline-flex items-center gap-1">${f.trophies} ${I.trophy('w-3.5 h-3.5')}</span></div>
         <button data-act="friend" data-i="${i}" class="friend-play">שחק</button>
       </div>`).join('')}
@@ -620,7 +614,7 @@ function questionnaire(first) {
   show(`
 <div class="flex-1 min-h-0 ${SCREEN_BG} flex flex-col overflow-y-auto">
   <form id="qform" class="px-5 pt-8 pb-6 flex flex-col gap-5" autocomplete="off">
-    <img src="./icon-512.png?v=23" alt="ראש בראש" class="w-28 h-28 mx-auto drop-shadow-lg" />
+    <img src="./icon-512.png?v=24" alt="ראש בראש" class="w-28 h-28 mx-auto drop-shadow-lg" />
     <h1 class="text-4xl font-black text-3d-white text-center">${first ? 'ברוך הבא!' : 'עריכת פרופיל'}</h1>
     <p class="text-center text-white/85 -mt-2">${first ? 'כמה שאלות קצרות לפני שמתחילים' : 'אפשר לשנות בכל זמן'}</p>
     <label class="flex flex-col gap-1.5">
@@ -646,7 +640,7 @@ function questionnaire(first) {
   ageEl.addEventListener('input', drawGroup);
   $('#qform').addEventListener('submit', (e) => {
     e.preventDefault();
-    const r = validateProfile({ name: nameEl.value, age: ageEl.value, logo: normLogo(save.logo) || charByName(nameEl.value.trim()) });
+    const r = validateProfile({ name: nameEl.value, age: ageEl.value });
     if (r.error) { $('#q-err').textContent = r.error; return; }
     Object.assign(save, r.value, { profileDone: true });
     persist();
@@ -662,7 +656,6 @@ function profileScreen() {
 <div class="flex-1 min-h-0 ${SCREEN_BG} flex flex-col overflow-y-auto">
   ${gameHeader()}
   <section class="px-5 pb-6 flex flex-col items-center gap-4">
-    <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-yellow-300 shadow-xl crown-in">${faceOf(ME)}</div>
     <h1 class="text-3xl font-black text-3d-white">${esc(ME.name)}</h1>
     <div class="flex gap-2">
       <span class="stat-pill rounded-lg px-4 py-1 text-sm font-extrabold">${esc(ageGroup(save.age) || 'ללא גיל')}</span>
@@ -755,7 +748,7 @@ function home() {
     </section>
     ${taskCard()}
   </main>
-  <footer class="mt-auto pt-3 pb-8 text-center text-[10px] text-white/60 z-10">v23 · <a href="./privacy.html" class="underline">מדיניות פרטיות</a></footer>
+  <footer class="mt-auto pt-3 pb-8 text-center text-[10px] text-white/60 z-10">v24 · <a href="./privacy.html" class="underline">מדיניות פרטיות</a></footer>
 </div>`, null, 'home');
 }
 
@@ -790,7 +783,6 @@ function leaderboard() {
       ${rows.map((r, i) => `
       <div class="lb-row rounded-xl px-3 py-2 flex items-center gap-3 ${r.me ? 'bg-white/15 border border-white/50' : 'bg-white/5'}" style="animation-delay:${i * 70}ms">
         <div class="w-9 h-9 rounded-lg ${r.me ? 'text-yellow-300 border-yellow-300/70' : 'border-white/30'} border flex items-center justify-center font-black text-lg">${i + 1}</div>
-        ${avatar(r, 'w-12 h-12', `border-2 ${r.me ? 'border-yellow-400' : 'border-white/80'}`)}
         <b class="flex-1 font-extrabold text-lg ${r.me ? 'text-yellow-200' : ''}">${esc(r.name)}</b>
         <div class="stat-pill px-3 py-1 rounded-lg text-sm font-extrabold flex items-center gap-1.5"><span>${r.trophies}</span>${I.trophy('w-4 h-4')}</div>
       </div>`).join('')}
@@ -848,7 +840,7 @@ const REDUCED = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').ma
 /** רולטה של יריבים: מסתובבת בזמן החיפוש, ונעצרת על היריב שנמצא. */
 function rouletteHtml() {
   const pool = [...NAMES].sort(() => Math.random() - 0.5);
-  const items = pool.map((name) => `<div class="roulette-item">${avatar({ name }, 'w-12 h-12', 'border-2 border-white/80')}<b>${esc(name)}</b></div>`).join('');
+  const items = pool.map((name) => `<div class="roulette-item"><b>${esc(name)}</b></div>`).join('');
   return `<div class="roulette"><div id="strip" class="roulette-strip">${items}${items}</div><div class="roulette-band"></div></div>`;
 }
 function startRoulette() {
@@ -877,7 +869,7 @@ function startRoulette() {
         landing = true;
         const cur = pos % total;
         const idx = (Math.ceil(cur / ROW) + 14) % n;
-        const html = `${avatar(opp, 'w-12 h-12', 'border-2 border-yellow-300')}<b>${esc(opp.name)}</b>`;
+        const html = `<b>${esc(opp.name)}</b>`;
         for (const k of [idx, idx + n]) { strip.children[k].innerHTML = html; strip.children[k].classList.add('roulette-hit'); }
         let target = pos - cur + (((idx - 1) * ROW + total) % total);
         if (target < pos + 8 * ROW) target += total;
@@ -952,7 +944,7 @@ function startOnline() {
 
 /** לחיצת יד: כל צד שולח שם וגביעים. אחרי שהרולטה נעצרת על היריב, המשחק מתחיל. */
 function connected({ role, conn }, found, isCancelled) {
-  const hello = { t: 'hello', name: cleanName(save.name || ME.name), trophies: save.trophies, logo: ME.logo };
+  const hello = { t: 'hello', name: cleanName(save.name || ME.name), trophies: save.trophies };
   let started = false;
   const pending = [];
   const timeout = setTimeout(() => { if (!started) { conn.close(); toast('החיבור נכשל, משחקים מול בוט'); startMatch(); } }, 6000);
@@ -961,7 +953,7 @@ function connected({ role, conn }, found, isCancelled) {
     if (!m || m.t !== 'hello') return;
     started = true;
     clearTimeout(timeout);
-    const opp = { name: cleanName(m.name), trophies: Number(m.trophies) || 0, logo: cleanLogo(m.logo) };
+    const opp = { name: cleanName(m.name), trophies: Number(m.trophies) || 0 };
     found(opp).then((ok) => {
       if (!ok || isCancelled()) { conn.close(); return; }
       if (!spendEnergy(save)) { conn.close(); return buyEnergy(); }
@@ -1028,9 +1020,9 @@ function introHtml(q, actionsHtml) {
   ${gameHeader()}
   <section class="px-3.5 flex flex-col gap-4">
     <div class="grid grid-cols-[1fr_auto_1fr] items-center text-center gap-2 mt-2">
-      <div class="flex flex-col items-center gap-1">${avatar(ME, 'w-20 h-20', 'border-[3px] border-white shadow-xl')}<span class="font-black">${esc(ME.name)}</span>${trophyPill(save.trophies)}</div>
+      <div class="flex flex-col items-center gap-1"><span class="name-plate">${esc(ME.name)}</span>${trophyPill(save.trophies)}</div>
       <div class="text-5xl font-black text-3d-white bump" dir="ltr">${M.score[0]}-${M.score[1]}</div>
-      <div class="flex flex-col items-center gap-1">${avatar(M.opp, 'w-20 h-20', 'border-[3px] border-white shadow-xl')}<span class="font-black">${esc(M.opp.name)}</span>${trophyPill(M.opp.trophies)}</div>
+      <div class="flex flex-col items-center gap-1"><span class="name-plate">${esc(M.opp.name)}</span>${trophyPill(M.opp.trophies)}</div>
     </div>
     <div id="count" class="count-tick self-center w-20 h-20 rounded-full border-4 border-white/25 border-t-white flex items-center justify-center text-4xl font-black">${PRE_SECONDS}</div>
     <div class="bg-[#8b2dbf] p-5 rounded-2xl border-2 border-white/25 shadow-xl text-center">
@@ -1109,12 +1101,12 @@ function mountPlay(q) {
   ${gameHeader()}
   <section class="px-3.5 z-10 flex flex-col gap-3 min-h-0">
     <div class="flex items-start justify-between px-1">
-      <div class="flex flex-col items-center gap-1"><div id="av-me" class="rounded-full">${avatar(ME, 'w-11 h-11', 'border-2 border-white shadow-lg')}</div><div id="lives-me" class="flex gap-0.5"></div></div>
+      <div class="flex flex-col items-center gap-1"><div id="av-me" class="name-plate">${esc(ME.name)}</div><div id="lives-me" class="flex gap-0.5"></div></div>
       <div class="flex flex-col items-center">
         <div id="chip" class="stat-pill rounded-lg px-4 py-1 text-sm font-extrabold flex items-center gap-2"><span id="chip-text"></span><span id="chip-sec" class="text-yellow-300 tabular-nums"></span></div>
         <div class="w-40 bg-purple-950/40 h-1.5 rounded-full overflow-hidden mt-1.5"><div id="tbar" class="h-full rounded-full w-full" style="background:linear-gradient(to left,#d4a853,#eab308)"></div></div>
       </div>
-      <div class="flex flex-col items-center gap-1"><div id="av-bot" class="rounded-full">${avatar(M.opp, 'w-11 h-11', 'border-2 border-white shadow-lg')}</div><div id="lives-bot" class="flex gap-0.5"></div></div>
+      <div class="flex flex-col items-center gap-1"><div id="av-bot" class="name-plate">${esc(M.opp.name)}</div><div id="lives-bot" class="flex gap-0.5"></div></div>
     </div>
     <div class="relative bg-[#8b2dbf] p-3 pb-3.5 rounded-2xl border-2 border-white/25 shadow-xl flex flex-col gap-2.5 min-h-0">
       <button data-act="mute" aria-label="סאונד" class="absolute top-2 right-2 w-8 h-8 rounded-lg bg-black/25 border border-white/20 flex items-center justify-center z-10">${soundOn() ? I.sound('w-5 h-5') : I.mute('w-5 h-5')}</button>
@@ -1183,8 +1175,8 @@ function paintPlayTurn(v, turn) {
   snd.setSuspenseLevel(suspenseLevel(10, 10) * (on ? 1 : 0.55));
   $('#chip-text').textContent = turnLabel(turn);
   $('#chip-sec').style.visibility = turn === 'me' || M.mode !== 'bot' ? 'visible' : 'hidden';
-  $('#av-me').className = `rounded-full ${turn === 'me' ? 'turn-active' : 'turn-idle'}`;
-  $('#av-bot').className = `rounded-full ${turn === 'bot' ? 'turn-active' : 'turn-idle'}`;
+  $('#av-me').className = `name-plate ${turn === 'me' ? 'turn-active' : 'turn-idle'}`;
+  $('#av-bot').className = `name-plate ${turn === 'bot' ? 'turn-active' : 'turn-idle'}`;
   v.input.disabled = !on;
   v.send.disabled = !on;
   v.input.placeholder = on ? 'הזן תשובה' : `התור של ${M.opp.name}...`;
@@ -1473,9 +1465,9 @@ function finishMatch(outcome) {
   ${gameHeader()}
   <section class="px-4 flex-1 flex flex-col justify-center gap-5 text-center">
     <div class="flex items-center justify-center gap-6">
-      ${avatar(ME, 'w-20 h-20', 'border-[3px] border-white shadow-xl')}
+      <span class="name-plate">${esc(ME.name)}</span>
       <div class="text-5xl font-black text-3d-white" dir="ltr">${M.score[0]}-${M.score[1]}</div>
-      ${avatar(M.opp, 'w-20 h-20', 'border-[3px] border-white shadow-xl')}
+      <span class="name-plate">${esc(M.opp.name)}</span>
     </div>
     <div>${titleBurst(`<h2 class="text-5xl font-black text-3d-banner">${esc(title)}</h2>`)}</div>
     ${local2 ? '' : `<div class="flex justify-center gap-3">
