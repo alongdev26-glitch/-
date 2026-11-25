@@ -20,8 +20,10 @@ const M = 0.35;
 const lift = (B: number, tilt: number) => ((B / 2) * Math.SQRT2 + 2) * Math.sin((tilt * Math.PI) / 180);
 /** shrink it back by as much as the lift made it grow */
 const shrink = (B: number, tilt: number) => (B ? (B * 1.6 - lift(B, tilt)) / (B * 1.6) : 1);
-/** how close the camera rides: the board fills the view and follows the player whose turn it is */
+/** how close the camera rides at first (pinch to change it): the board fills the view and follows the player whose turn it is */
 const ZOOM = 1.85;
+const ZOOM_MIN = 1;
+const ZOOM_MAX = 3.4;
 /** each die face, in the order three.js paints a box: +x, -x, +y, -y, +z (up), -z */
 const FACES = [1, 6, 2, 5, 3, 4];
 /** the turn that brings each value to the top */
@@ -47,7 +49,7 @@ export default function Stage3D({ game, shown, rolling, children }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const tilt = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState(0);
-  const [view, setView] = useState({ tilt: 28, spin: 0 });
+  const [view, setView] = useState({ tilt: 28, spin: 0, zoom: ZOOM });
   const live = useRef({ game, shown, rolling, view, size });
   live.current = { game, shown, rolling, view, size };
 
@@ -59,29 +61,57 @@ export default function Stage3D({ game, shown, rolling, children }: Props) {
     return () => ro.disconnect();
   }, []);
 
-  // drag to turn and tilt; a real drag never counts as a tap on a square
+  // drag to turn and tilt, pinch (or the mouse wheel) to come closer or step back; a real drag never counts as a tap on a square
   useEffect(() => {
     const el = stage.current!;
-    let start: { x: number; y: number; tilt: number; spin: number } | null = null;
+    const fingers = new Map<number, { x: number; y: number }>();
+    let start: { x: number; y: number; tilt: number; spin: number; zoom: number; gap: number } | null = null;
     let dragged = false;
+    const gap = () => {
+      const [a, b] = [...fingers.values()];
+      return b ? Math.hypot(a.x - b.x, a.y - b.y) : 0;
+    };
+    const restart = () => {
+      const f = [...fingers.values()];
+      if (!f.length) return (start = null);
+      const x = f.reduce((s, p) => s + p.x, 0) / f.length,
+        y = f.reduce((s, p) => s + p.y, 0) / f.length;
+      start = { x, y, ...live.current.view, gap: gap() };
+    };
+    const clampZoom = (z: number) => Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z));
     const down = (e: PointerEvent) => {
-      start = { x: e.clientX, y: e.clientY, ...live.current.view };
-      dragged = false;
+      fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (fingers.size === 1) dragged = false;
+      restart();
     };
     const move = (e: PointerEvent) => {
-      if (!start) return;
+      if (!start || !fingers.has(e.pointerId)) return;
+      fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (fingers.size >= 2) {
+        dragged = true;
+        const z = clampZoom(start.zoom * (gap() / (start.gap || 1)));
+        setView((v) => ({ ...v, zoom: z }));
+        return;
+      }
       const dx = e.clientX - start.x,
         dy = e.clientY - start.y;
       if (!dragged && Math.hypot(dx, dy) < 8) return;
       dragged = true;
-      setView({
-        tilt: Math.max(0, Math.min(60, start.tilt - dy * 0.3)),
-        spin: start.spin - dx * 0.4,
-      });
+      setView((v) => ({
+        ...v,
+        tilt: Math.max(0, Math.min(60, start!.tilt - dy * 0.3)),
+        spin: start!.spin - dx * 0.4,
+      }));
     };
-    const up = () => {
-      start = null;
+    const up = (e: PointerEvent) => {
+      fingers.delete(e.pointerId);
+      restart();
     };
+    const wheel = (e: WheelEvent) => {
+      e.preventDefault();
+      setView((v) => ({ ...v, zoom: clampZoom(v.zoom * Math.exp(-e.deltaY * 0.0015)) }));
+    };
+    el.addEventListener('wheel', wheel, { passive: false });
     const click = (e: MouseEvent) => {
       if (dragged) {
         e.stopPropagation();
@@ -92,11 +122,14 @@ export default function Stage3D({ game, shown, rolling, children }: Props) {
     el.addEventListener('pointerdown', down);
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
     el.addEventListener('click', click, true);
     return () => {
       el.removeEventListener('pointerdown', down);
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+      el.removeEventListener('wheel', wheel);
       el.removeEventListener('click', click, true);
     };
   }, []);
@@ -212,7 +245,7 @@ export default function Stage3D({ game, shown, rolling, children }: Props) {
     const makePiece = (token: string, color: string) => {
       const g = new THREE.Group();
       const shadow = new THREE.Mesh(
-        new THREE.PlaneGeometry(cell * 0.8, cell * 0.8),
+        new THREE.PlaneGeometry(cell, cell),
         new THREE.MeshBasicMaterial({
           map: shadowTex,
           transparent: true,
@@ -223,7 +256,7 @@ export default function Stage3D({ game, shown, rolling, children }: Props) {
       g.add(shadow);
       const up = stand(new THREE.Group());
       g.add(up);
-      const r = cell * 0.26;
+      const r = cell * 0.33;
       const base = new THREE.Mesh(
         new THREE.CylinderGeometry(r, r * 1.1, cell * 0.12, 28),
         new THREE.MeshStandardMaterial({ color, roughness: 0.3 }),
@@ -238,7 +271,7 @@ export default function Stage3D({ game, shown, rolling, children }: Props) {
             roughness: 0.38,
           }),
         );
-        cat.scale.setScalar(cell * 1.05);
+        cat.scale.setScalar(cell * 1.35);
         cat.position.y = cell * 0.12;
         cat.rotation.y = -Math.PI / 2;
         up.add(cat);
@@ -252,14 +285,14 @@ export default function Stage3D({ game, shown, rolling, children }: Props) {
           [0.09, 0.52],
           [0.16, 0.58],
           [0.09, 0.62],
-        ].map(([x, y]) => new THREE.Vector2(x * cell * 0.72, y * cell * 0.72));
+        ].map(([x, y]) => new THREE.Vector2(x * cell * 0.92, y * cell * 0.92));
         const body = new THREE.Mesh(new THREE.LatheGeometry(pts, 24), mat);
         body.position.y = cell * 0.12;
         up.add(body);
         const em = TOKENS.find((t) => t.id === token)?.emoji ?? '●';
         const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: emojiTex(em), depthTest: true }));
-        sp.scale.setScalar(cell * 0.5);
-        sp.position.y = cell * 0.72;
+        sp.scale.setScalar(cell * 0.62);
+        sp.position.y = cell * 0.9;
         up.add(sp);
       }
       return g;
@@ -367,8 +400,9 @@ export default function Stage3D({ game, shown, rolling, children }: Props) {
       camera.updateProjectionMatrix();
       // follow the current player; keep the board's edges outside the view
       const cur = spot(at[gs.current] ?? 0);
-      const k = shrink(B, v.tilt) * ZOOM;
-      const room = Math.max(0, 0.5 - 0.22 / k);
+      const k = shrink(B, v.tilt) * v.zoom;
+      // stepped back, the whole board sits in the middle; closer in, the view can reach the corners
+      const room = Math.max(0, Math.min(0.5 - 0.22 / k, 0.5 - 0.5 / k + Math.max(0, k - 1) * 0.6));
       const tx = Math.max(-room, Math.min(room, cur.x)),
         ty = Math.max(-room, Math.min(room, -cur.y));
       aim.x += (tx - aim.x) * 0.08;
@@ -417,7 +451,7 @@ export default function Stage3D({ game, shown, rolling, children }: Props) {
         }
         const mates = alive.filter((q) => at[q.id] === at[p.id]);
         const k = mates.indexOf(p);
-        const target = spot(at[p.id]).add(new THREE.Vector3((k - (mates.length - 1) / 2) * cell * 0.36, 0, 0));
+        const target = spot(at[p.id]).add(new THREE.Vector3((k - (mates.length - 1) / 2) * cell * 0.44, 0, 0));
         if (!target.equals(pc.to)) {
           pc.from.copy(pc.at);
           pc.to.copy(target);
