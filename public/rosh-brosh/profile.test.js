@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ageGroup, validateProfile, LOGOS, normLogo } from './profile.js';
+import { ageGroup, validateProfile } from './profile.js';
 
 describe('פרופיל', () => {
   it('קבוצת גיל', () => {
@@ -12,21 +12,13 @@ describe('פרופיל', () => {
     expect(ageGroup(3)).toBe('');
     expect(ageGroup('abc')).toBe('');
   });
-  it('מאמת שם, גיל ולוגו', () => {
-    expect(validateProfile({ name: '  דנה   כהן ', age: '25', logo: 'crown' })).toEqual({ value: { name: 'דנה כהן', age: 25, logo: 'kira' } });
-    expect(validateProfile({ name: '', age: 20, logo: 'bolt' }).error).toBeTruthy();
-    expect(validateProfile({ name: 'א'.repeat(15), age: 20, logo: 'bolt' }).error).toBeTruthy();
-    expect(validateProfile({ name: 'דנה', age: '4', logo: 'bolt' }).error).toBeTruthy();
-    expect(validateProfile({ name: 'דנה', age: '100', logo: 'bolt' }).error).toBeTruthy();
-    expect(validateProfile({ name: 'דנה', age: '12.5', logo: 'bolt' }).error).toBeTruthy();
-    expect(validateProfile({ name: 'דנה', age: '', logo: 'bolt' }).error).toBeTruthy();
-    expect(validateProfile({ name: 'דנה', age: 20, logo: 'banana' }).error).toBeTruthy();
-    for (const l of LOGOS) expect(validateProfile({ name: 'דנה', age: 20, logo: l }).value.logo).toBe(l);
-  });
-  it('מזהי לוגו ישנים ממופים לדמויות', () => {
-    expect(normLogo('flame')).toBe('hana');
-    expect(normLogo('gem')).toBe('yuki');
-    expect(normLogo('sora')).toBe('sora');
-    expect(normLogo('banana')).toBeUndefined();
+  it('מאמת שם וגיל', () => {
+    expect(validateProfile({ name: '  דנה   כהן ', age: '25'})).toEqual({ value: { name: 'דנה כהן', age: 25 } });
+    expect(validateProfile({ name: '', age: 20 }).error).toBeTruthy();
+    expect(validateProfile({ name: 'א'.repeat(15), age: 20 }).error).toBeTruthy();
+    expect(validateProfile({ name: 'דנה', age: '4' }).error).toBeTruthy();
+    expect(validateProfile({ name: 'דנה', age: '100' }).error).toBeTruthy();
+    expect(validateProfile({ name: 'דנה', age: '12.5' }).error).toBeTruthy();
+    expect(validateProfile({ name: 'דנה', age: '' }).error).toBeTruthy();
   });
 });
