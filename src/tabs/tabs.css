@@ -763,39 +763,3 @@
   border-radius: 12px;
   padding: 8px 12px;
 }
-
-/* 2D / 3D board switch, next to the sound button */
-.board-3d {
-  position: absolute;
-  top: 6px;
-  left: 54px;
-  z-index: 6;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  background: rgba(17, 17, 17, 0.35);
-  color: #fff;
-  font: 900 13px/1 var(--font);
-  cursor: pointer;
-}
-.board-3d[aria-pressed='true'] {
-  background: var(--red);
-}
-@media (orientation: landscape) and (min-aspect-ratio: 4/3) {
-  .board-3d {
-    top: auto;
-    bottom: 8px;
-  }
-}
-/* the 3D board's buttons sit over the bottom of its frame */
-.fab-3d {
-  position: relative;
-  width: var(--board-size);
-  height: 0;
-  z-index: 7;
-}
-.fab-3d .board-fab {
-  bottom: 12px;
-  right: 12px;
-}
