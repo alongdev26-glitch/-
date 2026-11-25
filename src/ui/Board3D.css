@@ -23,3 +23,14 @@
 .stage3d .board {
   outline: none;
 }
+/* zoomed in, the board fills its frame: nothing around it shows */
+.stage3d {
+  overflow: hidden;
+  border-radius: 14px;
+  background: #3a2412;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+}
+/* the 3D layer throws its own dice */
+.stage3d .board-dice {
+  visibility: hidden;
+}

@@ -18,17 +18,19 @@ const track = (n: number) => (n === 1 ? C / 2 : n === 11 ? TOTAL - C / 2 : C + n
 const M = 0.35;
 /** the tilt carries the far corner behind the page, where the browser stops drawing it: lift the board toward the viewer so all of it stays in front */
 const lift = (B: number, tilt: number) => ((B / 2) * Math.SQRT2 + 2) * Math.sin((tilt * Math.PI) / 180);
-/** and shrink it back by as much as the lift made it grow, plus a little so a turned board's corners stay on screen */
-const shrink = (B: number, tilt: number, spin = 0) => {
-  const r = (spin * Math.PI) / 180;
-  // a turned square is wider than its side: keep its corners on screen
-  const fit = 1 / Math.max(1, (Math.abs(Math.cos(r)) + Math.abs(Math.sin(r))) * 0.84);
-  return B ? ((B * 1.6 - lift(B, tilt)) / (B * 1.6)) * 0.8 * fit : 1;
-};
+/** shrink it back by as much as the lift made it grow */
+const shrink = (B: number, tilt: number) => (B ? (B * 1.6 - lift(B, tilt)) / (B * 1.6) : 1);
+/** how close the camera rides: the board fills the view and follows the player whose turn it is */
+const ZOOM = 1.85;
+/** each die face, in the order three.js paints a box: +x, -x, +y, -y, +z (up), -z */
+const FACES = [1, 6, 2, 5, 3, 4];
+/** the turn that brings each value to the top */
+const FACE_UP: Record<number, [number, number]> = { 3: [0, 0], 4: [Math.PI, 0], 2: [Math.PI / 2, 0], 5: [-Math.PI / 2, 0], 1: [0, -Math.PI / 2], 6: [0, Math.PI / 2] };
 
 interface Props {
   game: GameState;
   shown: number[];
+  rolling: boolean;
   children: ReactNode;
 }
 
@@ -40,13 +42,14 @@ type Piece = {
   t0: number;
 };
 
-export default function Stage3D({ game, shown, children }: Props) {
+export default function Stage3D({ game, shown, rolling, children }: Props) {
   const stage = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
+  const tilt = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState(0);
-  const [view, setView] = useState({ tilt: 38, spin: 0 });
-  const live = useRef({ game, shown, view, size });
-  live.current = { game, shown, view, size };
+  const [view, setView] = useState({ tilt: 28, spin: 0 });
+  const live = useRef({ game, shown, rolling, view, size });
+  live.current = { game, shown, rolling, view, size };
 
   // the board's size follows the tab's layout
   useEffect(() => {
@@ -209,7 +212,7 @@ export default function Stage3D({ game, shown, children }: Props) {
     const makePiece = (token: string, color: string) => {
       const g = new THREE.Group();
       const shadow = new THREE.Mesh(
-        new THREE.PlaneGeometry(cell * 1.1, cell * 1.1),
+        new THREE.PlaneGeometry(cell * 0.8, cell * 0.8),
         new THREE.MeshBasicMaterial({
           map: shadowTex,
           transparent: true,
@@ -220,7 +223,7 @@ export default function Stage3D({ game, shown, children }: Props) {
       g.add(shadow);
       const up = stand(new THREE.Group());
       g.add(up);
-      const r = cell * 0.36;
+      const r = cell * 0.26;
       const base = new THREE.Mesh(
         new THREE.CylinderGeometry(r, r * 1.1, cell * 0.12, 28),
         new THREE.MeshStandardMaterial({ color, roughness: 0.3 }),
@@ -235,7 +238,7 @@ export default function Stage3D({ game, shown, children }: Props) {
             roughness: 0.38,
           }),
         );
-        cat.scale.setScalar(cell * 1.5);
+        cat.scale.setScalar(cell * 1.05);
         cat.position.y = cell * 0.12;
         cat.rotation.y = -Math.PI / 2;
         up.add(cat);
@@ -249,14 +252,14 @@ export default function Stage3D({ game, shown, children }: Props) {
           [0.09, 0.52],
           [0.16, 0.58],
           [0.09, 0.62],
-        ].map(([x, y]) => new THREE.Vector2(x * cell, y * cell));
+        ].map(([x, y]) => new THREE.Vector2(x * cell * 0.72, y * cell * 0.72));
         const body = new THREE.Mesh(new THREE.LatheGeometry(pts, 24), mat);
         body.position.y = cell * 0.12;
         up.add(body);
         const em = TOKENS.find((t) => t.id === token)?.emoji ?? '●';
         const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: emojiTex(em), depthTest: true }));
-        sp.scale.setScalar(cell * 0.7);
-        sp.position.y = cell * 1.0;
+        sp.scale.setScalar(cell * 0.5);
+        sp.position.y = cell * 0.72;
         up.add(sp);
       }
       return g;
@@ -308,10 +311,52 @@ export default function Stage3D({ game, shown, children }: Props) {
       });
     };
 
+    // the dice
+    const dieTex = (n: number) => {
+      const c = document.createElement('canvas');
+      c.width = c.height = 128;
+      const x = c.getContext('2d')!;
+      x.fillStyle = '#fff';
+      x.fillRect(0, 0, 128, 128);
+      x.fillStyle = '#1a1a1a';
+      const P: Record<number, number[][]> = {
+        1: [[64, 64]],
+        2: [[34, 34], [94, 94]],
+        3: [[30, 30], [64, 64], [98, 98]],
+        4: [[34, 34], [94, 34], [34, 94], [94, 94]],
+        5: [[30, 30], [98, 30], [64, 64], [30, 98], [98, 98]],
+        6: [[34, 28], [94, 28], [34, 64], [94, 64], [34, 100], [94, 100]],
+      };
+      for (const [a, b] of P[n]) {
+        x.beginPath();
+        x.arc(a, b, 12, 0, 7);
+        x.fill();
+      }
+      const t = new THREE.CanvasTexture(c);
+      t.colorSpace = THREE.SRGBColorSpace;
+      return t;
+    };
+    const dieMats = FACES.map((n) => new THREE.MeshStandardMaterial({ map: dieTex(n), roughness: 0.3 }));
+    const D = cell * 0.5;
+    const dice = [0, 1].map(() => {
+      const d = new THREE.Mesh(new THREE.BoxGeometry(D, D, D), dieMats);
+      d.visible = false;
+      unit.add(d);
+      return d;
+    });
+    let seenRoll = live.current.game.rollSeq;
+    let rollT0 = -1e9;
+    const spins = [new THREE.Euler(), new THREE.Euler()];
+    /** where the dice land: in front of the current player, toward the middle of the board */
+    let diceAt = new THREE.Vector3();
+
+    // the camera's aim, eased toward the current player
+    const aim = new THREE.Vector2(0, 0);
+
     let raf = 0;
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
-      const { game: gs, shown: at, view: v, size: B } = live.current;
+      const { game: gs, shown: at, rolling: isRolling, view: v, size: B } = live.current;
       if (!B) return;
       const W = B * (1 + 2 * M),
         P = B * 1.6;
@@ -320,10 +365,43 @@ export default function Stage3D({ game, shown, children }: Props) {
       camera.aspect = 1;
       camera.position.set(0, 0, P);
       camera.updateProjectionMatrix();
+      // follow the current player; keep the board's edges outside the view
+      const cur = spot(at[gs.current] ?? 0);
+      const k = shrink(B, v.tilt) * ZOOM;
+      const room = Math.max(0, 0.5 - 0.22 / k);
+      const tx = Math.max(-room, Math.min(room, cur.x)),
+        ty = Math.max(-room, Math.min(room, -cur.y));
+      aim.x += (tx - aim.x) * 0.08;
+      aim.y += (ty - aim.y) * 0.08;
       board.rotation.set((-v.tilt * Math.PI) / 180, 0, (-v.spin * Math.PI) / 180, 'XYZ');
       board.position.z = lift(B, v.tilt);
-      board.scale.setScalar(shrink(B, v.tilt, v.spin));
+      board.scale.setScalar(k);
       unit.scale.setScalar(B);
+      unit.position.set(-aim.x * B, aim.y * B, 0);
+      // the live board under the 3D layer moves with exactly the same transform
+      if (tilt.current)
+        tilt.current.style.transform = `translateZ(${board.position.z}px) scale3d(${k}, ${k}, ${k}) rotateX(${v.tilt}deg) rotateZ(${v.spin}deg) translate(${-aim.x * B}px, ${-aim.y * B}px)`;
+
+      // dice: thrown on every roll, they tumble while the roll runs and land on its numbers
+      if (gs.rollSeq !== seenRoll) {
+        seenRoll = gs.rollSeq;
+        rollT0 = now;
+        diceAt = cur.clone().multiplyScalar(0.62);
+        spins.forEach((e) => e.set(Math.random() * 12, Math.random() * 12, Math.random() * 12));
+      }
+      const dt = (now - rollT0) / 900;
+      const show = gs.rollSeq > 0 && (isRolling || dt < 6);
+      dice.forEach((d, i) => {
+        d.visible = show;
+        if (!show) return;
+        const e = Math.min(1, Math.max(0, dt));
+        const ease = 1 - Math.pow(1 - e, 3);
+        const [rx, ry] = FACE_UP[gs.dice[i]] ?? [0, 0];
+        const off = (i - 0.5) * D * 1.5;
+        d.position.set(diceAt.x + off + (1 - ease) * cell * 2, diceAt.y + (1 - ease) * cell * 2, D / 2 + Math.abs(Math.sin(e * Math.PI * 3)) * (1 - e) * cell * 2);
+        const sp = isRolling && dt > 1 ? now / 120 : 0;
+        d.rotation.set(rx + spins[i].x * (1 - ease) + sp, ry + spins[i].y * (1 - ease) + sp, spins[i].z * (1 - ease) + i * 0.4, 'XYZ');
+      });
 
       syncHouses(gs);
       const alive = gs.players.filter((p) => !p.bankrupt);
@@ -339,7 +417,7 @@ export default function Stage3D({ game, shown, children }: Props) {
         }
         const mates = alive.filter((q) => at[q.id] === at[p.id]);
         const k = mates.indexOf(p);
-        const target = spot(at[p.id]).add(new THREE.Vector3((k - (mates.length - 1) / 2) * cell * 0.5, 0, 0));
+        const target = spot(at[p.id]).add(new THREE.Vector3((k - (mates.length - 1) / 2) * cell * 0.36, 0, 0));
         if (!target.equals(pc.to)) {
           pc.from.copy(pc.at);
           pc.to.copy(target);
@@ -362,15 +440,10 @@ export default function Stage3D({ game, shown, children }: Props) {
   }, []);
 
   const P = size * 1.6;
-  const k = shrink(size, view.tilt, view.spin);
   return (
     <div className="stage3d" ref={stage} style={{ perspective: `${P}px` }}>
-      <div
-        className="tilt3d"
-        style={{
-          transform: `translateZ(${lift(size, view.tilt)}px) scale3d(${k}, ${k}, ${k}) rotateX(${view.tilt}deg) rotateZ(${view.spin}deg)`,
-        }}
-      >
+      {/* its transform is set every frame, with the 3D layer's */}
+      <div className="tilt3d" ref={tilt}>
         {children}
       </div>
       <canvas

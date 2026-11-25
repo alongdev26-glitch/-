@@ -788,3 +788,14 @@
     bottom: 8px;
   }
 }
+/* the 3D board's buttons sit over the bottom of its frame */
+.fab-3d {
+  position: relative;
+  width: var(--board-size);
+  height: 0;
+  z-index: 7;
+}
+.fab-3d .board-fab {
+  bottom: 12px;
+  right: 12px;
+}

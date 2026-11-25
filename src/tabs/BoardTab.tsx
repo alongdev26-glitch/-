@@ -49,6 +49,40 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
     main = { label: t('endTurn'), action: { type: 'END_TURN' } };
   }
 
+  const fab = (
+    <div className="board-fab">
+      {main ? (
+        <button className="fab" onClick={() => act(main.action)}>
+          {main.label}
+        </button>
+      ) : (
+        <div className="fab fab-wait">{busy ? '...' : t('plays', { name: me.name })}</div>
+      )}
+      {!main && !busy && onTakeover && (
+        <button className="btn btn-black btn-sm" onClick={onTakeover}>
+          {t('toBot')}
+        </button>
+      )}
+      {canBuildAny && (
+        <button className="btn btn-gold btn-sm" onClick={onBuild}>
+          {t('buildHouses')}
+        </button>
+      )}
+      {ready && ph.t === 'roll' && me.inJail && (
+        <div className="fab-extra">
+          <button className="btn btn-gold btn-sm" disabled={me.money < JAIL_FINE} onClick={() => act({ type: 'PAY_JAIL' })}>
+            {t('payFineOut', { n: money(JAIL_FINE) })}
+          </button>
+          {me.jailCards.length > 0 && (
+            <button className="btn btn-gold btn-sm" onClick={() => act({ type: 'USE_JAIL_CARD' })}>
+              {t('jailCard')}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
   const board = (
     <Board
       game={game}
@@ -73,37 +107,7 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
           <div className="board-dice">
             <Dice dice={game.dice} rolling={rolling} showSum={game.rollSeq > 0} />
           </div>
-          <div className="board-fab">
-            {main ? (
-              <button className="fab" onClick={() => act(main.action)}>
-                {main.label}
-              </button>
-            ) : (
-              <div className="fab fab-wait">{busy ? '...' : t('plays', { name: me.name })}</div>
-            )}
-            {!main && !busy && onTakeover && (
-              <button className="btn btn-black btn-sm" onClick={onTakeover}>
-                {t('toBot')}
-              </button>
-            )}
-            {canBuildAny && (
-              <button className="btn btn-gold btn-sm" onClick={onBuild}>
-                {t('buildHouses')}
-              </button>
-            )}
-            {ready && ph.t === 'roll' && me.inJail && (
-              <div className="fab-extra">
-                <button className="btn btn-gold btn-sm" disabled={me.money < JAIL_FINE} onClick={() => act({ type: 'PAY_JAIL' })}>
-                  {t('payFineOut', { n: money(JAIL_FINE) })}
-                </button>
-                {me.jailCards.length > 0 && (
-                  <button className="btn btn-gold btn-sm" onClick={() => act({ type: 'USE_JAIL_CARD' })}>
-                    {t('jailCard')}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          {!is3d && fab}
         </>
       }
     />
@@ -138,9 +142,11 @@ export function BoardTab({ game, shown, rolling, busy, myTurn, act, onSpace, onB
       )}
       {is3d ? (
         <Suspense fallback={board}>
-          <Stage3D game={game} shown={shown}>
+          <Stage3D game={game} shown={shown} rolling={rolling}>
             {board}
           </Stage3D>
+          {/* zoomed in, the board's middle can be off screen: the buttons ride over the frame instead */}
+          <div className="fab-3d">{fab}</div>
         </Suspense>
       ) : (
         board
