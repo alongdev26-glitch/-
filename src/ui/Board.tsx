@@ -194,7 +194,8 @@ function TokenLayer({ game, shown, skinFor }: { game: GameState; shown: number[]
             className={`token-ride${far ? ' far' : ''}`}
             style={{ transform: `translate(${x}%, ${y}%)`, zIndex: p.id === game.current ? 2 : 1 }}
           >
-            <span className="token-at">
+            {/* keyed by the square, so every step plays the hop */}
+            <span className="token-at" key={at}>
               <Token token={p.token} color={p.color} active={p.id === game.current} skin={skinFor(p.id)} />
             </span>
           </div>
@@ -220,6 +221,8 @@ export function Board({ game, shown, onSpace, center, highlight }: Props) {
           <button
             key={sp.id}
             className={`space side-${side}${sp.id % 10 === 0 ? ` corner corner-${sp.id}` : ''}${owner ? ' owned' : ''}${
+              shown[game.current] === sp.id ? ' here' : ''
+            }${
               highlight?.space === sp.id ? ` glow glow-${highlight.tone}` : ''
             }`}
             style={{ gridRow: row, gridColumn: col, ...(owner ? { ['--owner' as string]: owner.color } : {}) }}
